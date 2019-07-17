@@ -1,0 +1,257 @@
+.left-config-wrap {
+    display: flex;
+    flex-direction: column;
+    width: 40px;
+    height: 100%;
+    background: #223946;
+    overflow-x: hidden;
+    transition: (all .4s);
+    padding-bottom: 60px;
+}
+
+.left-config-wrap::-webkit-scrollbar {
+    width: 7px;
+}
+
+.left-config-wrap::-webkit-scrollbar-button {
+    width: 7px;
+    height: 5px;
+}
+
+.left-config-wrap::-webkit-scrollbar-track {
+    background: #eee;
+    border: thin solid lightgray;
+    box-shadow: 0px 0px 3px #dfdfdf inset;
+    border-radius: 10px;
+}
+
+.left-config-wrap::-webkit-scrollbar-thumb {
+    background: #999;
+    border: thin solid gray;
+    border-radius: 10px;
+}
+
+.left-config-wrap::-webkit-scrollbar-thumb:hover {
+    background: #7d7d7d;
+}
+
+.config-switch {
+    position: absolute;
+    width: 50px;
+    height: 40px;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 18px;
+    transition: (all .4s);
+    z-index: 9;
+    top: 14px;
+    left: -190px;
+    cursor: pointer;
+}
+
+.config-switch .pnl-open {
+    margin-left: 200px;
+}
+
+.config-switch .pnl-close {
+    margin-left: 200px;
+}
+
+.left-config-wrap-on {
+    width: 230px;
+}
+
+.left-config-wrap .config-switch {
+    left: 0px;
+    top: 70px;
+}
+
+.left-config-wrap-on .config-switch {
+    left: 190px;
+    top: 70px;
+}
+
+/* ---------------Left menu------------ */
+
+.nav-link[data-toggle].collapsed:after {
+    content: "▾";
+}
+
+.nav-link[data-toggle]:not(.collapsed):after {
+    content: "▴";
+}
+
+.menu-wrap {
+    padding: 0;
+    width: 230px;
+    height: auto;
+    margin-top: 20px !important;
+}
+
+.menu-item {
+    margin: 0;
+    list-style: none;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+}
+
+.menu-link {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    width: 100%;
+    height: 50px;
+    outline: none;
+    background: transparent;
+    border-left: 3px solid transparent;
+    color: #fff !important;
+    text-decoration: none;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+}
+
+.menu-link:hover {
+    color: #fff !important;
+    background: #166ed2;
+}
+
+.placeholder, .text, .direction {
+    display: block;
+    height: 50px;
+    line-height: 50px;
+    font-size: 14px;
+}
+
+.placeholder {
+    width: 35px;
+    text-align: center;
+    margin-right: 5px;
+}
+
+.text {
+    flex: 1;
+}
+
+.direction {
+    width: 50px;
+    transition: (transform .2s);
+    transform: (rotate(0deg));
+}
+
+.menu-link.active {
+    border-left: 3px solid transparent;
+    color: #fff;
+}
+
+.collapse-menu {
+    display: none;
+}
+
+.collapse-menu-on {
+    display: block;
+}
+
+.menu-icon {
+    position: absolute;
+    right: 10px;
+    height: 50px;
+    line-height: 50px;
+}
+
+.child-menu {
+    list-style-type: none;
+}
+
+.child-item {
+    margin: 0;
+    list-style: none;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    position: relative;
+}
+
+.child-item-link {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    width: 100%;
+    height: 40px;
+    outline: none;
+    background: transparent;
+    color: #ffffff !important;
+    text-decoration: none;
+    overflow: hidden;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 32px;
+}
+
+.child-item-link .text {
+    line-height: 40px;
+}
+
+.child-menu-icon {
+    position: absolute;
+    z-index: 9;
+    right: 48px;
+    top: 0px;
+}
+
+.left-config-wrap .active {
+    background: transparent;
+}
+
+.left-config-wrap .menu-icon {
+    display: none;
+}
+
+.left-config-wrap-on .menu-icon {
+    display: block;
+}
+
+.left-config-wrap-on .active {
+    color: #fff !important;
+    background: #166ed2;
+}
+
+.left-config-wrap .child-item-link:hover {
+    color: #fff !important;
+    background: transparent;
+}
+
+.left-config-wrap-on .child-item-link:hover {
+    color: #fff !important;
+    background: #166ed2;
+}
+
+.router-link-active {
+    color: white;
+    background-color: #52b9e9;
+    text-decoration: none;
+}
+
+.active .child-item-link .text {
+    color: #fff !important;
+}
+
+@media (max-width:767px) {
+    .left-config-wrap {
+        display: block;
+        width: 230px;
+    }
+    .left-config-wrap-on {
+        display: none;
+    }
+    .config-switch .pnl-open {
+        margin-left: 0px;
+    }
+    .config-switch .pnl-close {
+        margin-left: 0px;
+    }
+}

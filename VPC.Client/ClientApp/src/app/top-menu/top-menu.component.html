@@ -1,0 +1,99 @@
+<!-- *ngIf="isLoggedIn$ | async as isLoggedIn" -->
+<div class="pages-top-menu" *ngIf="authService.isLoggedIn">
+    <!-- <div class="pages-top-menu"> -->
+    <div class="logo-wrap" (click)='logoClick()'>
+        <img src="assets/img/view-logo.svg" width="120" alt="view">
+    </div>
+    
+    <div>
+        <div *ngIf="onlyLogin !== true" class="breadcrumb-wrap">
+        <nav aria-label="breadcrumb">
+            <app-breadcrumb></app-breadcrumb>
+            <!-- <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Home</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Products</li>
+                <li class="breadcrumb-item active" aria-current="page" *ngFor="let link of menu; let i = index;">
+                    <a href="#">{{link.title}}</a>
+                </li>
+            </ol>  -->
+        </nav>
+    </div>
+    </div>
+    <div class="content-wrap">
+        <div *ngIf="onlyLogin !== true" ngbDropdown class="top-dropdown" ngbDropdownToggle>
+            <a><span class="fa fa-th"></span></a>
+            <div ngbDropdownMenu>
+                <div class="top-drp-wrapper">
+                    <div *ngFor="let menu of groups">
+                        <div class="dropdown-item" (click)="topMenuClick(menu)">
+                            <div class="icon">
+                                <i class="{{menu.groupName}}"></i>
+                                <!-- <i class="fa fa-user"></i> -->
+                            </div>
+                            <div class="text">
+                                {{menu.groupName}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <app-language></app-language>
+    </div>
+
+    <div class="user">
+        <!-- <div class="msg-entrance">
+            <span class="fa fa-comments-o fa-fw"></span>
+        </div> -->
+        <!-- {{userinfoService.userInfo.username}} -->
+
+        <div ngbDropdown class="user-dropdown" ngbDropdownToggle>
+            <i class="fa fa-user"></i>
+            <div ngbDropdownMenu>
+                <!-- <div class="user-info">
+                    <label ngbTooltip="{{username.length>25?username:''}}">{{username | slice:0:25}}</label>
+                    <label *ngIf="username.length>25">...</label>
+                </div> -->
+                <div class="profile">
+                    <ul>
+                        <li (click)="onChangePass()" *ngIf="authService.isLoggedIn && canUserChangePassword">
+                          <a><i class="fa fa-key"></i>{{getResourceValue("ChangePassword_Field")}}</a>
+                        </li>
+                        <li (click)="onLogout()" *ngIf="authService.isLoggedIn">
+                          <a><i class="fa fa-sign-out"></i>{{getResourceValue("Logout")}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="user-name">{{username}}</div>
+
+        <!-- //dynamic menu -->
+        <!-- <div ngbDropdown class="top-dropdown" ngbDropdownToggle>
+            <a><span class="fa fa-th"></span></a>
+            <div ngbDropdownMenu>
+                <div class="expand"></div>
+                <div class="top-drp-wrapper">
+                    <div *ngFor="let menu of topMenuNew">
+                        <div class="dropdown-item" (click)="topMenuNewClick(menu.group)">
+                            <div class="icon">
+                                <i class="{{menu.icon}}"></i>
+                            </div>
+                            <div class="text">
+                                {{menu.group}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="logout" (click)="onLogout()" *ngIf="authService.isLoggedIn">
+                        <span>Logout</span>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+
+
+    </div>
+</div>

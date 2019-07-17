@@ -1,0 +1,23 @@
+<div class="detailsMenu">
+    <div class="msg-tips-left">
+      <div class="msg-entrance" ngbTooltip="{{resource[generateResourceName('Update')]}}" container="body" (click)="updateMetaDataValues()">
+        
+          <span class="fa fa-save"></span>
+        
+      </div>
+    </div>
+  </div>
+  
+  <div class="page-content">
+        <my-tree 
+   
+      [rootNode]="tree" 
+      [mode]="1" 
+      [resource]="resource"
+      [displayRule]="displayRule"
+      *ngIf="isTreeReady" class="detail-view">
+      </my-tree>
+  </div>
+  
+
+

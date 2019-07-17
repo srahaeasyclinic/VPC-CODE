@@ -1,0 +1,53 @@
+@media (max-width: 767px) {
+  /* On small screens, the nav menu spans the full width of the screen. Leave a space for it. */
+  /* .body-content {
+    padding-top: 50px;
+  } */
+}
+
+.pages-wrap {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.pages-body {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  background: transparent;
+  overflow: hidden;  
+}
+.pages-content {
+  /* padding: 15px; */
+  flex: 1;
+  background: #edf1f5;
+  /* border-left: 1px solid #ccc;
+  border-top: 1px solid #ccc; */
+  color: #000;
+  overflow: hidden;
+  /* padding-top: 0px; */
+  padding-right: 0px;
+}
+.filter-content {
+  /* padding: 15px; */
+  flex: 1;
+  background: transparent;
+  border-left: 1px solid #ccc;
+  border-top: 1px solid #ccc;
+  color: #000;
+  overflow-x: visible;
+}
+
+
+
+
+.page-wrap{
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  height: 100vh;
+  grid-gap: 20px;
+}

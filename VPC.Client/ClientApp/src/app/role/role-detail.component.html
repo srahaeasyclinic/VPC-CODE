@@ -1,0 +1,99 @@
+<div *ngIf=(roleInfo) class="text-header">{{roleInfo.name}}</div>
+<div class="detailsMenu">
+  <div class="msg-tips-left">
+    <div class="msg-entrance" ngbTooltip="{{getResourceValue('Role_Operation_Save')}}" container="body" (click)="updateRole()">
+      <i class="fa fa-save"></i>Update
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+    
+  <div class="card-wrapper">
+    <div class="card-block">
+      <div class="card-row">
+        <label class="text-less-important">{{getResourceValue('Role_Field_Name')}}</label>
+        <input type="text" class="input-control" [(ngModel)]="roleInfo.name" name="name" />
+      </div>
+    </div>
+    <div class="card-block">
+      <div class="card-row">
+        <label class="text-less-important">{{getResourceValue('Role_Field_Type')}}</label>
+        <select class="form-control" disabled="disabled" [(ngModel)]="roleInfo.roleType"
+          name="roleType">
+          <option *ngFor="let roleType of roleTypes" value={{roleType.id}}>
+            {{roleType.name}}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div></div>
+  </div>
+  <kendo-grid [kendoGridBinding]="gridData" [selectable]="true" [pageSize]="10" [pageable]="true" [sortable]="true"
+    [filterable]="true" [resizable]="true">
+    <kendo-grid-column field="name" title="{{getResourceValue('EntityName')}}"></kendo-grid-column>
+    <ng-template kendoGridDetailTemplate let-dataItem>
+      <mat-tab-group animationDuration="0ms">
+        <mat-tab label="Entity">
+          <app-entitysequrity [roleIdParam]="roleId" [entityNameParam]="dataItem.name"></app-entitysequrity>
+        </mat-tab>
+        <mat-tab label="WorkFlow">
+          <app-workflowsequrity [roleIdParam]="roleId" [entityNameParam]="dataItem.name">
+          </app-workflowsequrity>
+        </mat-tab>
+      </mat-tab-group>
+    </ng-template>
+  </kendo-grid>
+  <!-- <table class="table">
+          <tr >
+            <td style="padding: 0px; border:none;">
+
+              <mat-accordion>
+                <mat-expansion-panel *ngFor="let entity of entityList; let mainIndex = index;">
+                  <mat-expansion-panel-header  >
+                    <mat-panel-title>
+                      {{entity.name}}
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div class="row">
+                      <div class="col-md-12 col-xs-12">
+
+                          <mat-tab-group animationDuration="0ms">
+                              <mat-tab label="Entity">         
+                                  <app-entitysequrity [roleIdParam]="roleId" [entityNameParam]="entity.name"></app-entitysequrity>
+                              
+                              </mat-tab>
+                              <mat-tab label="WorkFlow"> 
+                                  <app-workflowsequrity [roleIdParam]="roleId" [entityNameParam]="entity.name"></app-workflowsequrity>
+
+                              </mat-tab>
+                        
+                            </mat-tab-group>
+
+                          
+                            
+                        </div>
+                    </div>                
+                </mat-expansion-panel>
+              </mat-accordion>
+
+              
+            </td>
+          </tr>
+        </table> -->
+
+  <!-- <div *ngFor="let entity of entityList; let mainIndex = index;" >
+    <div class="custom-table">     
+    <a class="text-important" (click)="onClick_EntityTab(entity)">{{entity.name}} </a>
+  </div>  
+    <div class="expand-table-block">
+        <nav mat-tab-nav-bar>
+            <a mat-tab-link *ngFor="let link of entity.navLinks"  [routerLink]="[link.path]" routerLinkActive #rla="routerLinkActive" [active]="rla.isActive">
+              {{link.label}}===={{link.path}}
+            </a>
+          </nav> 
+          <router-outlet></router-outlet>
+
+    </div>
+  </div> -->
+</div>

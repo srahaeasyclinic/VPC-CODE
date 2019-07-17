@@ -1,0 +1,96 @@
+<div *ngIf="(defaultLayout)" class="text-header">{{defaultLayout.pluralName}}</div>
+<div class="detailsMenu">
+  <!-- <div class="msg-tips-left">
+    <div *ngFor="let toolbarButton of this.toolbarButtons">
+      <div *ngIf="!toolbarButton.group">
+        <div class="msg-entrance" ngbTooltip="{{toolbarButton.name}}" *ngIf="toolbarButton.name==='Create'"
+          (click)="toolbarButtonOperation(toolbarButton.name)">
+          <span class="fa fa-plus"></span>
+        </div>
+        <div class="msg-entrance" ngbTooltip="{{toolbarButton.name}}" *ngIf="toolbarButton.name!=='Create'"
+          (click)="toolbarButtonOperation(toolbarButton.name)">
+          <span class="fa fa-cog"></span>
+        </div>
+      </div>
+    </div>
+    <div class="msg-drp" *ngIf="this.sendToButtons?.length > 0">
+      <div ngbDropdown class="">
+        <a ngbDropdownToggle>Send to</a>
+        <div ngbDropdownMenu class="d-text">
+          <a (click)="toolbarButtonOperation(button.name)" *ngFor="let button of sendToButtons">{{button.name}}</a>
+        </div>
+      </div>
+    </div>
+    <div class="msg-drp" *ngIf="this.printButtons?.length > 0">
+      <div ngbDropdown class="">
+        <a ngbDropdownToggle>Print</a>
+        <div ngbDropdownMenu class="d-text">
+          <a (click)="toolbarButtonOperation(button.name)" *ngFor="let button of printButtons">{{button.name}}</a>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  <div *ngIf="defaultLayout!=null">
+    <utility-top-bar [defaultLayoutData]="defaultLayout"></utility-top-bar>
+  </div>
+
+  <!-- Right Filter Start -->
+  <div class="right-config-wrap" [ngClass]="{'right-config-wrap-on':isExpanded}">
+    <div class="msg-tips-wrap">
+      <div class="msg-entrance" (click)="configToggle()">
+        <span class="fa fa-search" *ngIf="!isExpanded" ngbTooltip="{{getResourceValue('SearchFilter')}}" container="body" position="left"></span>
+        <span class="fa fa-th fa-chevron-right" *ngIf="isExpanded" ngbTooltip="{{getResourceValue('CloseFilter')}}" container="body"></span>
+      </div>
+    </div>
+    <!-- <div *ngIf="defaultLayout.listLayoutDetails"> -->
+    <div *ngIf="defaultLayout && defaultLayout.listLayoutDetails && defaultLayout.listLayoutDetails.searchProperties">
+      <div class="right-filter">
+        <div *ngFor="let item of defaultLayout.listLayoutDetails.searchProperties">
+          <div *ngIf="item.name == 'FreeTextSearch'" class="form-group">
+            <label *ngIf="resource">{{getResourceValue(item.name)}}</label>
+            <input type="text" class="input-control" [(ngModel)]="freetextsearch"
+              (ngModelChange)="onFreeTextSearch($event)" />
+          </div>
+          <div *ngIf="item.name == 'SimpleSearch'">
+
+            <div *ngFor="let prop of item.properties">
+
+              <div *ngIf="prop.controlType==='TextBox'" class="form-group">
+                <label *ngIf="resource">{{getResourceValue(prop.name)}}</label>
+                <input type="text" class="input-control" [(ngModel)]="prop.value" (change)="onSimpleSearch()" />
+              </div>
+
+              <div *ngIf="prop.controlType==='Dropdown'" class="form-group">
+                <label *ngIf="resource">{{getResourceValue(prop.name)}}</label>
+                <select class="input-control" [(ngModel)]='prop.value' (change)="onSimpleSearch()">
+                  <option [ngValue]="null"></option>
+                  <option *ngFor="let vals of prop.values" [ngValue]="vals.id">{{vals.value}}</option>
+                </select>
+              </div>
+
+              <div *ngIf="prop.controlType==='Radio'">
+                <label *ngIf="resource">{{getResourceValue(prop.name)}}</label>
+                <label class="control control--radio" *ngFor="let option of prop.values">
+                  <span class="text-important">{{ option.value }}</span>
+                  <input type="radio" [(ngModel)]="prop.value" (change)="onSimpleSearch()" [value]="option.id">
+                  <span class="control__indicator"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Right Filter End -->
+</div>
+<div class="page-content">
+  <div class="r-filter-page">
+
+    <dynamic-grid [gridData]="gridData" [totalRecords]="totalRecords" [resources]="resource"
+      [defaultLayout]="defaultLayout" [defaultSortOrder]="sort" [currentPage]="pageindex" [dataSkip]="skip"
+      [groupBy]="groups" (columnClick)="edit($event)" (onActionClick)="onActionClick($event)"
+      (onGridChangeEvent)="onGridChangeEvent($event)"></dynamic-grid>
+
+  </div>
+</div>

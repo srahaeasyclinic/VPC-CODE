@@ -1,0 +1,140 @@
+<div>
+  <ngb-tabset class="c-left-tab">
+    <ngb-tab>
+      <ng-template ngbTabTitle>
+        <span class="tab-title">{{getResourceValue('Entities')}}</span>
+      </ng-template>
+      <ng-template ngbTabContent>
+        <mat-accordion *ngIf="!roleId">
+          <mat-expansion-panel *ngFor="let role of entitySecurity;">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{getResourceByKey(role.name)}}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="row">
+              <div *ngFor="let operationLvl of role.entity.operationLevel;" class="col-md-4 form-group">
+                <label> {{getResourceByKey(operationLvl.name)}}</label>
+                <select class="form-control" [(ngModel)]="operationLvl.scopeSelected"
+                  (ngModelChange)="onAccessSelected($event,role.entity.data)">
+                  <option *ngFor="let accessLvl of role.entity.accessLevel" value={{accessLvl.id}}>
+                    {{getResourceByKey(accessLvl.name)}}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+
+        <div *ngIf="roleId">
+          <div *ngFor="let role of entitySecurity;">
+            <div class="row">
+              <div *ngFor="let operationLvl of role.entity.operationLevel;" class="col-md-4 form-group">
+                <label> {{getResourceByKey(operationLvl.name)}}</label>
+                <select class="form-control" [(ngModel)]="operationLvl.scopeSelected"
+                  (ngModelChange)="onAccessSelected($event,role.entity.data)">
+                  <option *ngFor="let accessLvl of role.entity.accessLevel" value={{accessLvl.id}}>
+                    {{getResourceByKey(accessLvl.name)}}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngb-tab>
+
+
+
+    <ngb-tab>
+      <ng-template ngbTabTitle>
+        <span class="tab-title">{{getResourceValue('Functions')}}</span>
+      </ng-template>
+      <ng-template ngbTabContent>
+        <app-functionsequrity [roleIdParam]="roleId" [entityNameParam]="entityName"></app-functionsequrity>
+      </ng-template>
+    </ngb-tab>
+
+
+    <ngb-tab>
+      <ng-template ngbTabTitle>
+        <span class="tab-title">{{getResourceValue('Reports')}}</span>
+      </ng-template>
+      <ng-template ngbTabContent>
+
+      </ng-template>
+    </ngb-tab>
+
+    <ngb-tab>
+      <ng-template ngbTabTitle>
+        <span class="tab-title">{{getResourceValue('Dashlets')}}</span>
+      </ng-template>
+      <ng-template ngbTabContent>
+
+      </ng-template>
+    </ngb-tab>
+
+  </ngb-tabset>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- <mat-tab-group animationDuration="0ms">
+    <mat-tab label="Entities">
+      <mat-accordion *ngIf="!roleId">
+        <mat-expansion-panel *ngFor="let role of entitySecurity;">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{role.name}}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="row">
+            <div *ngFor="let operationLvl of role.entity.operationLevel;" class="col-md-4 form-group">
+              <label>{{operationLvl.name}}</label>
+              <select class="form-control" [(ngModel)]="operationLvl.scopeSelected"
+                (ngModelChange)="onAccessSelected($event,role.entity.data)">
+                <option *ngFor="let accessLvl of role.entity.accessLevel" value={{accessLvl.id}}>
+                  {{accessLvl.name}}
+                </option>
+              </select>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <div *ngIf="roleId">
+        <div *ngFor="let role of entitySecurity;">
+          <div class="row">
+            <div *ngFor="let operationLvl of role.entity.operationLevel;" class="col-md-4 form-group">
+              <label>{{operationLvl.name}}</label>
+              <select class="form-control" [(ngModel)]="operationLvl.scopeSelected"
+                (ngModelChange)="onAccessSelected($event,role.entity.data)">
+                <option *ngFor="let accessLvl of role.entity.accessLevel" value={{accessLvl.id}}>
+                  {{accessLvl.name}}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+    <mat-tab label="Functions"> Content 2 </mat-tab>
+    <mat-tab label="Reports"> Content 3 </mat-tab>
+    <mat-tab label="Dashlets"> Content 3 </mat-tab>
+  </mat-tab-group> -->
+</div>

@@ -1,0 +1,45 @@
+<div class="tab-section">
+<a class="btn btn-primary margin-top-10 margin-bottom-10" (click)="open()">{{getResourceValue('AddLayout')}}</a>
+<br />
+
+
+<kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true">
+  <kendo-grid-column field="name" [title]="getResourceValue('Name')" [width]="130">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <a class="gridLink" (click)="goToLayoutDetail(gridData.id,gridData.layoutTypeName)">{{gridData.name}}</a>
+    </ng-template>
+  </kendo-grid-column>
+  <kendo-grid-column field="layoutTypeName" [title]="getResourceValue('Type')"  [width]="130"></kendo-grid-column>
+  <kendo-grid-column field="subtypeeName" [title]="getResourceValue('SubType')" [width]="130"></kendo-grid-column>
+  <kendo-grid-column field="contextName" [title]="getResourceValue('Context')" [width]="130"></kendo-grid-column>
+  <kendo-grid-column field="modifiedDate" format='{0:MM/dd/yyyy h:mm a}' [title]="getResourceValue('UpdatedOn')" [width]="130">
+  </kendo-grid-column>
+  <kendo-grid-column [title]="getResourceValue('Default')" [width]="50">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <div ngbTooltip="{{getResourceValue('defaultLayout')}}" container="body" placement="left" filter="a" *ngIf="gridData.defaultLayout">
+        <a class="statusRoundedGreen">{{getResourceValue('D')}}</a>
+      </div>
+    </ng-template>
+  </kendo-grid-column>
+  <kendo-grid-column [width]="120" [style]="{'overflow': 'visible'}">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <!-- <div ngbDropdown class="grdDropdown pull-right" *ngIf="!gridData.DefaultLayout">
+        <a id="dropdownBasic1" ngbDropdownToggle>Actions</a>
+        <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+          <a class="dropdown-item" (click)="deleteLayout(gridData)">Delete</a>
+          <a class="dropdown-item" (click)="saveLayoutDefault(gridData)">Set default</a>
+        </div>
+      </div> -->
+      <button mat-icon-button [matMenuTriggerFor]="menu" class="actions" *ngIf="!gridData.defaultLayout">
+        <mat-icon>
+          ...
+        </mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <a class="dropdown-item" (click)="deleteLayout(gridData)">{{getResourceValue('Delete')}}</a>
+          <a class="dropdown-item" (click)="saveLayoutDefault(gridData)">{{getResourceValue('SetDefault')}}</a>
+      </mat-menu>
+    </ng-template>
+  </kendo-grid-column>
+</kendo-grid>
+</div>

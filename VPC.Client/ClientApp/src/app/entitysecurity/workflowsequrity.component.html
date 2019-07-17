@@ -1,0 +1,66 @@
+<kendo-grid [kendoGridBinding]="gridData" [resizable]="true">
+  <kendo-grid-column field="subTypeCode" title="Code"></kendo-grid-column>
+  <ng-template kendoGridDetailTemplate let-dataItem>
+    <ngb-tabset class="c-left-tab">
+      <ngb-tab *ngFor="let step of dataItem.steps;">
+        <ng-template ngbTabTitle>
+          <span class="tab-title"> {{getResourceValue(step.name)}}</span>
+        </ng-template>
+        <ng-template ngbTabContent>
+          <div class="row">
+            <div class="col-md-6 col-xs-12">
+              <div class="row">
+                <div class="col-md-12 form-group">
+                  <label>{{getResourceValue("Step_Can_Be_Activated")}}</label>              
+                  <ng-multiselect-dropdown [placeholder]="'Activated'" [data]="roleList"
+                    [(ngModel)]="step.activatedList" [settings]="dropdownSettings" class="custom-multi-select"
+                    (onDeSelect)="deleteWorkFlowRoleSecurity(step.workFlowStepId,1,step.workFlowId,$event)"
+                    (onSelect)="addWorkFlowRoleSecurity(step.workFlowStepId,1,step.workFlowId,$event);">
+                  </ng-multiselect-dropdown>
+                </div>
+                <div class="col-md-12 form-group">
+                  <label> {{getResourceValue("Step_Can_Be_Accessed")}} </label>
+                  <ng-multiselect-dropdown [placeholder]="'Accessed'" [data]="roleList" [(ngModel)]="step.accessedList"
+                    [settings]="dropdownSettings" class="custom-multi-select"
+                    (onDeSelect)="deleteWorkFlowRoleSecurity(step.workFlowStepId,2,step.workFlowId,$event)"
+                    (onSelect)="addWorkFlowRoleSecurity(step.workFlowStepId,2,step.workFlowId,$event);">
+                  </ng-multiselect-dropdown>
+                </div>
+                <div class="col-md-12 form-group">
+                  <label class="control control--checkbox">
+                     {{getResourceValue("Assignment_Is_Mandatory")}}
+                    <input type="checkbox" [(ngModel)]="step.isAssigmentMandatory"
+                      (change)="onAssignemntMandatoryEvent(step)">
+                    <span class="control__indicator"></span>
+                  </label>
+                  <ng-multiselect-dropdown [placeholder]="'Assignment'" [data]="roleList"
+                    [(ngModel)]="step.assignedList" [settings]="dropdownSettings" class="custom-multi-select"
+                    (onDeSelect)="deleteWorkFlowRoleSecurity(step.workFlowStepId,3,step.workFlowId,$event)"
+                    (onSelect)="addWorkFlowRoleSecurity(step.workFlowStepId,3,step.workFlowId,$event);">
+                  </ng-multiselect-dropdown>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+              <label>
+                 {{getResourceValue("Performance")}}
+              </label>
+              <div class="row">
+                <div class="col-md-6 col-xs-6">
+                  <label>   {{getResourceValue("Allot_Time")}} </label>
+                  <input type="number" class="input-control" min="0" placeholder="Allot time(min)"
+                    [(ngModel)]="step.allotedTime" (change)="onAssignemntMandatoryEvent(step)" name="allotedTime" />
+                </div>
+                <div class="col-md-6 col-xs-6">
+                  <label> {{getResourceValue("Critical_Time")}} </label>
+                  <input type="number" class="input-control" min="0" placeholder="Critical time(min)"
+                    [(ngModel)]="step.criticalTime" (change)="onAssignemntMandatoryEvent(step)" name="criticalTime" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngb-tab>
+    </ngb-tabset>
+  </ng-template>
+</kendo-grid>

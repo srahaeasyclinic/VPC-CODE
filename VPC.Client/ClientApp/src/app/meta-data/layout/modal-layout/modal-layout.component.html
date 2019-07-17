@@ -1,0 +1,61 @@
+
+    <div class="modal-header">
+      <label>{{title}}</label>
+      <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="myForm" (ngSubmit)="submitForm()">
+      
+          <div class="form-group">
+            <label>{{getResourceValue('Name')}}</label>
+            <input type="text" formControlName="layoutName" class="form-control"
+              [ngClass]="{ 'is-invalid': submitted && f.layoutName.errors }" />
+            <div *ngIf="submitted && f.layoutName.errors" class="invalid-feedback">
+              <div *ngIf="f.layoutName.errors.required">{{getResourceValue('ValidationLayoutName')}}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select class="form-control" formControlName="drpType" (change)="onTypeChange($event.target.value)"
+              [ngClass]="{ 'is-invalid': submitted && f.drpType.errors }">
+              <option *ngFor="let layoutType of layoutTypes" value={{layoutType.id}}>
+                {{layoutType.name}}
+              </option>
+            </select>
+            <div *ngIf="submitted && f.drpType.errors" class="invalid-feedback">
+              <div *ngIf="f.drpType.errors.required">{{getResourceValue('ValidationLayoutType')}}</div>
+            </div>
+          </div>
+          <div class="form-group" *ngIf="showSubType">
+            <label>Subtype</label>
+            <select class="form-control" formControlName="drpSubtype"
+              [ngClass]="{ 'is-invalid': submitted && f.drpSubtype.errors }">
+              <option *ngFor="let subType of subTypes" value={{subType.id}}>
+                {{subType.name}}
+              </option>
+            </select>
+            <div *ngIf="submitted && f.drpSubtype.errors" class="invalid-feedback">
+              <div *ngIf="f.drpSubtype.errors.required">{{getResourceValue('ValidationSubType')}}</div>
+            </div>
+          </div>
+          <div class="form-group" *ngIf="showSubType">
+            <label>{{getResourceValue('Context')}}</label>
+            <select class="form-control" formControlName="drpContext"
+              [ngClass]="{ 'is-invalid': submitted && f.drpContext.errors }">
+              <option *ngFor="let context of contexts" value={{context.id}}>
+                {{context.name}}
+              </option>
+            </select>
+            <div *ngIf="submitted && f.drpContext.errors" class="invalid-feedback">
+              <div *ngIf="f.drpContext.errors.required">{{getResourceValue('ValidationContext')}}</div>
+            </div>
+          </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('cancel click')">{{getResourceValue('Cancel')}}</button>
+          <button class="btn btn-primary">{{getResourceValue('Submit')}}</button>
+        </div>
+      </form>
+    </div>

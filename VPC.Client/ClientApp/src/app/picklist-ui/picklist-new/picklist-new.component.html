@@ -1,0 +1,15 @@
+<div *ngIf=(layoutInfo) class="text-header">New {{layoutInfo.singularName}}</div>
+<div class="detailsMenu" *ngIf="layoutInfo!=null">
+  <!-- <div class="msg-tips-left">
+    <div class="msg-entrance" ngbTooltip="Save" (click)="savePicklistValue()">
+      
+        <span class="fa fa-save"></span>
+      
+    </div> -->
+    <utility-top-bar [tree]="tree" [defaultLayoutData]="layoutInfo"></utility-top-bar>
+</div>
+<div class="page-content">
+  <my-tree [rootNode]="tree" [mode]="1"   [resource]="resource" *ngIf="isTreeReady" class="create-view">
+  </my-tree>
+</div>
+

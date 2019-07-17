@@ -1,0 +1,9 @@
+.angular-editor-toolbar-set .angular-editor-button[title^="Insert Image"] {
+   display: none !important;
+}
+.angular-editor-button[title="Insert Image"]{
+display: none;
+}
+/* [title^='Insert Image']{
+    display: none;
+} */

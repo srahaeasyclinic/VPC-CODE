@@ -1,0 +1,52 @@
+
+<div class="text-header">{{getResourceValue('MetaDataList')}}</div>
+<div class="page-content">
+  <kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true"
+    [groupable]="true" [resizable]="true" [style.maxHeight.px]="750" [sortable]="true">
+    <kendo-grid-column field="name" title="{{getResourceValue('EntityName')}}" [width]="140">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <!-- <a class="gridLink" [routerLink]="[gridData.name]" (click)="goToMetaDataDetails(gridData.name)">{{resource[generateResourceName(gridData.name)]}}</a> -->
+        <a class="gridLink" [routerLink]="[gridData.name]"
+          (click)="goToMetaDataDetails(gridData.name)">{{gridData.name}}</a>
+      </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-column field="displayName" title="{{getResourceValue('DisplayName')}}" [width]="120"></kendo-grid-column>
+    <kendo-grid-column field="pluralName" title="{{getResourceValue('DisplayNamePlural')}}" [width]="100"></kendo-grid-column>
+    <kendo-grid-column field="supportedWorkflow" title="{{getResourceValue('WorkflowSupported')}}" [width]="130">
+      <ng-template kendoGridCellTemplate let-dataItem>
+        <span *ngIf="dataItem.supportWorkflow===true">
+          <i class="fa fa-check"></i>
+        </span>
+        <span *ngIf="!dataItem.supportWorkflow">
+          <i class="fa fa-close"></i>
+        </span>
+
+      </ng-template>
+    </kendo-grid-column>
+    <!--<kendo-grid-column field="type" title="Type" [width]="130"></kendo-grid-column>-->
+    <kendo-grid-column field="type" title="{{getResourceValue('EntityType')}}" [width]="130">
+      <ng-template kendoGridCellTemplate let-gridData>
+        {{getResourceValue(gridData.type)}}
+      </ng-template>
+    </kendo-grid-column>
+    <!-- 
+      As discussed with @ajay
+      
+      <kendo-grid-column [width]="120" [style]="{'overflow': 'visible'}">
+      <ng-template kendoGridCellTemplate let-gridData>
+      
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+          <mat-icon>
+            ...
+          </mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <a class="dropdown-item" (click)="clickWorkflow(gridData)">
+            {{getResourceValue('workflow')}}
+          </a>
+          <a class="dropdown-item">{{getResourceValue('security')}}</a>
+        </mat-menu>
+      </ng-template>
+    </kendo-grid-column> -->
+  </kendo-grid>
+</div>

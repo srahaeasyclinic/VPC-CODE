@@ -1,0 +1,27 @@
+<div *ngIf="defaultLayout && picklistValue" class="text-header">{{defaultLayout.singularName}}: {{picklistValue.Text}}</div>
+<div class="detailsMenu">
+  <div class="msg-tips-left" *ngIf="defaultLayout!=null">
+    <!-- <div class="msg-entrance" ngbTooltip="Edit" (click)="edit()">
+      <span class="fa fa-pencil-square-o"></span>
+    </div> -->
+    <utility-top-bar [tree]="tree" [defaultLayoutData]="defaultLayout"></utility-top-bar>
+  </div>
+  <div class="msg-tips-wrap">
+    <div class="margin-right-5">
+      <div [ngClass]="(isPreviousIdAvailable)?'active-item':'inactive-item'" (click)="previousData()">
+        <span class="fa fa-chevron-circle-left"></span>
+      </div>
+    </div>
+    <div class="margin-left-10">
+      <div [ngClass]="(isNexIdAvailable)?'active-item':'inactive-item'" (click)="nextData()">
+        <span class="fa fa-chevron-circle-right"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  
+  <my-tree [rootNode]="tree" [resource]="resource" [mode]="2" *ngIf="isTreeReady" class="preview">
+  </my-tree>
+</div>

@@ -1,0 +1,12 @@
+<div class="pages-wrap" *ngIf="menus && menus.length">
+    <app-top-menu [menus]="menus" onlyLogin="false" (groupClickEvent)="nevigateGroup($event)"></app-top-menu>
+    <!-- <div>Open {{menuItem}}</div> -->
+    <div class="pages-body">
+      <app-sidebar [menus]="menus" class="sidebar"  [currentGroup]="currentGroup" [isMenuopen]="isMenuopen" (menuClickEvent)="nevigateChildren($event)"></app-sidebar>
+      <div class="pages-content">
+        <app-nav-menu></app-nav-menu>
+        <router-outlet></router-outlet>
+      </div>
+    </div>       
+    <!-- <app-breadcrumb></app-breadcrumb> -->
+  </div>

@@ -1,0 +1,106 @@
+<div class="msg-tips-left">
+  <div *ngFor="let toolbarButton of this.toolbarButtons">
+    <div *ngIf="!toolbarButton.group">
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body" *ngIf="toolbarButton.name==='Create'"
+        (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
+        <i class="fa fa-plus"></i> {{getResourceValue(toolbarButton.name)}}
+      </div>
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body" *ngIf="toolbarButton.name==='Edit'"
+        (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
+        <i class="fa fa-pencil-square-o"></i>{{getResourceValue(toolbarButton.name)}}
+      </div>
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body" *ngIf="toolbarButton.name==='Update'"
+        (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
+        <i class="fa fa-save"></i>{{getResourceValue(toolbarButton.name)}}
+      </div>
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body" *ngIf="toolbarButton.name==='Save'"
+        (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
+        <i class="fa fa-save"></i>{{getResourceValue(toolbarButton.name)}}
+      </div>
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body"
+        *ngIf="toolbarButton.name!=='Create' && toolbarButton.name!=='Edit' && toolbarButton.name!=='Update' && toolbarButton.name!=='Save'"
+        (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
+        <i class="fa fa-check-square-o"></i>{{getResourceValue(toolbarButton.name)}}
+      </div>
+    </div>
+  </div>
+  <!-- <div class="msg-drp" *ngIf="this.possiblesteps?.length > 0"> -->
+  <div class="msg-drp" *ngIf="possiblesteps?.length > 0">
+    <div ngbDropdown class="">
+      <a ngbDropdownToggle>{{getResourceValue("SendTo")}}</a>
+
+      <div ngbDropdownMenu class="d-text">
+        <a (click)="onToolBarWorkFlowClick(possiblestep)"
+          *ngFor="let possiblestep of possiblesteps">{{possiblestep.nextTransitionName}}</a>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="msg-drp" *ngIf="this.sendToButtons?.length > 0"> -->
+  <div class="msg-drp" *ngIf="sendToButtons?.length > 0">
+    <div ngbDropdown class="">
+      <a ngbDropdownToggle>{{getResourceValue("Communication")}}</a>
+      <div ngbDropdownMenu class="d-text">
+        <a (click)="toolbarButtonOperation(button)" *ngFor="let button of sendToButtons">{{button.name}}</a>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="msg-drp" *ngIf="this.printButtons?.length > 0"> -->
+  <div class="msg-drp" *ngIf="printButtons?.length > 0">
+    <div ngbDropdown class="">
+      <a ngbDropdownToggle>{{getResourceValue("Print")}}</a>
+      <div ngbDropdownMenu class="d-text">
+        <a (click)="toolbarButtonOperation(button)" *ngFor="let button of printButtons">{{button.name}}</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #contentExchange let-modal>
+  <div class="modal-header">
+    <label class="text-important">{{getResourceValue("SelectSubtype")}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form (ngSubmit)="navigate()">
+      <div class="container">
+        <div class="form-group">
+          <label for="drpType">{{getResourceValue("SubType")}}</label>
+          <select class="input-control" (change)="onSubTypeChange($event.target.value)">
+            <option *ngFor="let subtype of subTypes" value={{subtype.name}}>
+              {{subtype.name}}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="navigate('Save click')">{{getResourceValue("Continue")}}</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #updaterolecontent let-modal>
+  <div class="modal-header">
+    <label id="modal-title">{{getResourceValue("OopsValidationWasFailedBecause")}}</label>
+    <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    
+      <div class="col-md-12 form-group">
+        <label>
+          <ul class="bullet-point">
+            <!-- <li *ngFor="let validateMessage of validateMessages">{{resource[generateResourceName(validateMessage)]}} is required.</li> -->
+              <li *ngFor="let validateMessage of validateMessages">{{validateMessage}}</li>
+          </ul>
+        </label>
+      </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
+    </div>
+  </div>
+</ng-template>

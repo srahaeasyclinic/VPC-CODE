@@ -1,0 +1,67 @@
+<div class="component-layout">
+  <div class="pnl-block">
+    <div class="pnl-block-header">
+      <label>{{getResourceValue("AvailableFields")}}</label>
+    </div>
+    <div class="pnl-block-body">
+      <div class="tableStyle">
+        <table class="table withoutborder margin-bottom-0">
+          <tbody>
+            <tr *ngFor="let item of toolbarSource">
+              <td (click)="mainItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                <div [className]="item.isAdded ? 'text-less-important line-through' : 'text-less-important'">{{item.name}}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnlBtnLayout">
+    <a class="btnListLayout margin-bottom-10" (click)="addItem()">
+      <i class="fa fa-share"></i>
+    </a>
+    <a class="btnListLayout" (click)="removeItem()">
+      <i class="fa fa-reply"></i>
+    </a>
+  </div>
+  <div class="pnl-block">
+    <div class="pnl-block-header">
+      <label>{{getResourceValue("SelectedFields")}}</label>
+    </div>
+    <div class="pnl-block-body">
+      <div class="tableStyle">
+        <table class="table withoutborder margin-bottom-0">
+          <tbody>
+            <tr *ngFor="let item of addedItemToMainList">
+              <td (click)="slectedItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                <div class="text-less-important">{{item.name}}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnlBtnLayout">
+    <a class="btnListLayout margin-bottom-10" (click)="upItem()">
+      <i class="fa fa-share fa-rotate-270"></i>
+    </a>
+    <a class="btnListLayout" (click)="downItem()">
+      <i class="fa fa-share fa-rotate-90"></i>
+    </a>
+  </div>
+  <div class="pnl-block" *ngIf="displayToolbarItem">
+    <div class="pnl-block-header">
+      <label>{{getResourceValue("FieldConfiguration")}}</label>
+    </div>
+    <div class="pnl-block-body right-block">
+      <label>{{getResourceValue("Group")}}</label>
+      <select class="input-control" [(ngModel)]="toolbarGroup" (change)="onChangeEvent($event)">
+        <option value=""></option>
+        <option value="communication">{{getResourceValue("Communication")}}</option>
+        <option value="print">{{getResourceValue("Print")}}</option>
+      </select>
+    </div>
+  </div>
+</div>

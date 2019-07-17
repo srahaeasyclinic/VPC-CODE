@@ -1,0 +1,26 @@
+<div class="tab-section">
+<a class="btn btn-primary margin-top-10 margin-bottom-10" (click)="addRulePopup()">{{buttonLabel}}</a>
+<!-- {{resource[generateResourceName("AddRule")]}} -->
+<kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true">
+  <kendo-grid-column field="ruleName" title="{{getResourceValue('Name')}}" [width]="140">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <a class="gridLink" (click)="editRulePopup(gridData.id)">{{gridData.ruleName}}</a>
+    </ng-template>
+  </kendo-grid-column>
+  <kendo-grid-column field="ruleTypeName" title="{{getResourceValue('Type')}}" [width]="120"></kendo-grid-column>
+  <kendo-grid-column field="source" title="{{getResourceValue('Source')}}" [width]="120"></kendo-grid-column>
+  <kendo-grid-column field="target" title="{{getResourceValue('Target')}}" [width]="120"></kendo-grid-column>
+  <kendo-grid-column [width]="120">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+        <mat-icon>
+          ...
+        </mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <a class="dropdown-item" (click)="deleteRule(gridData.id)">{{getResourceValue("Delete")}}</a>
+      </mat-menu>
+    </ng-template>
+  </kendo-grid-column>
+</kendo-grid>
+</div>

@@ -1,0 +1,94 @@
+<div *ngIf="field.controlType=='Label'">
+  <input type="text" disabled class="input-control disable-input" [(ngModel)]="field.value">
+</div>
+<!-- Rich Text Box Section -->
+<div *ngIf="field.controlType!=='Label'">
+  <!-- <div class="msg-entrance" (click)="addTagsPopup(managetags)" ngbTooltip="Manage Tags">
+      <span>Manage Tags</span>
+    </div> -->
+  <div style="position:relative">
+    <div class="btnEditorContainer" *ngIf="mode!==2">
+      <a class="btnEditor" title="Manage tag" (click)="addTagsPopup(managetags)"><i class="fa fa-tags"></i></a>
+    </div>
+
+    <!-- <angular-editor [(ngModel)]="field.value" [config]="editorConfig"></angular-editor> -->
+    <div *ngIf="mode!==2">
+      <ckeditor [(ngModel)]="field.value" #richeditor="ngModel" name="richeditor" required [config]="editorConfig" (change)="onChangeEvent($event)"
+        debounce="500">
+      </ckeditor>
+    </div>
+    <div *ngIf="mode===2" [innerHTML]="sanatizeHtml(field.value)"> 
+      <!-- <label class="text-important text-bold">{{field.value}}</label> -->
+      <!-- <p ng-bind-html="field.value"></p>   -->
+      <!-- <span ng-bind-html="field.value | trustAs"></span> -->
+      <!-- <div ></div> -->
+    </div>
+  </div>
+  <!-- End Rich Text Box -->
+</div>
+<!-- {{TagsItemName|json}}
+{{entityName}} -->
+
+<!-- <div>
+    <div *ngFor="let item of TagsItemName">{{item.name}}</div>
+</div> -->
+<!-- ----------------Add ManageTags Popup----------------- -->
+<ng-template #managetags let-modal>
+
+
+  <div class="modal-header">
+    <label>{{addTagsLabel}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    
+      <div class="row">
+        <div class="col-md-12">
+          <!-- <div class="form-group">           
+           	<select  [(ngModel)]="selectedtagsValues" name="tag" multiple (change)="change($event.target.options)" >
+              <option id="" [value]="tag" *ngFor="let tag of TagsItemName">
+                {{ tag }}
+              </option>
+            </select>           
+          </div> -->
+          <kendo-grid [kendoGridBinding]="TagsItemName" [pageSize]="10" [pageable]="true" [sortable]="true"
+            [kendoGridSelectBy]="'name'" [selectedKeys]="mySelection">
+            <kendo-grid-checkbox-column [width]="30"></kendo-grid-checkbox-column>
+            <kendo-grid-column field="name" title="{{getResourceValue('Tagname')}}">
+            </kendo-grid-column>
+          </kendo-grid>
+        </div>
+      </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="resetValue()">{{getResourceValue("Reset")}}</button>
+      <button class="btn btn-primary" (click)="saveTags()">{{getResourceValue("Add")}}</button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- {{TagsItemName}} -->
+<!-- ----------------Add ManageTags Popup----------------- -->
+
+<!-- <select class="input-control" [id]="ww" [(ngModel)]="Dropdowndata" [disabled] = "false" (change)="onChange($event)">
+
+  <ng-template ngFor let-item [ngForOf]="Dropdowndata">
+   <optgroup *ngIf="item.items" label="{{item.group.name+' ('+item.group.totalchild+')'}}">
+     <option *ngFor="let child of item.items" [value]="child.internalId">
+       <span>{{child.text}}</span>
+     </option>
+   </optgroup>
+
+   <option *ngIf="!item.items" value="item.group.id"><span>{{item.group.name}}</span>
+
+   </option>
+</ng-template>
+
+</select> -->
+  <!-- </optgroup> -->
+
+  
+
+  

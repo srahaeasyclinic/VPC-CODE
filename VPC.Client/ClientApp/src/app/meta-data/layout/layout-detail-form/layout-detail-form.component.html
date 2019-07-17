@@ -1,0 +1,310 @@
+<div class="page-content">
+
+
+
+
+  <div class="tab-block">
+    <!-- {{this.entityDeatils.fields|json}} -->
+    <mat-tab-group>
+      <mat-tab label="Fields">
+        <div class="content-block" id="content-block-wrapper" [ngClass]="{'sticky' : isSticky}">
+          <ngb-tabset class="c-left-tab">
+            <ngb-tab *ngIf="this.entityDeatils!=null && this.entityDeatils.fields!=null">
+              <ng-template ngbTabTitle>
+                <span class="tab-title">{{getResourceValue('Fields')}}</span>
+              </ng-template>
+
+              <ng-template ngbTabContent>
+                <div *ngFor="let field of this.entityDeatils.fields" [draggable]="(field.draggedItem)? false : true" class="draggable"
+                  [ngClass]="field.draggedItem?'dragg-on':'dragg-off'" (dragstart)="fieldDragStartEvent(field,entityDeatils.name)">                 
+                    <div class="btn-item">
+                    <span ngbTooltip="{{field.name.length>15?field.name:''}}"
+                      container="body">&nbsp;{{field.name | slice:0:15}}</span>
+                    <span *ngIf="field.name.length>15">...</span>
+                    <span class="text-mandatory" *ngIf="field.required">*</span>
+                  </div>
+
+                </div>
+
+              </ng-template>
+            </ngb-tab>
+
+            <ngb-tab *ngIf="this.predefinedData!=null">
+              <ng-template ngbTabTitle>
+                <span class="tab-title">{{getResourceValue('Layouts')}}</span>
+              </ng-template>
+              <ng-template ngbTabContent>
+                <div *ngFor="let field of this.predefinedData"
+                  [ngClass]="(this.selectedTreeNode!=null && this.selectedTreeNode.name==field.name)?'dragg-off':'dragg-off'"
+                  draggable="true" class="draggable" (dragstart)="fieldDragStartEvent(field)">
+                  <div class="btn-item">
+                    <span ngbTooltip="{{field.name.length>15?field.name:''}}"
+                      container="body">&nbsp;{{field.name | slice:0:15}}</span>
+                    <span *ngIf="field.name.length>15">...</span>
+                  </div>
+                </div>
+              </ng-template>
+            </ngb-tab>
+
+            <ngb-tab *ngIf="this.entityDeatils!=null && this.entityDeatils.detailEntities!=null">
+              <ng-template ngbTabTitle>
+                <span class="tab-title">{{getResourceValue('DetailEntity')}}</span>
+              </ng-template>
+              <ng-template ngbTabContent>
+                <div *ngFor="let field of this.entityDeatils.detailEntities"
+                  [ngClass]="(this.selectedTreeNode!=null && this.selectedTreeNode.name==field.name)?'dragg-off':'dragg-off'"
+                  draggable="true" class="draggable" (dragstart)="fieldDragStartEvent(field)">
+                  <div class="btn-item">
+                    <span ngbTooltip="{{field.name.length>15?field.name:''}}"
+                      container="body">&nbsp;{{field.name | slice:0:15}}</span>
+                    <span *ngIf="field.name.length>15">...</span>
+
+                  </div>
+
+                </div>
+              </ng-template>
+            </ngb-tab>
+
+            <!-- <ngb-tab  *ngIf="this.entityDeatils!=null && (this.entityDeatils.tasks!=null||this.entityDeatils.operations!=null)">
+            <ng-template ngbTabTitle>
+              <span class="tab-title">Task & Opeartion</span>
+            </ng-template>
+            <ng-template ngbTabContent>
+                <div *ngFor="let field of this.entityDeatils.tasks" [ngClass]="(this.selectedTreeNode!=null && this.selectedTreeNode.name==field.name)?'dragg-off':'dragg-off'"
+                draggable="true" class="draggable" (dragstart)="fieldDragStartEvent(field)">
+                <a class="btn-item">{{field.name}}</a>
+              </div>
+              <div *ngFor="let field of this.entityDeatils.operations" [ngClass]="(this.selectedTreeNode!=null && this.selectedTreeNode.name==field.name)?'dragg-off':'dragg-off'"
+                draggable="true" class="draggable" (dragstart)="fieldDragStartEvent(field)">
+                <a class="btn-item">{{field.name}}</a>
+              </div>
+            </ng-template>
+          </ngb-tab> -->
+
+            <ngb-tab
+              *ngIf="this.entityDeatils!=null && this.entityDeatils.activityEntity!=null && this.entityDeatils.activityEntity.fields!=null">
+              <ng-template ngbTabTitle>
+                <span class="tab-title">{{getResourceValue('ActivityEntity')}} </span>
+              </ng-template>
+              <ng-template ngbTabContent>
+
+                  <div *ngFor="let field of this.entityDeatils.activityEntity.fields" [draggable]="(field.draggedItem)? false : true" class="draggable"
+                  [ngClass]="field.draggedItem?'dragg-on':'dragg-off'" (dragstart)="fieldDragStartEvent(field,entityDeatils.activityEntity.name)">
+                  <div class="btn-item">
+                    <span ngbTooltip="{{field.name.length>15?field.name:''}}" container="body">&nbsp;{{field.name | slice:0:15}}</span>
+                    <span *ngIf="field.name.length>15">...</span>
+                    <span class="text-mandatory" *ngIf="field.required">*</span>
+                  </div>
+ 
+                </div>
+
+                <!-- <div *ngFor="let field of this.entityDeatils.activityEntity.fields"
+                  [ngClass]="(this.selectedTreeNode!=null && this.selectedTreeNode.name==field.name)?'dragg-off':'dragg-off'"
+                  draggable="true" class="draggable" (dragstart)="fieldDragStartEvent(field)">
+                  <div class="btn-item">
+                    <span ngbTooltip="{{field.name.length>15?field.name:''}}"
+                      container="body">&nbsp;{{field.name | slice:0:15}}</span>
+                    <span *ngIf="field.name.length>15">...</span>
+                    <span class="text-mandatory" *ngIf="field.required">*</span>
+                  </div>
+                </div> -->
+              </ng-template>
+            </ngb-tab>
+
+
+          </ngb-tabset>
+        </div>
+
+        <div class="fields-content">
+          <!-- [style.height.px]="screenHeight-300" -->
+          <div class="dynamic-wrapper">
+            <div class="pnl-block">
+
+              <div class="">
+                <my-tree *ngIf="tree!=null" [rootNode]="tree" [resource]="resource" [selectedNode]="selectedTreeNode"
+                  [displayRule]="displayRule" (select)="handleSelection($event)" (drop)="handleDropEvent($event)"
+                  (close)="handleCloseEvent($event)" (edit)="handleEditEvent($event)" (add)="handleAddEvent($event)">
+                </my-tree>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="Toolbar">
+        <div class="component-layout">
+          <div class="pnl-block">
+            <div class="pnl-block-header">
+              <label>{{getResourceValue('AvailableFields')}}</label>
+            </div>
+            <div class="pnl-block-body">
+              <div class="tableStyle">
+                <table class="table withoutborder margin-bottom-0">
+                  <tbody>
+                    <tr *ngFor="let item of toolbarSource">
+                      <td (click)="mainItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                        <div [className]="item.isAdded ? 'text-less-important' : 'text-important'">
+                          {{getResourceValue(item.name)}}</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="pnlBtnLayout">
+            <a class="btnListLayout margin-bottom-10" (click)="addItem()">
+              <i class="fa fa-share"></i>
+            </a>
+            <a class="btnListLayout" (click)="removeItem()">
+              <i class="fa fa-reply"></i>
+            </a>
+          </div>
+          <div class="pnl-block">
+            <div class="pnl-block-header">
+              <label>{{getResourceValue('SelectedFields')}} </label>
+            </div>
+            <div class="pnl-block-body">
+              <div class="tableStyle">
+                <table class="table withoutborder margin-bottom-0">
+                  <tbody>
+                    <tr *ngFor="let item of addedItemToMainList">
+                      <td (click)="slectedItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                        <div [className]="text-important">{{getResourceValue(item.name)}}</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="pnlBtnLayout">
+            <a class="btnListLayout margin-bottom-10" (click)="upItem()">
+              <i class="fa fa-share fa-rotate-270"></i>
+            </a>
+            <a class="btnListLayout" (click)="downItem()">
+              <i class="fa fa-share fa-rotate-90"></i>
+            </a>
+          </div>
+          <div class="pnl-block" *ngIf="displayToolbarItem">
+            <div class="pnl-block-header">
+              <label>{{getResourceValue('FieldConfiguration')}}</label>
+            </div>
+            <div class="pnl-block-body right-block">
+              <div>
+                <label>{{getResourceValue('Group')}}</label>
+                <select class="input-control" [(ngModel)]="toolbarGroup" (change)="onChangeEvent($event)">
+                  <option value=""></option>
+                  <option value="communication">{{getResourceValue('Communication')}}</option>
+                  <option value="print">{{getResourceValue('Print')}}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="Details">
+        <div class="margin-top-15">
+          <div class="card-wrapper">
+            <div class="card-block">
+              <div class="card-row" style="grid-column: 1 / span 3;">
+                <label>{{getResourceValue('LayoutName')}}</label>
+                <input type="text" [(ngModel)]="layoutInfo.name" class="input-control" />
+              </div>
+            </div>
+            <div class="card-block">
+              <div class="card-row">
+                <div class="text-less-important">{{getResourceValue('EntityName')}}</div>
+                <div class="text-important margin-top-10">{{entityname}}</div>
+              </div>
+              <div class="card-row">
+                <div class="text-less-important">{{getResourceValue('LayoutType')}}</div>
+                <div class="text-important margin-top-10">{{layoutInfo.layoutTypeName}}</div>
+              </div>
+              <div class="card-row">
+                <div class="text-less-important">{{getResourceValue('Context')}}</div>
+                <div class="text-important margin-top-10">{{layoutInfo.contextName}}</div>
+              </div>
+            </div>
+            <div class="card-block">
+              <div class="card-row">
+                <div class="text-less-important">{{getResourceValue('EntitySubTypeCode')}}</div>
+                <div class="text-important margin-top-10">{{layoutInfo.subtypeeName}}</div>
+              </div>
+              <div class="card-row">
+                <div class="text-less-important">{{getResourceValue('CreatedBy')}}</div>
+                <div class="text-important margin-top-10"></div>
+              </div>
+              <div class="card-row">
+                <div class="text-less-important">{{getResourceValue('CreatedDate')}}</div>
+                <div class="text-important margin-top-10">{{layoutInfo.modifiedDate | date:'dd/MM/yyyy'}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+  <div>
+    <a class="btn-float" ngbTooltip="{{getResourceValue('Save')}}" container="body" (click)="updateLayout()">
+      <i class="fa fa-floppy-o"></i>{{getResourceValue('Save')}}
+    </a>
+
+  </div>
+
+  <!-- <div id="loader" *ngIf="showLoader">
+    <span class="k-icon k-i-loading" style="font-size: 64px;"></span>
+  </div> -->
+
+
+</div>
+
+
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{getResourceValue('AddLayout')}}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="layoutForm" (ngSubmit)="saveLayout()">
+      <div class="container">
+        <div class="form-group">
+          <label for="layoutname">{{getResourceValue('Name')}}</label>
+          <input type="text" class="form-control" formControlName="layoutName" />
+        </div>
+        <!-- <div class="form-group">
+            <label for="drpType">Type</label>
+  
+            <select class="form-control" formControlName="drpType"   (change)="onTypeChange($event.target.value)" >
+              <option *ngFor="let layoutType of layoutTypes" value={{layoutType.id}}>
+                {{layoutType.name}}
+              </option>
+            </select> 
+          </div>
+          <div class="form-group"  *ngIf="showSubType">
+            <label for="drpSubtype">Subtype</label> 
+            <select class="form-control" formControlName="drpSubType" >
+              <option *ngFor="let subType of subTypes" value={{subType.id}}>
+                {{subType.name}}
+              </option>
+            </select> 
+          </div>
+          <div class="form-group" *ngIf="showSubType">
+            <label for="drpContext">Context</label>  
+            <select class="form-control" formControlName="drpContext" >
+              <option *ngFor="let context of contexts" value={{context.id}}>
+                {{context.name}}
+              </option>
+            </select> 
+          </div>  -->
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('Cancel')}}</button>
+    <button type="button" class="btn btn-outline-dark" (click)="saveLayout('Save click')">{{getResourceValue('Save')}}</button>
+    <!--(click)="modal.close('Save click')"-->
+  </div>
+</ng-template>

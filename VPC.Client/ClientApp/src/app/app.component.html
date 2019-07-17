@@ -1,0 +1,19 @@
+<!-- <div class="pages-wrap">
+  <app-top-menu [menus]="menus" (generateSideMenu)="topMenu($event)"></app-top-menu>
+  <div class="pages-body">
+    <app-sidebar [menu]="leftmenuItems" [groupName]="group" [isMenuopen]="isMenuopen"></app-sidebar>
+    <div class="pages-content">
+      <app-nav-menu></app-nav-menu>
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div> -->
+
+
+
+<div>
+  <router-outlet></router-outlet>
+</div>
+<ng-http-loader [backdrop]="false" [backgroundColor]="'#000000'" [debounceDelay]="100" [extraDuration]="900"
+  [minDuration]="900" [opacity]=".8" [spinner]="spinkit.skWave">
+</ng-http-loader>

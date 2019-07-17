@@ -1,0 +1,26 @@
+<div class="tab-section">
+<kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true"
+   [style.height.%]="100" [scrollable]="none">
+  <kendo-grid-column field="name" title="{{getResourceValue('Name')}}"></kendo-grid-column>
+  <kendo-grid-column field="displayName" title="{{getResourceValue('DisplayName')}}">
+    <!-- <ng-template kendoGridCellTemplate let-gridData>
+      <span>{{resourceData[generateResourceName(gridData.name)]}}</span>
+      <span *ngIf="getRequired(gridData.validators)" class="text-mandatory margin-left-3">*</span>
+    </ng-template> -->
+  </kendo-grid-column>
+  <kendo-grid-column field="dataType" title="{{getResourceValue('DataType')}}"></kendo-grid-column>
+  <kendo-grid-column field="controlType" title="{{getResourceValue('ControlType')}}"></kendo-grid-column>
+  <kendo-grid-column>
+    <ng-template kendoGridCellTemplate let-gridData>     
+      <button mat-icon-button [matMenuTriggerFor]="menu" class="actions" *ngIf="gridData.validators">
+        <mat-icon>
+          ...
+        </mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <a class="dropdown-item" (click)="validationRule(gridData.validators)">{{getResourceValue("ValidationRule")}}</a>
+      </mat-menu>
+    </ng-template>
+  </kendo-grid-column>
+</kendo-grid>
+</div>

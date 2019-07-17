@@ -1,0 +1,90 @@
+
+<div *ngIf=(menuService.getCacheMenu()) class="text-header">{{menuService.getCacheMenu().name}}</div>
+<div class="detailsMenu">
+  <div class="msg-tips-left">
+    <div class="msg-entrance" (click)="open(addsubscriptioncontent)" ngbTooltip="{{getResourceValue('Addsubscription')}}" container="body">
+      <i class="fa fa-plus"></i>{{getResourceValue("Create")}} 
+    </div>
+  </div>
+</div>
+<div class="page-content">
+  <kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [resizable]="true">
+    <kendo-grid-column field="group.name" title="{{getResourceValue('Category')}}"></kendo-grid-column>
+    <kendo-grid-column field="name" title="{{getResourceValue('Name')}}">
+      <ng-template kendoGridCellTemplate let-gridData>
+          <a class="gridLink" (click)="goToSubscriptionDetails(gridData)">{{gridData.name}}</a>     
+      </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-column field="recurringPrice" title="{{getResourceValue('Price')}}">
+      <ng-template kendoGridCellTemplate let-gridData>
+        {{gridData.recurringPrice}} NOK 
+    </ng-template>
+
+    </kendo-grid-column>
+
+    <kendo-grid-column field="status" title="{{getResourceValue('Status')}}" [width]="130">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <span *ngIf="gridData.status">
+          {{getResourceValue("Active")}} 
+        </span>
+        <span *ngIf="!gridData.status">
+          {{getResourceValue("Inactive")}} 
+        </span>
+      </ng-template>
+    </kendo-grid-column>
+
+    <kendo-grid-column>
+      <ng-template kendoGridCellTemplate let-gridData>
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+          <mat-icon>
+            ...
+          </mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <a class="dropdown-item" *ngIf="!gridData.status" (click)="statusSubscription(gridData.tenantSubscriptionId)">{{getResourceValue("Active")}}</a>
+          <a class="dropdown-item"  *ngIf="gridData.status"  (click)="statusSubscription(gridData.tenantSubscriptionId)">{{getResourceValue("Inactive")}} </a>
+          <a class="dropdown-item" (click)="deleteSubscription(gridData.tenantSubscriptionId)">{{getResourceValue("Delete")}}</a>
+        </mat-menu>
+      </ng-template>
+    </kendo-grid-column>
+  </kendo-grid>
+</div>
+
+<!-- ----------------Add Subscription Popup----------------- -->
+
+<ng-template #addsubscriptioncontent let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <label class="">{{getResourceValue('Addsubscription')}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+ 
+  <div class="modal-body">
+
+<div class="row" *ngIf="subscriptionInfo">
+    <div class="col-md-12 form-group">
+      <label>{{getResourceValue('Name')}}</label>
+      <input type="text" class="input-control" [(ngModel)]="subscriptionInfo.name" name="name" />
+    </div>
+    <div class="col-md-12 form-group">
+      <label>{{getResourceValue('Group')}}</label>
+      <div><kendo-autocomplete [data]="subsGroups" 
+        [filterable]="true"
+        [valueField]="'text'" 
+        [(ngModel)]="subscriptionInfo.group.name" 
+        (valueChange)="onGroupChange($event)"
+        (filterChange)="handleFilter($event)">
+      </kendo-autocomplete></div>
+      
+    </div>
+  </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="d('Cross click')">{{getResourceValue('Cancel')}}</button>
+        <button class="btn btn-primary"  (click)="addSubscriptionNext();">{{getResourceValue('SaveAndAddAnother')}}</button>
+        <button class="btn btn-primary" (click)="addSubscription();">{{getResourceValue('Save')}}</button>
+      </div>
+  </div>
+  
+</ng-template>

@@ -1,0 +1,162 @@
+<div class="text-header">{{getResourceValue("MenuItems")}}</div>
+<div class="detailsMenu">
+  <div class="msg-tips-left">
+    <div class="msg-entrance" (click)="addMenuPopup(menu)" ngbTooltip="{{getResourceValue('AddMenu')}}" container="body">
+      <i class="fa fa-plus"></i>{{getResourceValue("Create")}}
+    </div>
+    <div class="msg-entrance" (click)="addMenuGroupPopup(menuGroup)" ngbTooltip="{{getResourceValue('AddMenuGroup')}}" container="body">
+      <i class="fa fa-th"></i>{{getResourceValue("CreateMenuGroup")}}
+    </div>
+  </div>
+</div>
+<div class="page-content">
+    
+  <kendo-grid [kendoGridBinding]="gridData" [filterable]="true" [pageSize]="10" [pageable]="true" [sortable]="true" [resizable]="true">
+    <kendo-grid-column field="groupName" title="{{getResourceValue('Group')}}"></kendo-grid-column>
+    <kendo-grid-column field="name" title="Name">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <a class="gridLink" (click)="editMenuPopup(menu, gridData.id)">{{gridData.name}}</a>
+      </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-column field="menuTypeName" title="{{getResourceValue('MenuType')}}"></kendo-grid-column>
+    <kendo-grid-column field="referenceEntityId" title="{{getResourceValue('EntityReference')}}"></kendo-grid-column>
+    <kendo-grid-column field="actionTypeName" title="{{getResourceValue('ActionType')}}"></kendo-grid-column>
+    <kendo-grid-column field="wellKnownLink" title="{{getResourceValue('Path')}}"></kendo-grid-column>
+    <kendo-grid-column>
+      <ng-template kendoPagerTemplate kendoGridCellTemplate let-gridData let-rowIndex="rowIndex">
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+          <mat-icon>
+            ...
+          </mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <a *ngIf="rowIndex>0" class="dropdown-item" (click)="moveUpAndDown(gridData,rowIndex,rowIndex-1)">{{getResourceValue("MoveUp")}}</a>
+          <a *ngIf="(rowIndex<lastRowIndex-1)" class="dropdown-item" (click)="moveUpAndDown(gridData,rowIndex,rowIndex+1)">{{getResourceValue("MoveDown")}}</a>
+          <a class="dropdown-item" (click)="deleteMenu(gridData)">{{getResourceValue("Delete")}}</a>
+        </mat-menu>
+      </ng-template>
+    </kendo-grid-column>
+  </kendo-grid>
+</div>
+
+<!-- ----------------Add Menu Popup----------------- -->
+<ng-template #menu let-modal>
+  <div class="modal-header">
+    <label>{{addMenuLabel}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+   
+      <div class="row">
+        <div class="col-md-6 col-xs-12">
+          <div class="form-group">
+            <label>{{getResourceValue("Name")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <input type="text" [(ngModel)]="menuItemName" class="input-control">
+          </div>
+        </div>
+        <div class="col-md-6 col-xs-12">
+          <div class="form-group">
+            <label>{{getResourceValue("Group")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <select class="form-control" [(ngModel)]="groupId">
+              <option *ngFor="let vals of menuGroupList" [ngValue]="vals.internalId">{{vals.text}}</option>
+            </select>   
+          </div>
+        </div>
+        <div class="col-md-6 col-xs-12">
+          <div class="form-group">
+            <label>{{getResourceValue("MenuType")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <select [(ngModel)]="menuTypeId" (ngModelChange)="onMenuTypeChange($event)" class='input-control'>
+              <option value="1">{{getResourceValue("Entity")}}</option>
+              <option value="2">{{getResourceValue("Picklist")}}</option>
+              <option value="3">{{getResourceValue("Context")}}</option>
+              <option value="4">{{getResourceValue("WellKnown")}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-6 col-xs-12" *ngIf="menuTypeId===1||menuTypeId===2">
+          <div class="form-group">
+            <label>{{getResourceValue("ReferenceEntity")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <select [(ngModel)]="referenceEntityId" (ngModelChange)="onReferenceEntityChange($event)" class='input-control'>
+              <option *ngFor="let vals of referenceEntity" value="{{vals.name}}">{{vals.name}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-6 col-xs-12" *ngIf="menuTypeId===3">
+          <div class="form-group">
+            <label>{{getResourceValue("ActionType")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <select class="form-control" [(ngModel)]="actionTypeId">
+              <option [ngValue]="1">{{getResourceValue("EntityListLayout")}}</option>
+              <option [ngValue]="2">{{getResourceValue("EntityMetadata")}}</option>
+              <option [ngValue]="3">{{getResourceValue("PicklistMetadata")}}</option>
+              <option [ngValue]="4">{{getResourceValue("WorkflowDesigner")}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-6 col-xs-12" *ngIf="menuTypeId===4">
+          <div class="form-group">
+            <label>{{getResourceValue("SelectItem")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <select class="form-control" [(ngModel)]="wellKnownLink">
+              <option value="menu-item">{{getResourceValue("MenuItem")}}</option>
+              <option value="subscriptions">{{getResourceValue("Subscription")}}</option>
+              <option value="roles">{{getResourceValue("Roles")}}</option>
+              <option value="resource">{{getResourceValue("Resource")}}</option>
+              <option value="communication">{{getResourceValue("Communication")}}</option>
+              <option value="batchTypes">{{getResourceValue("BatchTypes")}}</option>
+              <option value="counter">{{getResourceValue("Counter")}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-6 col-xs-12" *ngIf="menuTypeId===1||menuTypeId===2">
+            <div class="form-group">
+              <label>{{getResourceValue("Layout")}}</label><label class="text-mandatory margin-left-3">*</label>
+              <select class="form-control" [(ngModel)]="layoutId" autocomplete="off">
+                  <option *ngFor="let vals of layoutlist" [ngValue]="vals.id" [selected]="vals.id===layoutId">{{vals.name}}</option>
+                </select>  
+            </div>
+          </div>
+      </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
+      <!-- <button class="btn btn-primary">Save and add another</button> -->
+      <button class="btn btn-primary" (click)="saveMenu()">{{editUpdate}}</button>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- ----------------Add Menu Group Popup----------------- -->
+<ng-template #menuGroup let-modal>
+  <div class="modal-header">
+    <label>{{getResourceValue("AddMenuGroup")}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <!-- <form [formGroup]="menuGroupForm" (ngSubmit)="submitForm()">
+      <div class="container">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" formControlName="groupName" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.groupName.errors }" />
+          <div *ngIf="submitted && f.groupName.errors" class="invalid-feedback">
+            <div *ngIf="f.groupName.errors.required">Group name is required</div>
+          </div>
+        </div>
+      </div> 
+    </form> -->
+    <div class="page-content" style="padding:0px; overflow:hidden;">
+      <my-tree [rootNode]="tree" [mode]="1" [displayRule]="displayRule"  [resource]="resource" *ngIf="isTreeReady" class="detail-entity-modal">
+      </my-tree>
+    </div>
+    <div class="modal-footer">    
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
+        <!-- <button class="btn btn-primary">Save and add another</button> -->
+        <button class="btn btn-primary" (click)="savePicklistValue()">{{getResourceValue("Save")}}</button>    
+      </div>
+  </div>
+      
+</ng-template>

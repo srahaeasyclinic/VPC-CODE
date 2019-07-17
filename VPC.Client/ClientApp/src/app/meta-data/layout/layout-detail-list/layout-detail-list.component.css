@@ -1,0 +1,24 @@
+.statusRoundedGreen {
+    background-color: #4caf50;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 14px;
+    display: block;
+    text-align: center;
+    line-height: 30px;
+}
+.page-content{
+    padding-bottom: 0px;
+    border: 1px solid #e4e4e4;
+    border-top: none;
+}
+.card-block {
+    border: none;
+    background-color: #fff;
+    padding: 0px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 15px;
+}

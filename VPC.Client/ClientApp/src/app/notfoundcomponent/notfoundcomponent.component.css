@@ -1,0 +1,21 @@
+.error-container{
+    margin-top: 150px;
+}
+.pages-content{
+    background-color: #ccc;
+}
+.error-icon{
+    text-align: center;
+}
+.error-icon i{
+    font-size: 150px;
+    font-weight: 300;
+    color: #fb9606;
+}
+.error-msg{
+    font-size: 52px;
+    font-weight: 300;
+    text-align: center;
+    color: #465294;
+    line-height: 120px;
+}

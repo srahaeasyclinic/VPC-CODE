@@ -1,0 +1,124 @@
+<div class="detailsMenu">
+  <div class="msg-tips-wrap">
+    <div class="msg-entrance" (click)="configToggle()" ngbTooltip="{{getResourceValue('SearchFilter')}}" container="body">
+      <span class="fa fa-search" *ngIf="!isExpanded"></span>
+      <span class="fa fa-chevron-right" *ngIf="isExpanded"></span>
+    </div>
+  </div>
+  <!-- Right Filter Start -->
+  <div class="right-config-wrap" [ngClass]="{'right-config-wrap-on':isExpanded}">
+    <div class="filter-top"></div>
+    <div *ngIf="displaySearch">
+      <div class="right-filter">
+        <div *ngFor="let item of layoutInfo.listLayoutDetails.searchProperties">
+          <div *ngIf="item.properties.length > 0">
+            <div *ngIf="item.name == 'FreeTextSearch'" class="form-group">
+              <label>{{getResourceValue(item.name)}}</label>
+              <input type="text" class="input-control" [(ngModel)]="freetextsearch" (ngModelChange)="onFieldChange($event)" />
+            </div>
+            <div *ngIf="item.name == 'SimpleSearch'">
+              <label class="text-important">{{getResourceValue(item.name)}}</label>
+              <div *ngFor="let prop of item.properties">
+                <div *ngIf="prop.controlType==='TextBox'" class="form-group">
+                  <input type="text" class="input-control" [(ngModel)]="prop.value" (change)="onChange()" />
+                  
+                </div>
+                <div *ngIf="prop.controlType==='Dropdown'" class="form-group">
+                  <select class="input-control" [(ngModel)]='prop.value' (change)="onChange()">
+                    <option *ngFor="let vals of prop.values" [ngValue]="vals.id">{{vals.value}}</option>
+                  </select>                 
+                </div>
+                <div *ngIf="prop.controlType==='Radio'" class="form-group">
+                  <label class="control control--radio" *ngFor="let option of prop.values">
+                    {{ option.value }}
+                    <input type="radio" [(ngModel)]="prop.value" (change)="onChange()" [value]="option.id" name="radiogroup">
+                    <span class="control__indicator"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="item.name == 'AdvanceSearch'">
+              <a class="gridLink" (click)="openAdvanceSearch(content)">{{getResourceValue(item.name)}}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Right Filter End -->
+</div>
+<div class="page-content">
+  <div class="r-filter-page">
+    <!-- <kendo-grid [data]="result" [columnMenu]="true" [filterable]="true" [sortable]="true">
+      <ng-container *ngFor="let column of columns">
+        <kendo-grid-column *ngIf="column.isVisible" [field]="column.field" [title]="column.title" [width]="column.width">
+        </kendo-grid-column>
+        <kendo-grid-column [width]="column.width" title="Status" *ngIf="column.isStatus">
+          <ng-template kendoGridCellTemplate let-result>
+            <span class="{{result.css}}">{{result.active}}</span>
+          </ng-template>
+        </kendo-grid-column>
+      </ng-container>
+    </kendo-grid> -->
+
+    <dynamic-grid [gridData]="gridData" 
+    [totalRecords]="totalRecords"
+    [resources]="resource"
+    [defaultLayout]="layoutInfo"
+    [defaultSortOrder]="sort"
+    [currentPage]="pageindex"
+    [dataSkip]="skip"
+    [groupBy]="groups"
+    (columnClick)="edit($event)" 
+    (onActionClick)="onActionClick($event)"
+    (onGridChangeEvent)="onGridChangeEvent($event)"
+    ></dynamic-grid> 
+
+
+
+
+  </div>
+  </div>
+  
+
+<ng-template #content let-modal>
+  <div class="modal-header">
+    <label class="text-important">{{getResourceValue('advanceSearch')}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    
+      <div *ngFor="let item of layoutInfo.listLayoutDetails.searchProperties">
+        <div *ngIf="item.name === 'AdvanceSearch'">
+          <div *ngFor="let prop of item.properties">
+            <div *ngIf="prop.controlType==='TextBox'">
+              <label>{{getResourceValue(prop.name)}}</label>
+              <input type="text" class="input-control" [(ngModel)]="prop.value">
+              <br />
+            </div>
+            <div *ngIf="prop.controlType==='Dropdown'">
+              <label>{{prop.name}}</label>
+              <select class="input-control" [(ngModel)]='prop.value'>
+                <option *ngFor="let vals of prop.values" [ngValue]="vals.id">{{vals.value}}</option>
+              </select>
+              <br />
+            </div>
+            <div *ngIf="prop.controlType==='Radio'">
+              <label class="control control--radio" *ngFor="let option of prop.values">
+                  {{ option.value }}
+                <input type="radio" [(ngModel)]="prop.value" [value]="option.id" name="radiogroup1">
+                <span class="control__indicator"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('cancel')}}</button>
+        <button type="button" class="btn btn-primary" (click)="AdvanceSearch()">{{getResourceValue('submit')}}</button>
+      </div>
+    
+  </div>
+</ng-template>

@@ -1,0 +1,103 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <IsPackable>false</IsPackable>
+    <SpaRoot>ClientApp\</SpaRoot>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+
+    <!-- Set this to true if you enable server-side prerendering -->
+    <BuildServerSideRenderer>false</BuildServerSideRenderer>
+    <ApplicationIcon />
+    <OutputType>Library</OutputType>
+    <StartupObject />
+    <Configurations>Debug;Release;VPC_QA;VPC_Staging;VPC_Production</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Content Remove="$(SpaRoot)**" />
+    <None Remove="$(SpaRoot)**" />
+    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="ClientApp\src\app\app.resource.service.ts" />
+    <None Remove="ClientApp\src\app\meta-data\layout\layout.service.ts" />
+    <None Remove="ClientApp\src\app\meta-data\layout\layoutpreview\layoutpreview.component.ts" />
+    <None Remove="ClientApp\src\app\model\activevalue.ts" />
+    <None Remove="ClientApp\src\app\model\configuration.ts" />
+    <None Remove="ClientApp\src\app\model\entities.ts" />
+    <None Remove="ClientApp\src\app\model\fieldmodel.ts" />
+    <None Remove="ClientApp\src\app\model\keyvalue.ts" />
+    <None Remove="ClientApp\src\app\model\layoutbasicmodel.ts" />
+    <None Remove="ClientApp\src\app\model\layoutmodel.ts" />
+    <None Remove="ClientApp\src\app\model\listlayoutdetails.ts" />
+    <None Remove="ClientApp\src\app\model\operation.ts" />
+    <None Remove="ClientApp\src\app\model\orderdetails.ts" />
+    <None Remove="ClientApp\src\app\model\properties.ts" />
+    <None Remove="ClientApp\src\app\model\relation.ts" />
+    <None Remove="ClientApp\src\app\model\rowleveloperations.ts" />
+    <None Remove="ClientApp\src\app\model\searchproperties.ts" />
+    <None Remove="ClientApp\src\app\model\selecteditem.ts" />
+    <None Remove="ClientApp\src\app\model\tasks.ts" />
+    <None Remove="ClientApp\src\app\model\validator.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ClientApp\src\assets\fonts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\app\model\activevalue.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\keyvalue.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\services\resource.service.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\meta-data\layout\layoutpreview\layoutpreview.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\meta-data\layout\layout.service.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\configuration.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\entities.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\fieldmodel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\layoutbasicmodel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\layoutmodel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\listlayoutdetails.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\operation.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\orderdetails.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\properties.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\relation.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\rowleveloperations.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\searchproperties.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\selecteditem.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\tasks.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\validator.ts" />
+  </ItemGroup>
+
+  <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
+    <!-- Ensure Node.js is installed -->
+    <Exec Command="node --version" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+    </Exec>
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+    <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+  </Target>
+
+  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition=" '$(BuildServerSideRenderer)' == 'true' " />
+
+    <!-- Include the newly-built files in the publish output -->
+    <ItemGroup>
+      <DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
+      <DistFiles Include="$(SpaRoot)node_modules\**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>%(DistFiles.Identity)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
+</Project>

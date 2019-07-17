@@ -1,0 +1,281 @@
+
+ <div *ngIf="schedulerInfo" class="modal-body">
+     <div class="row">
+  <div class="col-md-12 form-group">
+    <label>{{getResourceValue('TimeStart')}}</label>
+    <select class="input-control" placeholder="getResourceValue('Type')" [(ngModel)]="schedulerInfo.syncTime" name="syncTime">
+      <option *ngFor="let hourList of hourLists" value={{hourList.id}}>
+        {{hourList.name}}
+      </option>
+    </select>
+  </div>
+</div>
+  <div class="col-md-12 form-group">
+     
+      <div class="row">
+          <div class="col-md-12">
+              <div class="well">
+                  <label class="txtLessImportant">{{getResourceValue('RecurrencePattern')}}</label>
+                  <div class="row vertical-divider-right">
+                      <div class="col-md-2">
+                          <label class="control control--radio">
+                            {{getResourceValue('Daily')}}      
+                              <input type="radio" (click)="recurrenceTypeChange(1)"   name="recurrenceType" [checked]="schedulerInfo.recurrenceType==1"  />
+                              <span class="control__indicator"></span>
+                          </label>
+                          <label class="control control--radio">
+                            {{getResourceValue('Weekly')}}
+                              <input type="radio"  (click)="recurrenceTypeChange(2)"   name="recurrenceType"  [checked]="schedulerInfo.recurrenceType==2"  />
+                              <span class="control__indicator"></span>
+                          </label>
+                          <label class="control control--radio">
+                            {{getResourceValue('Monthly')}}
+                              <input type="radio"  (click)="recurrenceTypeChange(3)"   name="recurrenceType"  [checked]="schedulerInfo.recurrenceType==3"  />
+                              <span class="control__indicator"></span>
+                          </label>
+                          <label class="control control--radio">
+                            {{getResourceValue('Yearly')}}
+                              <input type="radio"  (click)="recurrenceTypeChange(4)"   name="recurrenceType"  [checked]="schedulerInfo.recurrenceType==4"  />
+                              <span class="control__indicator"></span>
+                          </label>
+                      </div>
+                       <div class="col-md-10">
+                         <!-- *************************Daily******************************************************** -->
+                          <div id="divDaily" *ngIf="schedulerInfo.recurrenceType==1">
+                              
+                            <div class="row">
+                              <div class="col-md-12">
+                                  <div class="pull-left margin-top-5">                     
+                                      <label class="control control--radio">
+                                        {{getResourceValue('Every')}}
+                                          <input (click)="dailyRadioClick(1)"   [checked]="schedulerInfo.daily.unit==1" type="radio" name="dailyUnit">
+                                          <span class="control__indicator"></span>
+                                      </label>
+                                  </div>
+                                  <div class="pull-left margin-left-10" style="width: 50px;">
+                                      <input type="number" [(ngModel)]="schedulerInfo.daily.value" [disabled]="schedulerInfo.daily.unit==2" /> <label>{{getResourceValue('Days')}}</label>
+                                  </div>
+                               
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-md-12">
+                                  <label class="control control--radio">
+                                    {{getResourceValue('EveryWeekday')}}
+                                      <input (click)="dailyRadioClick(2)"     [checked]="schedulerInfo.daily.unit==2"  type="radio" name="dailyUnit">
+                                      <span class="control__indicator"></span>
+                                  </label>
+                              </div>
+                          </div>
+      
+                          
+                          </div>
+                              <!-- *************************Weekly******************************************************** -->
+                          <div id="divWeekly" *ngIf="schedulerInfo.recurrenceType==2">                       
+                              <div class="row">
+                                  <div class="col-md-12">
+                                      <div class="pull-left margin-top-5">
+                                          <label>{{getResourceValue('RecurEvery')}}</label>
+                                      </div>
+                                      <div class="pull-left margin-left-10" style="width: 50px;">
+                                          <input type="number" [(ngModel)]="schedulerInfo.weekly.value" name="weeklyValue" />  <label>{{getResourceValue('WeeksOn')}}</label>
+                                      </div>                                    
+                                  </div>
+                              </div>
+                              <div class="row">
+                                  <div class="col-md-3">
+                                      <label class="control control--checkbox">
+                                          <input type="checkbox" [(ngModel)]="schedulerInfo.weekly.monday" (click)="weekDayChecked($event,schedulerInfo.weekly.monday)"  name="monday" />
+                                          <span class="control__indicator"></span>
+                                          {{getResourceValue('Monday')}} 
+                                      </label>
+                                  </div>
+                                  <div class="col-md-3">
+                                      <label class="control control--checkbox">
+                                          <input type="checkbox"  [(ngModel)]="schedulerInfo.weekly.tuesday" (click)="weekDayChecked($event,schedulerInfo.weekly.tuesday)"   name="tuesday" />
+                                          <span class="control__indicator"></span>
+                                          {{getResourceValue('Tuesday')}} 
+                                      </label>
+                                  </div>
+                                  <div class="col-md-3">
+                                      <label class="control control--checkbox">
+                                          <input type="checkbox"  [(ngModel)]="schedulerInfo.weekly.wednesday" (click)="weekDayChecked($event,schedulerInfo.weekly.wednesday)"   name="wednesday" />
+                                          <span class="control__indicator"></span>
+                                          {{getResourceValue('Wednesday')}} 
+                                      </label>
+                                  </div>
+                                  <div class="col-md-3">
+                                      <label class="control control--checkbox">
+                                          <input type="checkbox"  [(ngModel)]="schedulerInfo.weekly.thrusday" (click)="weekDayChecked($event,schedulerInfo.weekly.thrusday)"   name="thrusday" />
+                                          <span class="control__indicator"></span>
+                                          {{getResourceValue('Thrusday')}} 
+                                      </label>
+                                  </div>
+                                  <div class="col-md-3">
+                                      <label class="control control--checkbox">
+                                          <input type="checkbox"  [(ngModel)]="schedulerInfo.weekly.friday" (click)="weekDayChecked($event,schedulerInfo.weekly.friday)"   name="friday" />
+                                          <span class="control__indicator"></span>
+                                          {{getResourceValue('Friday')}}
+                                      </label>
+                                  </div>
+                                  <div class="col-md-3">
+                                      <label class="control control--checkbox">
+                                          <input type="checkbox"  [(ngModel)]="schedulerInfo.weekly.saturday" (click)="weekDayChecked($event,schedulerInfo.weekly.saturday)"   name="saturday"/>
+                                          <span class="control__indicator"></span>
+                                          {{getResourceValue('Saturday')}}
+                                      </label>
+                                  </div>
+                                  <div class="col-md-3">
+                                      <label class="control control--checkbox">
+                                          <input type="checkbox"  [(ngModel)]="schedulerInfo.weekly.sunday" (click)="weekDayChecked($event,schedulerInfo.weekly.sunday)"   name="sunday" />
+                                          <span class="control__indicator"></span>
+                                          {{getResourceValue('Sunday')}}
+                                      </label>
+                                  </div>
+                              </div>
+                              
+                          </div>
+                          <div id="divMonthly" *ngIf="schedulerInfo.recurrenceType==3">
+                       
+                              <div class="row">
+                                  <div class="col-md-12">
+                                      <div class="pull-left margin-top-5">
+                                          <label class="control control--radio">
+                                            {{getResourceValue('Day')}}
+                                              <input  (click)="monthltRadioClick(1)"   [checked]="schedulerInfo.monthly.unit==1"  type="radio">
+                                              <span class="control__indicator"></span>
+                                          </label>
+                                      </div>
+                                      <div class="pull-left margin-left-10" style="width: 50px;">
+                                          <input type="number" [disabled]="schedulerInfo.monthly.unit==2"  [(ngModel)]="schedulerInfo.monthly.dayValue1" />  <label>{{getResourceValue('OfEvery')}}</label>
+                                      </div>
+                                     
+                                      <div class="pull-left margin-left-10" style="width: 50px;">
+                                          <input type="number" [disabled]="schedulerInfo.monthly.unit==2"  [(ngModel)]="schedulerInfo.monthly.dayValue2" /> <label>{{getResourceValue('Months')}}</label>
+                                      </div>                                   
+                                  </div>
+                              </div>
+                              <div class="row">
+                                  <div class="col-md-12">
+                                      <div class="pull-left margin-top-5">
+                                          <label class="control control--radio">
+                                            {{getResourceValue('The')}}
+                                              <input   (click)="monthltRadioClick(2)"   [checked]="schedulerInfo.monthly.unit==2"   type="radio">
+                                              <span class="control__indicator"></span>
+                                          </label>
+                                      </div>
+                                      <div class="pull-left margin-left-10" style="width: 90px;">
+
+                                          <select class="input-control" placeholder="Type" [(ngModel)]="schedulerInfo.monthly.theValue1"  [disabled]="schedulerInfo.monthly.unit==1"  name="theMonthlyUnitList">
+                                              <option *ngFor="let unitList of unitLists" value={{unitList.id}}>
+                                                {{unitList.name}}
+                                              </option>
+                                            </select>
+
+                                    
+                                      </div>
+                                      <div class="pull-left margin-left-10" style="width: 110px;">
+
+                                          <select class="input-control" placeholder="Type" [(ngModel)]="schedulerInfo.monthly.theValue2"  [disabled]="schedulerInfo.monthly.unit==1"  name="theMonthlyDaysList">
+                                              <option *ngFor="let weekDaysList of weekDaysLists" value={{weekDaysList.id}}>
+                                                {{weekDaysList.name}}
+                                              </option>
+                                            </select>
+                                            <label>{{getResourceValue('OfEvery')}}</label>
+                                      </div>
+                                    
+                                      <div class="pull-left margin-left-10" style="width: 50px;">
+                                          <input type="number" [disabled]="schedulerInfo.monthly.unit==1"  [(ngModel)]="schedulerInfo.monthly.theValue3" />  <label>{{getResourceValue('Months')}}</label>
+                                      </div>                                  
+                                  </div>
+                              </div>
+                              
+
+                              
+                          </div>
+                          <div id="divYearly" *ngIf="schedulerInfo.recurrenceType===4">
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="pull-left margin-left-10 margin-top-5">
+                                        <label>{{getResourceValue('RecurEvery')}}</label>
+                                    </div>
+                                    <div class="pull-left margin-left-10" style="width: 50px;">
+                                        <input type="number" [(ngModel)]="schedulerInfo.yearly.recurrenceValue"  name="recurrenceValue" />  <label>{{getResourceValue('Years')}}</label>
+                                    </div>                                  
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="pull-left margin-top-5" style="width: 88px;">
+                                        <label class="control control--radio">
+                                            {{getResourceValue('On')}}
+                                            <input  (click)="yearlyRadioClick(1)"   [checked]="schedulerInfo.yearly.unit==1"  type="radio">
+                                            <span class="control__indicator"></span>
+                                        </label>
+                                    </div>
+                                    <div class="pull-left margin-left-10" style="width: 110px;">
+                                        <select class="input-control" placeholder="Year" [(ngModel)]="schedulerInfo.yearly.onValue1"  [disabled]="schedulerInfo.yearly.unit===2"  name="theYearlyYearList">
+                                            <option *ngFor="let monthList of monthLists" value={{monthList.id}}>
+                                              {{monthList.name}}
+                                            </option>
+                                          </select>
+                                    </div>
+                                    <div class="pull-left margin-left-10" style="width: 50px;">
+                                        <input type="number" [(ngModel)]="schedulerInfo.yearly.onValue2" [disabled]="schedulerInfo.yearly.unit===2" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="pull-left margin-top-5" style="width: 88px;">
+                                        <label class="control control--radio">
+                                            {{getResourceValue('OnThe')}}
+                                            <input  (click)="yearlyRadioClick(2)"  [checked]="schedulerInfo.yearly.unit==2" type="radio">
+                                            <span class="control__indicator"></span>
+                                        </label>
+                                    </div>
+                                    <div class="pull-left margin-left-10" style="width: 110px;">
+
+                                        <select class="input-control" placeholder="Unit" [(ngModel)]="schedulerInfo.yearly.theValue1"  [disabled]="schedulerInfo.yearly.unit==1"  name="theYearlyTheValue1">
+                                            <option *ngFor="let unitList of unitLists" value={{unitList.id}}>
+                                              {{unitList.name}}
+                                            </option>
+                                          </select>
+                                    </div>
+                                    <div class="pull-left margin-left-10" style="width: 110px;"> 
+
+                                        <select class="input-control" placeholder="Unit" [(ngModel)]="schedulerInfo.yearly.theValue2"  [disabled]="schedulerInfo.yearly.unit==1"  name="theYearlyTheValue2">
+                                            <option *ngFor="let weekDaysList of weekDaysLists" value={{weekDaysList.id}}>
+                                              {{weekDaysList.name}}
+                                            </option>
+                                          </select>
+                                    </div>
+                                    <div class="pull-left margin-left-10 margin-top-5">
+                                        <label>{{getResourceValue('Of')}}</label>
+                                    </div>
+                                    <div class="pull-left margin-left-10" style="width: 115px;">
+
+                                        <select class="input-control" placeholder="Annual" [(ngModel)]="schedulerInfo.yearly.theValue3"  [disabled]="schedulerInfo.yearly.unit===1"  name="theYearlyOnValue1">
+                                            <option *ngFor="let monthList of monthLists" value={{monthList.id}}>
+                                              {{monthList.name}}
+                                            </option>
+                                          </select>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                      </div> 
+                  </div>
+              </div>
+          </div>
+      </div>
+      
+    </div>
+ 
+</div>
+
+<div class="modal-footer">  
+  <button class="btn btn-primary" (click)="addScheduler();">{{getResourceValue('Update')}}</button>
+</div>
+

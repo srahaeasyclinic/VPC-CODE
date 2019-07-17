@@ -1,0 +1,21 @@
+<div class="tab-section">
+<kendo-grid [kendoGridBinding]="gridData"
+            [pageSize]="10"
+            [pageable]="true"
+            [sortable]="true"
+            [filterable]="true"
+            >
+  <kendo-grid-column field="name" [width]="80" title="{{getResourceValue('Name')}}">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <!-- {{resource[generateResourceName(gridData.name)]}} -->
+      {{gridData.name}}
+    </ng-template>
+    <!--<ng-template kendoGridCellTemplate let-gridData>
+    <a class="gridLink" [routerLink]="['./metadatadetail', gridData.name]" >-->
+    <!--</a>
+    </ng-template>-->
+  </kendo-grid-column>
+  <kendo-grid-column field="type" [width]="80" title="{{getResourceValue('Type')}}"></kendo-grid-column>
+</kendo-grid>
+
+</div>

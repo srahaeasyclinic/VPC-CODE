@@ -1,0 +1,92 @@
+<div class="tab-section">
+<div class="row margin-top-20">
+  <div class="col-md-4 col-sm-6 col-xs-12">
+    <label>{{getResourceValue('Fields')}}</label>
+    <ng-multiselect-dropdown placeholder=" {{getResourceValue('Fields')}}" [data]="this.fields" [(ngModel)]="selectedFields" [settings]="dropdownSettings" >
+    </ng-multiselect-dropdown>
+  </div>
+  <div class="col-md-4 col-sm-6 col-xs-12">
+    <label>{{getResourceValue('SortColumn')}}</label>
+    <select required [(ngModel)]='sortResults' class="input-control">
+      <option class='option' *ngFor='let option of selectedFields' [value]="option">{{option}}</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label>{{getResourceValue('SortDirection')}}</label>
+    <select required [(ngModel)]='selectedSortOrder' class="input-control">
+      <option class='option' *ngFor='let option of selectedOrderOptions' [value]="option">{{option}}</option>
+    </select>
+
+    <!-- <select required [(ngModel)]='selectedSortOrder' class="input-control">
+      <option [value]="ASC">ASC</option>
+      <option [value]="DESC">DESC</option>
+    </select> -->
+  </div>
+</div>
+<div class="row" *ngIf=" selectedFields && selectedFields.length > 0">
+  <div class="col-md-12">
+
+    <!-- Filter Results -->
+    <a (click)="addFilterValue()" class="btn btn-primary margin-top-20 margin-bottom-10">
+      {{getResourceValue('FilterResults')}}
+    </a>
+  </div>
+
+  <div class="col-md-12">
+    <table class="table table-striped table-bordered">
+      <tbody>
+        <tr *ngFor="let field of filterArray; let i = index">
+          <td>
+            <select required [(ngModel)]='field.name' name="filterResults" class="input-control">
+              <option class='option' *ngFor='let option of this.fields' [value]="option.name">{{option.name}}</option>
+            </select>
+          </td>
+          <td>
+            <select required [(ngModel)]='field.operator' class="input-control">
+              <option class='option' *ngFor='let option of operators' [value]="option.id">{{option.description}}</option>
+            </select>
+          </td>
+          <td>
+            <input type="textbox" [(ngModel)]="field.value" placeholder="{{getResourceValue('EnterValue')}}" class="input-control">
+          </td>
+          <td>
+            <a class="btn-small-action pull-right" (click)="removeFilterValue(i)">
+              <i class="fa fa-times"> </i>
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="row margin-top-20">
+  <div class="col-md-4">
+    <label>{{getResourceValue('MaximumResults')}}</label>
+    <input type="textbox" [(ngModel)]="maxvalue" placeholder="{{getResourceValue('Max')}}" class="input-control">
+  </div>
+</div>
+<div class="row margin-top-20">
+  <div class="col-md-12">
+    <a class="btn btn-primary margin-right-15" (click)="buildQuery()">{{getResourceValue('BuildQuery')}}</a>
+    <a class="btn btn-secondary" (click)="executeQuery()">{{getResourceValue('ExecuteQuery')}}</a>
+  </div>
+</div>
+
+<div class="row margin-top-20" *ngIf="this.query">
+  <div class="col-md-12">
+    <div class="card card-body bg-light">
+      <label class="text-important">{{this.query}}</label>
+    </div>
+  </div>
+</div>
+
+
+<div class="margin-top-20">
+<kendo-grid [data]="results" [columnMenu]="true" [filterable]="true" [sortable]="true">
+  <ng-container *ngFor="let column of columns">
+    <kendo-grid-column *ngIf="column.isVisible" [field]="column.field" [title]="column.title">
+    </kendo-grid-column>
+  </ng-container>
+</kendo-grid>
+</div>
+</div>

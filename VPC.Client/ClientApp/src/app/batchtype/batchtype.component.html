@@ -1,0 +1,97 @@
+<div class="text-header">{{getResourceValue('BatchTypes')}}</div>
+<div class="page-content">
+  
+  <div class="r-filter-page">
+    <kendo-grid [kendoGridBinding]="gridDatas" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true"
+      [groupable]="true" [style.height.%]="100">
+      <kendo-grid-column field="name" title="{{getResourceValue('Name')}}">
+        <ng-template kendoGridCellTemplate let-gridDatas>
+          <a class="gridLink" (click)="openUpdatePopUp(gridDatas,addbatchtypes)">{{gridDatas.name}}</a>
+        </ng-template>
+      </kendo-grid-column>
+
+      <kendo-grid-column field="priority" title="{{getResourceValue('Priority')}}"></kendo-grid-column>
+      <kendo-grid-column field="idleTime" title="{{getResourceValue('IdleTime')}}"></kendo-grid-column>
+      <kendo-grid-column field="runningType.name" title="{{getResourceValue('Type')}}"></kendo-grid-column>
+
+
+      <kendo-grid-column field="status" title="{{getResourceValue('Status')}}">
+        <ng-template kendoGridCellTemplate let-gridDatas>
+          <span *ngIf="gridDatas.status">
+
+            {{getResourceValue('Active')}}
+          </span>
+          <span *ngIf="!gridDatas.status">
+
+            {{getResourceValue('Inactive')}}
+          </span>
+        </ng-template>
+      </kendo-grid-column>
+
+      <kendo-grid-column>
+        <ng-template kendoGridCellTemplate let-gridDatas>
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+            <mat-icon>
+              ...
+            </mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+
+            <a class="dropdown-item" *ngIf="!gridDatas.status" (click)="addUpdateStatusBatch(gridDatas)">{{getResourceValue('Active')}}</a>
+            <a class="dropdown-item" *ngIf="gridDatas.status" (click)="updateStatus(gridDatas.batchTypeId)">{{getResourceValue('Inactive')}}</a>
+            <a class="dropdown-item" *ngIf="gridDatas.status && gridDatas.runningType.id===3"
+
+              (click)="openScheduler(gridDatas.batchTypeId,addschedulers)">{{getResourceValue('Scheduler')}}</a>
+          </mat-menu>
+        </ng-template>
+      </kendo-grid-column>
+
+    </kendo-grid>
+  </div>
+</div>
+
+<ng-template #addbatchtypes let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <label>{{batchInfo.name}} {{getResourceValue('UpdateBatch')}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="col-md-12 form-group">
+      <label  class="text-less-important">{{getResourceValue('Name')}}</label>
+      {{batchInfo.name}}
+    </div>
+    <div class="col-md-12 form-group">
+      <label>{{getResourceValue('Priority')}}</label>
+      <input type="number" class="input-control" pattern="^[0-9]"  min="0" oninput="validity.valid||(value='');" [(ngModel)]="batchInfo.priority" name="priority" />
+    </div>
+
+    <div class="col-md-12 form-group">
+      <label>{{getResourceValue('IdleTime')}}</label>
+      <input type="number" class="input-control" pattern="^[0-9]"  min="0" oninput="validity.valid||(value='');" [(ngModel)]="batchInfo.idleTime" name="idleTime" />
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closePopUp('cancel click')">{{getResourceValue('Cancel')}}</button>
+        <button class="btn btn-primary" (click)="addUpdateBatch(batchInfo);">{{getResourceValue('Update')}}</button>
+      </div>
+  </div>
+
+  
+</ng-template>
+
+
+<ng-template #addschedulers let-c="close" let-d="dismiss">
+  <div class="modal-header">
+
+    <label>{{getResourceValue('ConfigureScheduler')}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <app-scheduler></app-scheduler>
+  </div>
+
+</ng-template>

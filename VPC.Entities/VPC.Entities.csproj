@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Configurations>Debug;Release;VPC_QA;VPC_Staging;VPC_Production</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="EntityCore\Metadata\Crew.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VPC.Metadata.Business\VPC.Metadata.Business.csproj" />
+  </ItemGroup>
+
+</Project>

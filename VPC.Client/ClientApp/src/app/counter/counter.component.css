@@ -1,0 +1,12 @@
+.validationMsg{
+    color: #ff6358;
+}
+
+.btn{
+    background-color: #15141400;
+    border: none;
+}
+
+.well-block{
+    min-height: 130px;
+}

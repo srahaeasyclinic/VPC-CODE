@@ -1,0 +1,84 @@
+<h4>{{getResourceValue('LayoutDetails')}}</h4>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="btnContainer">
+      <a class="btnToolbar"><i class="fa fa-save"></i>{{getResourceValue('Save')}}</a>
+      <!--<a class="btnToolbar" ng-click="vm.listPreviewPage()"><i class="fa fa-eye"></i>Preview</a>-->
+    </div>
+  </div>
+</div>
+
+<!--<div class="row row-flex row-flex-wrap">
+  <div class="col-md-4">
+      <div class="pnlInvoice">
+          <div class="row">
+              <div class="col-md-6">
+                  <label class="txtLessImportant">Entity name</label>
+              </div>
+              <div class="col-md-6">
+                  <label class="txt_important"></label>
+              </div>
+          </div>
+
+      </div>
+  </div>
+  <div class="col-md-4">
+      <div class="pnlInvoice">
+          <div class="row">
+              <div class="col-md-6">
+                  <label class="txtLessImportant">Layout name</label>
+              </div>
+              <div class="col-md-6">
+                  <label class="txt_important">{{layoutInfo.name}}</label>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-md-6">
+                  <label class="txtLessImportant">Layout type</label>
+              </div>
+              <div class="col-md-6">
+                  <label class="txt_important">{{layoutInfo.layoutTypeName}}</label>
+              </div>
+          </div>
+          <div class="row" *ngIf="layoutInfo.defaultLayout">
+              <div class="col-md-6">
+                  <label class="txtLessImportant">Default layout</label>
+              </div>
+              <div class="col-md-6">
+                  <span *ngIf="vm.layoutDetail.defaultLayout" ng-class="vm.layoutDetail.defaultLayout ? 'statusRoundedGreen' : ''" class="statusRoundedGreen">D</span>
+                  
+              </div>
+          </div>
+      </div>
+  </div>
+  <div class="col-md-4">
+      <div class="pnlInvoice">
+          <div class="row">
+              <div class="col-md-6">
+                  <label class="txtLessImportant">Created by</label>
+              </div>
+              <div class="col-md-6">
+                  <label class="txt_important">{{layoutInfo.modifiedBy}}</label>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-md-6">
+                  <label class="txtLessImportant">Created date</label>
+              </div>
+              <div class="col-md-6">
+                  <label class="txt_important">{{layoutInfo.modifiedDate | date:'dd/MM/yyyy'}}</label>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<div class="margin-top-20">
+  <nav mat-tab-nav-bar>
+    <a mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" routerLinkActive #rla="routerLinkActive"
+       [active]="rla.isActive">
+      {{link.label}}
+    </a>
+  </nav>
+  <router-outlet></router-outlet>
+</div>-->

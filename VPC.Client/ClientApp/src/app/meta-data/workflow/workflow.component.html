@@ -1,0 +1,78 @@
+<div class="tab-section">
+<div *ngIf="subTypes && subTypes.length>1">
+  <div class="row">
+    <div class="col-md-4 col-xs-12 form-group">
+      <label>{{getResourceValue("SubType")}}</label>
+      <select [(ngModel)]='subTypeSelected' (ngModelChange)="getWorkFlow($event)" class='input-control'>
+        <option *ngFor="let subType of subTypes" value='{{subType}}'>{{subType}}</option>
+      </select>
+    </div>
+  </div>
+</div>
+<div *ngIf=workFlowInfo>
+  <div class="custom-table" *ngFor="let mainStep of workFlowInfo.steps; let mainIndex = index;">
+    <div>
+      <button class="config-switch" (click)="configToggle(mainStep)">
+        <i class="fa fa-plus-square-o" *ngIf="!mainStep.isConfigToggle"></i>
+        <i class="fa fa-minus-square-o" *ngIf="mainStep.isConfigToggle"></i>
+      </button>
+    </div>
+    <div>
+      <span *ngIf="mainStep.workFlowStepId!='00000000-0000-0000-0000-000000000000'" class="active-block"></span>
+      <span *ngIf="mainStep.workFlowStepId=='00000000-0000-0000-0000-000000000000'" class="in-active-block"></span>
+    </div>
+    <div> {{getResourceValue(mainStep.transitionType.name)}}
+    </div>
+    <div>
+      <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+        <mat-icon>
+          ...
+        </mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <a class="dropdown-item" *ngIf="mainStep.workFlowStepId=='00000000-0000-0000-0000-000000000000'"
+          (click)="addWorkFlowStep(mainStep)"> {{getResourceValue("Enable")}}</a>
+        <a class="dropdown-item" *ngIf="mainStep.workFlowStepId!='00000000-0000-0000-0000-000000000000'"
+          (click)="addWorkFlowStep(mainStep)"> {{getResourceValue("Disable")}}</a>
+        <a class="dropdown-item" *ngIf="mainIndex!=0 && mainStep.workFlowStepId!='00000000-0000-0000-0000-000000000000'"
+          (click)="moveUp_Step(workFlowInfo.steps,mainIndex)"> {{getResourceValue("MoveUp")}}</a>
+        <a class="dropdown-item"
+          *ngIf="(mainIndex!=workFlowInfo.steps.length-1) && mainStep.workFlowStepId!='00000000-0000-0000-0000-000000000000' && mainStep.lastItem!=true"
+          (click)="moveDown_Step(workFlowInfo.steps,mainIndex)"> {{getResourceValue("MoveDown")}}</a>
+      </mat-menu>
+    </div>
+    <div class="expand-table-block" *ngIf="mainStep.isConfigToggle">
+      <div class="margin-top-10 margin-bottom-10 margin-left-10">
+        <a class="gridLink" *ngIf="mainStep.workFlowStepId!='00000000-0000-0000-0000-000000000000'"
+          (click)="getInnerStep(mainStep)">{{getResourceValue("addTransition")}}</a>
+      </div>
+      <div>
+        <table class="table">
+          <tr *ngFor="let innerStep of mainStep.innerSteps ; let innerIndex = index;">
+            <td>
+             {{getResourceValue(innerStep.transitionType.name)}}
+            </td>
+            <td>
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+                <mat-icon>
+                  ...
+                </mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <a class="dropdown-item" (click)="deleteWorkFlowInnerStep(innerStep,mainStep.innerSteps)">
+                   {{getResourceValue("Delete")}}</a>
+                <a class="dropdown-item" *ngIf="innerIndex!=0"
+                  (click)="moveUp_InnerStep(mainStep.innerSteps,innerIndex)">{{getResourceValue("MoveUp")}}</a>
+                <a class="dropdown-item" *ngIf="(innerIndex!=mainStep.innerSteps.length-1)"
+                  (click)="moveDown_InnerStep(mainStep.innerSteps,innerIndex)">{{getResourceValue("MoveDown")}}</a>
+                <a class="dropdown-item" (click)="addProcess(mainStep,innerStep)">{{getResourceValue("Workflow_ProcessConfiguration")}}</a>
+              </mat-menu>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>

@@ -1,0 +1,13 @@
+<div class="detailsMenu">
+   
+    <div class="msg-tips-left">
+        <div class="msg-entrance" ngbTooltip="{{resource[generateResourceName('Save')]}}" container="body" (click)="saveUser()">
+                <span class="fa fa-save"></span>
+        </div>
+    </div>
+</div>
+<div class="page-content">
+    
+<my-tree [rootNode]="tree"  [resource]="resource" [mode]="1" [displayRule]="displayRule" *ngIf="isTreeReady" class="detail-view">
+</my-tree>
+</div>

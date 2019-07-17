@@ -1,0 +1,96 @@
+
+    <div class="modal-header">
+      <label>{{title}}</label>
+      <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      
+        <div *ngIf="subTypes && subTypes.length>1" class="margin-top-10 margin-bottom-10">
+          <label>{{getResourceValue("SubType")}}</label>
+          <select [(ngModel)]='subTypeSelected' (ngModelChange)="getWorkFlow($event)" class='input-control'>
+            <option *ngFor="let subType of subTypes" value='{{subType}}'>{{subType}}</option>
+          </select>
+        </div>
+        <mat-tab-group animationDuration="0ms">
+          <mat-tab label="Pre process">
+            <div class="margin-top-20">
+              <select [(ngModel)]='preProcessSelected' (ngModelChange)="onChangeProcess($event,1)"
+                class='input-control'>
+                <option value='00000000-0000-0000-0000-000000000000'>{{getResourceValue("Select")}}</option>
+                <option *ngFor="let preProc of allPreProcessTasks" value='{{preProc.id}}'>{{preProc.key}}</option>
+              </select>
+            </div>
+            <div class="margin-top-20">
+              <table class="table table-bordered table-striped">
+                <tbody>
+                  <tr *ngFor="let preProc of preProcessList">
+                    <td>
+                      <label class="text-important">{{preProc.processName}}</label>
+                    </td>
+                    <td>
+                      <a class="btn-small-action" (click)="delProcessTask(preProc,1)">
+                        <i class="fa fa-times"></i>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </mat-tab>
+          <mat-tab label="Process">
+            <div class="margin-top-20">
+              <select [(ngModel)]='processSelected' (ngModelChange)="onChangeProcess($event,2)" class='input-control'>
+                <option value='00000000-0000-0000-0000-000000000000'>{{getResourceValue("Select")}}</option>
+                <option *ngFor="let proc of allProcessTasks" value='{{proc.id}}'>{{proc.key}}</option>
+              </select>
+            </div>
+            <div>
+              <table class="table table-bordered table-striped">
+                <tbody>
+                  <tr *ngFor="let proc of processList">
+                    <td>
+                      <label class="text-important">{{proc.processName}}</label>
+                    </td>
+                    <td>
+                      <a class="btn-small-action" (click)="delProcessTask(proc,2)">
+                        <i class="fa fa-times"></i>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </mat-tab>
+          <mat-tab label="Post process">
+            <div class="margin-top-20">
+              <select [(ngModel)]='postProcessSelected' (ngModelChange)="onChangeProcess($event,3)"
+                class='input-control'>
+                <option value='00000000-0000-0000-0000-000000000000'>{{getResourceValue("Select")}}</option>
+                <option *ngFor="let postProc of allPostProcessTasks" value='{{postProc.id}}'>{{postProc.key}}</option>
+              </select>
+            </div>
+            <div>
+              <table class="table table-bordered table-striped">
+                <tbody>
+                  <tr *ngFor="let postProc of postProcessList">
+                    <td>
+                      <label class="text-important">{{postProc.processName}}</label>
+                    </td>
+                    <td>
+                      <a class="btn-small-action" (click)="delProcessTask(postProc,3)">
+                        <i class="fa fa-times"></i>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </mat-tab>
+        </mat-tab-group>        
+      
+      <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
+        </div>
+    </div>

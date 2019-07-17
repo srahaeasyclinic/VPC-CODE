@@ -1,0 +1,318 @@
+<div *ngIf=subscriptionInfo class="text-header">{{subscriptionInfo.name}}</div>
+<div class="detailsMenu">
+  <div class="msg-tips-left">
+    <!-- <div class="msg-entrance" (click)="open(addsubscriptioncontent)" ngbTooltip="Add subscription"> -->
+    <div class="msg-entrance" ngbTooltip="{{getResourceValue('Addsubscription')}}" container="body">
+      <span class="fa fa-plus"></span>
+    </div>
+  </div>
+</div>
+<div class="page-content">
+  <div class="card-wrapper">
+    <div class="card-block">
+      <div class="text-large text-center">23</div>
+      <div class="text-less-important text-center">{{getResourceValue("ActiveCustomers")}}</div>
+    </div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <div *ngIf="subscriptionInfo" class="tab-block">
+    <div class="row">
+      <div class="col-md-3 col-xs-12 form-group">
+        <label>{{getResourceValue("Name")}}</label>
+        <input type="text" class="input-control" [(ngModel)]="subscriptionInfo.name" (change)="updateSubscription()"
+          name="name" />
+      </div>
+      <div class="col-md-3 col-xs-12 form-group">
+        <label>{{getResourceValue("Group")}}</label>
+        <kendo-autocomplete [data]="subsGroups" [filterable]="true" class="input-control" [valueField]="'text'"
+          [value]="subscriptionInfo.group.name" (valueChange)="onGroupChange($event)"
+          (filterChange)="handleFilter($event)">
+        </kendo-autocomplete>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3 col-xs-12">
+        <label>{{getResourceValue("RecuringPrice")}}(NOK)</label>
+        <div class="row">
+          <div class="col-md-6 col-xs-12">
+            <input type="number" (change)="updateSubscription()" [(ngModel)]="subscriptionInfo.recurringPrice"
+              name="recurringPrice" class="input-control">
+          </div>
+          <div class="col-md-6 col-xs-12">
+            <div class="form-group">
+              <select class="input-control" placeholder="getResourceValue('Duration')"
+                (ngModelChange)="onRecurringDurationChange($event)" [(ngModel)]="subscriptionInfo.recurringDuration"
+                name="recurringDuration">
+                <option *ngFor="let recurringDur of recurringDurations" value={{recurringDur.id}}>
+                  {{recurringDur.name}}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-xs-12 form-group">
+        <label>{{getResourceValue("OneTimeSetupPrice")}}(NOK)</label>
+        <input type="number" [(ngModel)]="subscriptionInfo.setUpPrice" (change)="updateSubscription()" name="setUpPrice"
+          class="input-control">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <mat-tab-group animationDuration="0ms">
+          <mat-tab label="Entities">
+            <div class="row">
+              <div class="col-md-4 col-sm-6 col-xs-12">
+                <kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true"
+                  [filterable]="true" [resizable]="true" [style.maxHeight.px]="750">
+                  <kendo-grid-column title="" [width]="40">
+                    <ng-template kendoGridCellTemplate let-gridData>
+                      <label class="control control--checkbox" style="top:-3px;">
+                        <input type="checkbox" [(ngModel)]="gridData.entityChecked" (change)="entityOnCheck(gridData)">
+                        <span class="control__indicator"></span>
+                      </label>
+                    </ng-template>
+                  </kendo-grid-column>
+                  <kendo-grid-column field="name" title="{{getResourceValue('EntityName')}}" [width]="300">
+                    <ng-template kendoGridCellTemplate let-gridData>
+                      <a class="gridLink" (click)="currentSubscriptionEntity(gridData)">{{gridData.name}}</a>
+                    </ng-template>
+                  </kendo-grid-column>
+                  <kendo-grid-column field="" title="" [width]="40">
+                    <ng-template kendoGridCellTemplate let-dataItem>
+                      <div *ngIf=dataItem.showSubscription>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-o-right fa-lg"></i></span>
+                      </div>
+                    </ng-template>
+                  </kendo-grid-column>
+                </kendo-grid>
+              </div>
+              <div *ngIf=subscriptionEntity class="col-md-8 col-sm-6 col-xs-12">
+                <div class="row">
+                  <div class="col-md-12">
+                    <label class="text-large">{{subscriptionEntity.entityId}}</label>
+                  </div>
+                  <div class="col-md-12">
+                    <label>{{getResourceValue("LimitNoOf")}}
+                      {{subscriptionEntity.entityId | lowercase }}s?</label>
+                    <label class="margin-left-10">
+                      <i class="fa fa-question-circle-o fa-lg" placement="bottom" ngbPopover="This is test data">
+                      </i>
+                    </label>
+                    <div class="row">
+                      <div class="col-md-2 col-xs-6">
+                        <input type="number" [(ngModel)]="subscriptionEntity.limtNumber"
+                          [ngClass]="{disabledDiv: !selectedSubscriptionEntity.entityChecked}"
+                          (change)="updateSubscriptionEntity()" name="limtNumber" class="input-control">
+                      </div>
+                      <div class="col-md-2 col-xs-6">
+                        <select class="input-control" placeholder="getResourceValue('Duration')"
+                          [ngClass]="{disabledDiv: !selectedSubscriptionEntity.entityChecked}"
+                          (ngModelChange)="onLimitTypeChange($event)" [(ngModel)]="subscriptionEntity.limitType"
+                          name="limitType">
+                          <option *ngFor="let limitType of limitTypes" value={{limitType.id}}>
+                            {{limitType.name}}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="pnl-feature">
+                      <div class="heading">{{getResourceValue("Features")}}</div>
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>{{getResourceValue("AdditionalRecurringPrice")}}(NOK)</th>
+                            <th>{{getResourceValue("OneTimeCharge")}}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let subscriptionFeature of subscriptionEntityDetailFeatures">
+                            <td>
+                              <label [ngClass]="{disabledDiv: !selectedSubscriptionEntity.entityChecked}"
+                                class="control control--checkbox">
+                                {{subscriptionFeature.name}}
+                                <input type="checkbox" [(ngModel)]="subscriptionFeature.infoChecked"
+                                  (change)="featureReportDashletOnCheck(subscriptionFeature)">
+                                <span class="control__indicator"></span>
+                              </label>
+                            </td>
+                            <td>
+                              <div class="pull-left margin-right-15">
+                                <input type="number" class="input-control"
+                                  [ngClass]="{disabledDiv: !subscriptionFeature.infoChecked}"
+                                  [(ngModel)]="subscriptionFeature.recurringPrice"
+                                  (change)="featureReportDashlet_Update(subscriptionFeature)" name="recurringPrice">
+                              </div>
+                              <div class="pull-left">
+                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                  [ngClass]="{disabledDiv: !subscriptionFeature.infoChecked}"
+                                  (ngModelChange)="detailRecurringDuration_OnChange($event,subscriptionFeature)"
+                                  [(ngModel)]="subscriptionFeature.recurringDuration" name="recurringDuration">
+                                  <option *ngFor="let recurringDur of recurringDurations" value={{recurringDur.id}}>
+                                    {{recurringDur.name}}
+                                  </option>
+                                </select>
+                              </div>
+                            </td>
+                            <td>
+                              <div class="pull-left margin-right-15">
+                                <input type="number" class="input-control"
+                                  [ngClass]="{disabledDiv: !subscriptionFeature.infoChecked}"
+                                  [(ngModel)]="subscriptionFeature.oneTimePrice"
+                                  (change)="featureReportDashlet_Update(subscriptionFeature)" name="oneTimePrice">
+                              </div>
+                              <div class="pull-left">
+                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                  [ngClass]="{disabledDiv: !subscriptionFeature.infoChecked}"
+                                  (ngModelChange)="detailOneTimeDuration_OnChange($event,subscriptionFeature)"
+                                  [(ngModel)]="subscriptionFeature.oneTimeDuration" name="oneTimeDuration">
+                                  <option *ngFor="let recurringDur of recurringDurations" value={{recurringDur.id}}>
+                                    {{recurringDur.name}}
+                                  </option>
+                                </select>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="pnl-feature">
+                      <div class="heading">{{getResourceValue("Reports")}}</div>
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>{{getResourceValue("AdditionalRecurringPrice")}}(NOK)</th>
+                            <th>{{getResourceValue("OneTimeCharge")}}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let subscriptionReport of subscriptionEntityDetailReports">
+                            <td>
+                              <label [ngClass]="{disabledDiv: !selectedSubscriptionEntity.entityChecked}"
+                                class="control control--checkbox">
+                                {{subscriptionReport.name}}
+                                <input type="checkbox" [(ngModel)]="subscriptionReport.infoChecked"
+                                  (change)="featureReportDashletOnCheck(subscriptionReport)">
+                                <span class="control__indicator"></span>
+                              </label>
+                            </td>
+                            <td>
+                              <div class="pull-left margin-right-15">
+                                <input type="number" class="input-control"
+                                  [ngClass]="{disabledDiv: !subscriptionReport.infoChecked}"
+                                  [(ngModel)]="subscriptionReport.recurringPrice"
+                                  (change)="featureReportDashlet_Update(subscriptionReport)" name="recurringPrice">
+                              </div>
+                              <div class="pull-left">
+                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                  [ngClass]="{disabledDiv: !subscriptionReport.infoChecked}"
+                                  (ngModelChange)="detailRecurringDuration_OnChange($event,subscriptionReport)"
+                                  [(ngModel)]="subscriptionReport.recurringDuration" name="recurringDuration">
+                                  <option *ngFor="let recurringDur of recurringDurations" value={{recurringDur.id}}>
+                                    {{recurringDur.name}}
+                                  </option>
+                                </select>
+                              </div>
+                            </td>
+                            <td>
+                              <div class="pull-left margin-right-15">
+                                <input type="number" class="input-control"
+                                  [ngClass]="{disabledDiv: !subscriptionReport.infoChecked}"
+                                  [(ngModel)]="subscriptionReport.oneTimePrice"
+                                  (change)="featureReportDashlet_Update(subscriptionReport)" name="oneTimePrice">
+                              </div>
+                              <div class="pull-left">
+                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                  [ngClass]="{disabledDiv: !subscriptionReport.infoChecked}"
+                                  (ngModelChange)="detailOneTimeDuration_OnChange($event,subscriptionReport)"
+                                  [(ngModel)]="subscriptionReport.oneTimeDuration" name="oneTimeDuration">
+                                  <option *ngFor="let recurringDur of recurringDurations" value={{recurringDur.id}}>
+                                    {{recurringDur.name}}
+                                  </option>
+                                </select>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="pnl-feature">
+                      <div class="heading">{{getResourceValue("Dashlets")}}</div>
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>{{getResourceValue("AdditionalRecurringPrice")}}(NOK)</th>
+                            <th>{{getResourceValue("OneTimeCharge")}}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let subscriptionDashlet of subscriptionEntityDetailDashlets">
+                            <td>
+                              <label [ngClass]="{disabledDiv: !selectedSubscriptionEntity.entityChecked}"
+                                class="control control--checkbox">
+                                {{subscriptionDashlet.name}}
+                                <input type="checkbox" [(ngModel)]="subscriptionDashlet.infoChecked"
+                                  (change)="featureReportDashletOnCheck(subscriptionDashlet)">
+                                <span class="control__indicator"></span>
+                              </label>
+                            </td>
+                            <td>
+                              <div class="pull-left margin-right-15">
+                                <input type="number" [(ngModel)]="subscriptionDashlet.recurringPrice"
+                                  [ngClass]="{disabledDiv: !subscriptionDashlet.infoChecked}"
+                                  (change)="featureReportDashlet_Update(subscriptionDashlet)" name="recurringPrice"
+                                  class="input-control">
+                              </div>
+                              <div class="pull-left">
+                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                  [ngClass]="{disabledDiv: !subscriptionDashlet.infoChecked}"
+                                  (ngModelChange)="detailRecurringDuration_OnChange($event,subscriptionDashlet)"
+                                  [(ngModel)]="subscriptionDashlet.recurringDuration" name="recurringDuration">
+                                  <option *ngFor="let recurringDur of recurringDurations" value={{recurringDur.id}}>
+                                    {{recurringDur.name}}
+                                  </option>
+                                </select>
+                              </div>
+                            </td>
+                            <td>
+                              <div class="pull-left margin-right-15">
+                                <input type="number" [(ngModel)]="subscriptionDashlet.oneTimePrice"
+                                  [ngClass]="{disabledDiv: !subscriptionDashlet.infoChecked}"
+                                  (change)="featureReportDashlet_Update(subscriptionDashlet)" name="oneTimePrice"
+                                  class="input-control">
+                              </div>
+                              <div class="pull-left">
+                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                  [ngClass]="{disabledDiv: !subscriptionDashlet.infoChecked}"
+                                  (ngModelChange)="detailOneTimeDuration_OnChange($event,subscriptionDashlet)"
+                                  [(ngModel)]="subscriptionDashlet.oneTimeDuration" name="oneTimeDuration">
+                                  <option *ngFor="let recurringDur of recurringDurations" value={{recurringDur.id}}>
+                                    {{recurringDur.name}}
+                                  </option>
+                                </select>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+    </div>
+  </div>
+
+</div>

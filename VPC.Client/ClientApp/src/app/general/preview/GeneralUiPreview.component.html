@@ -1,0 +1,71 @@
+<div *ngIf="entityInfo && entityInfo.itemName && layoutInfo" class="text-header">{{layoutInfo.singularName}}: {{entityInfo.itemName}}</div>
+
+<div class="detailsMenu">
+  <!-- <div class="msg-tips-left">
+    <div class="msg-entrance" ngbTooltip="Edit" (click)="edit()">
+      <span class="fa fa-pencil-square-o"></span>
+    </div>
+  </div>
+  <div class="msg-tips-center">
+      <div *ngIf="isPreviousIdAvailable">
+        <div class="msg-entrance" (click)="previousData()">
+          <span class="fa fa-chevron-left fa-fw"></span>
+        </div>
+      </div>
+      <div *ngIf="isNexIdAvailable">
+        <div class="msg-entrance" (click)="nextData()">
+          <span class="fa fa-chevron-right fa-fw"></span>
+        </div>
+      </div>
+    </div> -->
+
+  <!-- <utility-top-bar></utility-top-bar> -->
+
+  <div class="msg-tips-left" *ngIf="layoutInfo!=null">
+    <utility-top-bar [tree]="tree" [defaultLayoutData]="layoutInfo"></utility-top-bar>
+  </div>
+  <div class="msg-tips-wrap">
+    <div class="margin-right-5">
+      <div [ngClass]="(isPreviousIdAvailable)?'active-item':'inactive-item'" (click)="previousData()">
+        <span class="fa fa-chevron-circle-left"></span>
+      </div>
+    </div>
+    <div class="margin-left-10">
+      <div [ngClass]="(isNexIdAvailable)?'active-item':'inactive-item'" (click)="nextData()">
+        <span class="fa fa-chevron-circle-right"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<ng-template #updaterolecontent let-modal>
+  <div class="modal-header">
+    <label class="text-important" id="modal-title">{{getResourceValue("RequiredFields")}}</label>
+    <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    
+      <div class="col-md-12 form-group">
+        <label>
+          <ul class="bullet-point">
+            <li *ngFor="let validateMessage of validateMessages">{{getResourceValue(validateMessage)}}
+              Requried</li>
+          </ul>
+        </label>
+      </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
+    </div>
+  </div>
+</ng-template>
+
+<div class="page-content">
+  
+  <my-tree [rootNode]="tree" [mode]="2" [resource]="resource" [displayRule]="displayRule" *ngIf="isTreeReady"
+    class="preview">
+  </my-tree>
+</div>

@@ -1,0 +1,90 @@
+<div class="component-layout">
+  <div class="pnl-block">
+    <div class="pnl-block-header">
+      <label>{{getResourceValue("AvailableFields")}}</label>
+    </div>
+    <div class="pnl-block-body">
+      <div class="tableStyle">
+        <table class="table withoutborder">
+          <tbody>
+            <tr *ngFor="let item of simpleSearchSource">
+              <td (click)="mainItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                <div [className]="item.isAdded ? 'text-less-important line-through' : 'text-less-important'">{{item.name}}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnlBtnLayout">
+    <a class="btnListLayout margin-bottom-10" (click)="addItem()">
+      <i class="fa fa-share"></i>
+    </a>
+    <a class="btnListLayout" (click)="removeItem()">
+      <i class="fa fa-reply"></i>
+    </a>
+  </div>
+  <div class="pnl-block">
+    <div class="pnl-block-header">
+      <label>{{getResourceValue("SelectedFields")}}</label>
+    </div>
+    <div class="pnl-block-body">
+      <div class="tableStyle">
+        <table class="table withoutborder">
+          <tbody>
+            <tr *ngFor="let item of addedItemToMainList">
+              <td (click)="slectedItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                <div class="text-less-important">{{item.name}}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnlBtnLayout">
+    <a class="btnListLayout margin-bottom-10" (click)="upItem()">
+      <i class="fa fa-share fa-rotate-270"></i>
+    </a>
+    <a class="btnListLayout" (click)="downItem()">
+      <i class="fa fa-share fa-rotate-90"></i>
+    </a>
+  </div>
+  <div class="pnl-block" *ngIf="displaySimpleDetailsItem">
+    <div class="pnl-block-header">
+      <label>{{getResourceValue("FieldConfiguration")}}</label>
+    </div>
+    <div class="pnl-block-body right-block">
+      <div class="margin-bottom-15">
+        <label>{{getResourceValue("ControlType")}}</label>
+        <select class="input-control" [(ngModel)]="simpleSearchControlType" (change)="onChangeEvent($event)">
+          <option value="Dropdown">{{getResourceValue("Dropdown")}}</option>
+          <option value="Radio">{{getResourceValue("Radio")}}</option>
+        </select>
+      </div>
+      <div class="tableStyle">
+        <table class="table withoutborder margin-bottom-0">
+          <tbody>
+            <tr *ngFor="let item of pickListSource">
+              <td>
+                <label class="control control--checkbox">
+                  &nbsp;
+                  <input type="checkbox" [checked]="item.isChecked" (change)="onCheckboxChecked($event, item)" />
+                  <span class="control__indicator"></span>
+                </label>
+              </td>
+              <td (click)="setDefaultStatusValue(item)">
+                <div class="text-important">
+                  {{item.text}}</div>
+              </td>
+              <td *ngIf="item.isEnabled">
+                <a ngbTooltip="{{getResourceValue('Default')}}" container="body" class="statusRoundedGreen">{{getResourceValue("D")}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+<!-- <div ngbDropdown class="top-dropdown" ngbDropdownToggle>
+        <a><span class="fa fa-th"></span></a>
+        <div ngbDropdownMenu>
+            <div class="expand"></div>
+            <div class="top-drp-wrapper">
+                <div *ngFor="let language of languages">
+                    <div class="dropdown-item" (click)="onLanguageClick(language)">
+                        <div class="text">
+                            {{language.text}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <div ngbDropdown class="top-dropdown" ngbDropdownToggle>
+            <a><span class="fa fa-language"></span></a>
+            <div ngbDropdownMenu>
+                
+                <!-- <div class="top-drp-wrapper">
+                    <div *ngFor="let language of languages">
+                        <div class="dropdown-item" (click)="onLanguageClick(language)">
+                            <div class="icon">
+                                <i class="{{language.text}}"></i>
+                            </div>
+                            <div class="text">
+                                {{language.text}}
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+
+                <div class="profile">
+                    <ul>
+                        <li *ngFor="let language of languages">
+                            <a (click)="onLanguageClick(language)">{{language.text}}</a>
+                        </li>
+                    </ul>
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+        </div>

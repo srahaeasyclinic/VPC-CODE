@@ -1,0 +1,66 @@
+<div class="detailsMenu">
+  <div class="msg-tips-wrap">
+    <div class="msg-entrance" (click)="configToggle()" ngbTooltip="{{resource[generateResourceName('SearchFilter')]}}" container="body">
+      <span class="fa fa-search" *ngIf="!isExpanded"></span>
+      <span class="fa fa-chevron-right" *ngIf="isExpanded"></span>
+    </div>
+  </div>
+  <!-- Right Filter Start -->
+  <div class="right-config-wrap" [ngClass]="{'right-config-wrap-on':isExpanded}">
+    <div class="filter-top"></div>
+    <div *ngIf="displaySearch">
+      <div class="right-filter">
+        <div *ngFor="let item of layoutInfo.listLayoutDetails.searchProperties">
+          <div *ngIf="item.name == 'FreeTextSearch'" class="form-group">
+            <label>{{item.name}}</label>
+            <input type="text" class="input-control" [(ngModel)]="freetextsearch" (ngModelChange)="onFieldChange($event)" />
+          </div>
+          <div *ngIf="item.name == 'SimpleSearch'">
+            <label>{{item.name}}</label>
+            <div *ngFor="let prop of item.properties">
+              <div *ngIf="prop.controlType==='TextBox'" class="form-group">
+                <input type="text" class="input-control" [(ngModel)]="prop.value" (change)="onChange()" />
+              </div>
+              <div *ngIf="prop.controlType==='Dropdown'" class="form-group">
+                <select class="input-control" [(ngModel)]='prop.value' (change)="onChange()">
+                  <option *ngFor="let vals of prop.values" [ngValue]="vals.id">{{vals.value}}</option>
+                </select>
+              </div>
+              <div *ngIf="prop.controlType==='Radio'">
+                <label class="control control--radio" *ngFor="let option of prop.values">
+                  <span class="text-important">{{ option.value }}</span>
+                  <input type="radio" [(ngModel)]="prop.value" name="radiogroup" (change)="onChange()" [value]="option.id">
+                  <span class="control__indicator"></span>
+                </label>                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Right Filter End -->
+</div>
+<div class="r-filter-page">
+    <dynamic-grid [gridData]="gridData" 
+                [totalRecords]="totalRecords"
+                [resources]="resource"
+                [defaultLayout]="layoutInfo"
+                [defaultSortOrder]="sort"
+                [currentPage]="pageindex"
+                [dataSkip]="skip"
+                [groupBy]="groups"     
+                (onGridChangeEvent)="onGridChangeEvent($event)"           
+                ></dynamic-grid> 
+  <!-- <kendo-grid [data]="results" [columnMenu]="true" [filterable]="true" [sortable]="true">
+    <ng-container *ngFor="let column of columns">
+      <kendo-grid-column *ngIf="column.isVisible" [width]="column.width" [field]="column.field" [title]="column.title">
+      </kendo-grid-column>
+      <kendo-grid-column [width]="column.width" title="Status" *ngIf="column.isStatus">
+        <ng-template kendoGridCellTemplate let-results>
+          <span class="{{results.css}}">{{results.active}}</span>
+        </ng-template>
+      </kendo-grid-column>
+    </ng-container>
+  </kendo-grid> -->
+</div>

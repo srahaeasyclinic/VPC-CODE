@@ -1,0 +1,10 @@
+
+<!-- *ngIf="isLoggedIn$ | async as isLoggedIn" -->
+<button class="config-switch" (click)="configToggle()">
+    <i class="fa fa-tasks" *ngIf="!isConfigToggle"></i>
+    <i class="fa fa-chevron-right" *ngIf="isConfigToggle"></i>
+  </button>
+  <!-- *ngIf="isLoggedIn$ | async as isLoggedIn" -->
+  <div class="right-config-wrap" [ngClass]="{'right-config-wrap-on':isConfigToggle}">
+    <p>Right filter</p>
+  </div>

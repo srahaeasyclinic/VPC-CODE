@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Configurations>Debug;Release;VPC_QA;VPC_Staging;VPC_Production</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DataTypes\Picklists\**" />
+    <Compile Remove="DynamicQueryBuilder\**" />
+    <Compile Remove="Entity\Model\**" />
+    <EmbeddedResource Remove="DataTypes\Picklists\**" />
+    <EmbeddedResource Remove="DynamicQueryBuilder\**" />
+    <EmbeddedResource Remove="Entity\Model\**" />
+    <None Remove="DataTypes\Picklists\**" />
+    <None Remove="DynamicQueryBuilder\**" />
+    <None Remove="Entity\Model\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="DataAnnotations\InternalIdIntBase.cs" />
+    <Compile Remove="DataTypes\Active.cs" />
+    <Compile Remove="DataTypes\InternalIdInt.cs" />
+    <Compile Remove="DataTypes\Lookups.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="DataTypes\Picklists\City.cs" />
+    <Compile Include="DataTypes\Picklists\Country.cs" />
+    <Compile Include="DataTypes\Picklists\Municipality.cs" />
+    <Compile Include="DataTypes\Picklists\State.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VPC.Utilities\VPC.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Entity\Configuration\Schema\" />
+  </ItemGroup>
+
+</Project>

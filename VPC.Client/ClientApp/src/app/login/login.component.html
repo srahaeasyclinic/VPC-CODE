@@ -1,0 +1,56 @@
+<div class="container-login100">
+  <div class="login100-form-title">
+    <div class="login100-form-logo">
+      <img src="assets/img/view-logo.svg" width="180" alt="view">
+    </div>
+    <span>Log In</span>
+  </div>
+  <div class="loginWrapper">
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <mat-form-field class="full-width-input">
+          <input matInput formControlName="tenantcode" placeholder="Workspace" autocomplete="organization-title"> 
+        </mat-form-field>
+        <mat-form-field class="full-width-input">
+          <input matInput formControlName="username" placeholder="Username" autocomplete="username">
+        </mat-form-field>
+        <mat-form-field class="full-width-input">
+          <input matInput formControlName="password" type="password" placeholder="Password" autocomplete="current-password">
+        </mat-form-field>
+        
+        <div class="form-checkbox">
+          <!-- <input class="input-checkbox100" id="ckb1" type="checkbox" name="remember-me" formControlName="isRemember" >
+          <label class="label-checkbox100" for="ckb1">
+            Remember me
+          </label> -->
+
+          <label class="control control--checkbox">
+            Remember me
+            <input type="checkbox" name="remember-me" formControlName="isRemember">
+            <span class="control__indicator"></span>
+          </label>
+
+
+
+
+        </div>
+        <div class="login">
+          <button class="btn btn-primary" type="submit">Login</button>
+        </div>
+        <div class="text-center p-t-50">
+          <a class="link" (click)="navigate()">
+            Forgot password?
+          </a>
+        </div>
+      </form>
+    </mat-card-content>
+  </div>
+
+
+
+
+
+
+  <div *ngIf="error" class="alert alert-danger">{{error}}</div>
+
+</div>

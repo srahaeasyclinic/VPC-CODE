@@ -1,0 +1,103 @@
+<!-- <a class="btn btn-primary margin-top-10 margin-bottom-10" (click)="addResource(resourceDetails)">Add Resource</a> -->
+<div class="text-header">{{getResourceValue("Resource_Name_Plural")}}</div>
+<div class="detailsMenu">
+  <div class="msg-tips-left">
+    <div class="msg-entrance" ngbTooltip="globalresource[generateResourceName('AddResource')]" container="body" (click)="addResource(resourceDetails)">
+      <i class="fa fa-plus"></i>{{getResourceValue("Resource_Operation_Create")}}
+    </div>
+  </div>
+</div>
+
+
+
+<div class="page-content">
+
+  <kendo-grid [kendoGridBinding]="resources" [pageSize]="10" [pageable]="true" [sortable]="true"
+              (dataStateChange)="pageChange($event)" [filterable]="true">
+    <kendo-grid-column field="key" title="{{getResourceValue('Resource_Field_Key')}}" [width]="140">
+      <ng-template kendoGridCellTemplate let-resources>
+        <a class="gridLink" (click)="getDefaultLanguage(resourceDetails,resources)">{{resources.key}}</a>
+      </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-column field="value" title="{{getResourceValue('Resource_Field_Text')}}" [width]="120"></kendo-grid-column>
+    <kendo-grid-column field="languageName" title="{{getResourceValue('Resource_Field_Language')}}" [width]="120"></kendo-grid-column>
+    <kendo-grid-column [width]="120">
+      <ng-template kendoGridCellTemplate let-resources>
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+          <mat-icon>
+            ...
+          </mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <a class="dropdown-item" (click)="deleteResourceByKey(resources.key)">{{getResourceValue("Resource_Operation_Delete")}}</a>
+        </mat-menu>
+      </ng-template>
+    </kendo-grid-column>
+  </kendo-grid>
+</div>
+<ng-template #resourceDetails let-modal>
+  <div class="modal-header">
+    <label>{{addUpdateLabel}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    
+      <div class="row divider">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="control control--checkbox pull-right">
+              {{getResourceValue("Resource_Field_TranslateView")}}
+              <input type="checkbox" [(ngModel)]="translate" name="translate"
+                     (ngModelChange)="checkChange($event)">
+              <span class="control__indicator"></span>
+            </label>
+
+          </div>
+          <div class="form-group">
+            <label for="key">{{getResourceValue("Resource_Field_Key")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <input type="text" [disabled]="(resource.id!='')" name="key" [(ngModel)]="resource.key"
+                   class="input-control" #key="ngModel" maxlength="225">
+
+          </div>
+          <div class="form-group">
+            <label for="value">{{getResourceValue("Resource_Field_Text")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <label class="pull-right">{{resource.languageName}}</label>
+            <label class="lan-icon pull-right margin-right-10"></label>
+            <input type="text" name="value" [(ngModel)]="resource.value" class="input-control" #value="ngModel">
+          </div>
+        </div>
+        <div class="col-md-6" *ngIf="translate">
+          <div class="form-group">
+            <!-- <label class="control control--checkbox pull-right">
+              {{getResourceValue("Active")}}
+                <input type="checkbox" [(ngModel)]="newResource.isActive" name="isActive" #isActive=ngModel>
+                <span class="control__indicator"></span>
+            </label>               -->
+          </div>
+          <div class="form-group">
+            <label for="language">{{getResourceValue("Resource_Field_Language")}}</label>
+            <!-- <label class="text-mandatory margin-left-3">*</label> -->
+            <select name="newlan" class="input-control" [(ngModel)]="newlanguage"
+                    (ngModelChange)="languageChange($event)">
+              <option *ngFor="let l of languages" [ngValue]="l">{{l.text}}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label *ngIf="!(newlanguage.text==null)" class="pull-right">{{newlanguage.text}}</label>
+            <label *ngIf="!(newlanguage.text==null)" class="lan-icon pull-right margin-right-10"></label>
+            <label for="newResourceName">{{getResourceValue("Resource_Field_Text")}}</label>
+            <!-- <label class="text-mandatory margin-left-3">*</label> -->
+            <input name="newResourceName" type="text" [(ngModel)]="newResource.value" class="input-control">
+          </div>
+        </div>
+      </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Resource_Operation_Cancel")}}</button>
+      <button class="btn btn-primary" (click)="saveResource()">{{editUpdate}}</button>
+    </div>
+
+  </div>
+</ng-template>

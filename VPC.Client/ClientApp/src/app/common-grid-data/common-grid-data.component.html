@@ -1,0 +1,90 @@
+<!-- {{columns|json}} -->
+
+<!-- {{data|json}} -->
+ <kendo-grid [data]="data" [columnMenu]="true" [filterable]="true" [sortable]="true" [sort]="sort" [pageSize]="10"
+    [pageable]="true" [skip]="skip" [resizable]="true" [groupable]="true" [group]="groups"
+    [selectable]="selectableSettings" (pageChange)="pageChange($event)" (sortChange)="sortChange($event)" 
+    [style.maxHeight.px]="750">
+    <!-- <ng-template kendoGridToolbarTemplate>
+   <button type="button" kendoGridExcelCommand icon="file-excel">Export to Excel</button>
+ </ng-template> -->
+    <ng-container *ngFor="let column of columns">
+
+      <!-- Clickable column -->
+      <kendo-grid-column *ngIf="column.isClickable && mode!==2" [field]="column.field" [title]="column.title"
+        [width]="column.width">
+        <ng-template kendoGridCellTemplate let-results>
+          <a class="gridLink" (click)="rowEditableColumnClick(results.internalId)">{{results.clickable}}</a>
+        </ng-template>
+
+      </kendo-grid-column>
+
+      <kendo-grid-column *ngIf="column.isClickable && mode===2" [field]="column.field" [title]="column.title"
+        [width]="column.width">
+        <ng-template kendoGridCellTemplate let-results>
+          {{results.clickable}}
+        </ng-template>
+
+      </kendo-grid-column>
+
+      <!-- Normal columns -->
+      <kendo-grid-column
+        *ngIf="column.isVisible && !column.isAction && !column.isClickable && !column.isDateField && !column.isBooleanField"
+        [width]="column.width" [field]="column.field" [title]="column.title">
+      </kendo-grid-column>
+
+      <!-- Datetime columns -->
+      <kendo-grid-column *ngIf="column.isVisible && !column.isAction && !column.isClickable && column.isDateField"
+        [field]="column.field" [width]="column.width" [title]="column.title" filter="date" [format]="dateFormat">
+      </kendo-grid-column>
+
+      <!-- Checkbox column -->
+      <kendo-grid-column [field]="column.field" [title]="column.title" [width]="column.width"
+        *ngIf="column.isBooleanField">
+        <ng-template kendoGridCellTemplate let-results>
+          <!-- <input type="checkbox" [checked]="results.boolFieldValue" disabled /> -->
+
+          <label class="control control--checkbox">
+            &nbsp;
+            <input type="checkbox" [checked]="results.boolFieldValue" disabled>
+            <span class="control__indicator"></span>
+          </label>
+
+        </ng-template>
+      </kendo-grid-column>
+
+      <!-- Status column -->
+      <kendo-grid-column [width]="column.width" title="Status" *ngIf="column.isStatus">
+        <ng-template kendoGridCellTemplate let-results>          
+          <span class="{{results.css}}">{{results.active}}</span>
+        </ng-template>
+      </kendo-grid-column>
+
+      <!-- picklist datatype column -->
+      <kendo-grid-column [width]="column.width" [title]="column.title" *ngIf="column.isPicklisttype">
+        <ng-template kendoGridCellTemplate let-results>          
+          <span class="{{results.PickListcss}}">{{results.PickListvalue}}</span>
+        </ng-template>
+      </kendo-grid-column>
+      
+      <!-- action columns -->
+      <kendo-grid-column *ngIf="column.isAction && mode!==2" [width]="column.width" [columnMenu]="false">
+        <ng-template kendoGridCellTemplate let-results>
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+            <mat-icon>
+              ...
+            </mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <a *ngFor="let action of actions" class="dropdown-item"
+              (click)="onActionClick(results.internalId,action.name)">{{action.name}}</a>
+
+              <a *ngFor="let innerStep of results.innerSteps" class="dropdown-item"
+              (click)="onActionWorkFlowClick(results.internalId,results.itemName,results.subType,results.currentWorkFlowStep,innerStep.transitionType.id,innerStep)" >{{innerStep.transitionType.name}}</a>
+
+          </mat-menu>
+        </ng-template>
+      </kendo-grid-column>
+      <!-- <kendo-grid-excel fileName="Products.xlsx"></kendo-grid-excel> -->
+    </ng-container>
+  </kendo-grid>

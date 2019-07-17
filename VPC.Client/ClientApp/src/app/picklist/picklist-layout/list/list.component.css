@@ -1,0 +1,19 @@
+.statusRoundedGreen {
+    background-color: #4caf50;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 14px;
+    display: block;
+    text-align: center;
+    line-height: 30px;
+}
+.page-content{
+    padding-bottom: 0px;
+    padding: 0px;
+}
+
+.tab-block{
+    padding: 0px;
+}

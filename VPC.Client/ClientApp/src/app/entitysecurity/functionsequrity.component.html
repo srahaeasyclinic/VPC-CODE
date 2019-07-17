@@ -1,0 +1,44 @@
+<div>
+      <mat-accordion  *ngIf="!roleId">
+        <mat-expansion-panel *ngFor="let role of functionSecurity;">
+          <mat-expansion-panel-header >
+            <mat-panel-title>
+              {{getResourceByKey(role.name)}}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="row"  *ngFor="let function of role.entity.functions;" >
+              <div> {{getResourceByKey(function.name)}}</div>
+              <div *ngFor="let operationLvl of function.operationLevel;" class="col-md-4 form-group">
+                  <label>{{getResourceByKey(operationLvl.name)}}</label>
+                  <select class="form-control" [(ngModel)]="operationLvl.scopeSelected" (ngModelChange)="onAccessSelected($event,function)">
+                    <option *ngFor="let accessLvl of role.entity.accessLevel" value={{accessLvl.id}}>
+                      {{getResourceByKey(accessLvl.name)}}
+                    </option>
+                  </select>
+                </div>
+          </div> 
+        
+        
+
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <div  *ngIf="roleId" >
+
+        <div *ngFor="let role of functionSecurity;">
+          <div class="row"  *ngFor="let function of role.entity.functions;" >
+            <div>{{getResourceByKey(function.name)}}</div>
+            <div *ngFor="let operationLvl of function.operationLevel;" class="col-md-4 form-group">
+                <label>{{getResourceByKey(operationLvl.name)}}</label>
+                <select class="form-control" [(ngModel)]="operationLvl.scopeSelected" (ngModelChange)="onAccessSelected($event,function)">
+                  <option *ngFor="let accessLvl of role.entity.accessLevel" value={{accessLvl.id}}>
+                    {{getResourceByKey(accessLvl.name)}}
+                  </option>
+                </select>
+              </div>
+        </div> </div>
+
+      </div> 
+
+</div>

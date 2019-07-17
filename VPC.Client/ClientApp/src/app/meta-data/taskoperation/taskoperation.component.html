@@ -1,0 +1,36 @@
+<div class="tab-section">
+<kendo-grid [kendoGridBinding]="gridData"
+            [pageSize]="10"
+            [pageable]="true"
+            [sortable]="true"
+            [filterable]="true"
+            
+            [height]="510">
+  <kendo-grid-column field="name" title="{{getResourceValue('Name')}}" [width]="140">
+    <ng-template kendoGridCellTemplate let-gridData>
+      {{getResourceValue(gridData.name)}}
+    </ng-template>
+  </kendo-grid-column>
+  <kendo-grid-column field="type" title="{{getResourceValue('Type')}}" [width]="120"></kendo-grid-column>
+
+  <kendo-grid-column [width]="120" [style]="{'overflow': 'visible'}">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <!-- <div ngbDropdown class="grdDropdown pull-right" *ngIf="gridData.isOperation">
+        <a id="dropdownBasic1" ngbDropdownToggle>Actions</a>
+        <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+          <a class="dropdown-item" (click)="addOperationProcess(gridData)">Add process</a>        
+        </div>
+      </div> -->
+      <button mat-icon-button [matMenuTriggerFor]="menu" class="actions" *ngIf="gridData.isOperation">
+        <mat-icon>
+          ...
+        </mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <a class="dropdown-item" (click)="addOperationProcess(gridData)">{{getResourceValue("Workflow_ProcessConfiguration")}}</a>
+      </mat-menu>
+    </ng-template>
+  </kendo-grid-column>
+
+</kendo-grid>
+</div>

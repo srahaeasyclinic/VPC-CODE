@@ -1,0 +1,54 @@
+<div class="row">
+  <div class="col-md-3">
+    <div class="pnlListLayout">
+      <label class="font-15 margin-left-10 margin-top-10">{{resource[generateResourceName("AvailableFields")]}}</label>
+      <hr />
+      <div class="listLayout">
+        <div class="tableStyle">
+          <table class="table withoutborder margin-bottom-0">
+            <tbody>
+              <tr *ngFor="let item of advanceSearchSource">
+                <td (click)="mainItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                  <div [className]="item.isAdded ? 'text-less-important line-through' : 'text-less-important'">{{item.name}}</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-1">
+    <div class="pnlBtnLayout">
+      <a class="btnListLayout margin-bottom-10" (click)="addItem()"><i class="fa fa-share"></i></a>
+      <a class="btnListLayout" (click)="removeItem()"><i class="fa fa-reply"></i></a>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="pnlListLayout">
+      <label class="font-15 margin-left-10 margin-top-10">{{resource[generateResourceName("SelectedFields")]}}</label>
+      <hr />
+      <div class="listLayout">
+        <div class="tableStyle">
+          <table class="table withoutborder margin-bottom-0">
+            <tbody>
+              <tr *ngFor="let item of addedItemToMainList">
+                <td (click)="slectedItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                  <div [className]="text-less-important">{{item.name}}</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-1">
+    <div class="pnlBtnLayout">
+      <a class="btnListLayout margin-bottom-10" (click)="upItem()"><i class="fa fa-share fa-rotate-270"></i></a>
+      <a class="btnListLayout" (click)="downItem()"><i class="fa fa-share fa-rotate-90"></i></a>
+    </div>
+  </div>
+</div>
+
+

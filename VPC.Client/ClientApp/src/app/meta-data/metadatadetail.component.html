@@ -1,0 +1,72 @@
+<div class="text-header">{{getResourceValue(entityInfo.pluralName)}}</div>
+<div class="detailsMenu">
+  <div class="msg-tips-left">
+
+  </div>
+</div>
+
+<div class="page-content" id="page-content-wrapper" [ngClass]="{'sticky' : isSticky}">
+       
+<div class="card-wrapper">
+  <div class="card-block">
+    <div class="card-row">
+      <div class="text-less-important">{{getResourceValue("EntityName")}}</div>
+      <div class="text-label-preview margin-top-15">{{entityInfo.name}}</div>
+    </div>
+    <div class="card-row">
+      <div class="text-less-important">{{getResourceValue("DisplayName")}}</div>
+      <div class="text-label-preview margin-top-15">{{entityInfo.displayName}}</div>
+    </div>
+    <div class="card-row">
+      <div class="text-less-important">{{getResourceValue("DisplayNames")}}</div>
+      <div class="text-label-preview margin-top-15">{{entityInfo.pluralName}}</div>
+    </div>    
+  </div>
+
+
+
+
+  
+  <div class="card-block">
+    <div class="card-row">
+      <div class="text-less-important">{{getResourceValue("WorkflowSupported")}}</div>
+      <div class="text-label-preview margin-top-15">
+        <span> {{entityInfo.supportWorkflow ? getResourceValue("Yes") : getResourceValue("No")}}</span>
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="text-less-important">{{getResourceValue("Import")}} </div>
+      <div class="text-label-preview margin-top-15">
+        <span> {{entityInfo.configurations && entityInfo.configurations.allowImpor ? getResourceValue("Yes") : getResourceValue("No")}}</span>
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="text-less-important">{{getResourceValue('Export')}}</div>
+      <div class="text-label-preview margin-top-15">
+        <span> {{entityInfo.configurations && entityInfo.configurations.allowExport ? getResourceValue("Yes") : getResourceValue("No")}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="card-block">
+      <div class="card-row">
+          <div class="text-less-important">{{getResourceValue("Type")}}</div>
+          <div class="text-label-preview margin-top-15">{{entityInfo.type}}</div>
+        </div>
+    <div class="card-row">
+      <div class="text-less-important">
+        <span *ngIf="entityInfo.subtypes && entityInfo.subtypes.length > 1">{{getResourceValue("SubTypes")}}</span>
+        <span *ngIf="entityInfo.subtypes && entityInfo.subtypes.length == 1">{{getResourceValue("subType")}}</span>
+      </div>
+      <div class="text-label-preview margin-top-15">{{entityInfo.subtypes}}</div>
+    </div>
+  </div>
+</div>
+<div class="tab-block">
+  <nav mat-tab-nav-bar>
+    <a mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" routerLinkActive #rla="routerLinkActive" [active]="rla.isActive">
+      {{getResourceValue(link.label)}}
+    </a>
+  </nav>
+  <router-outlet></router-outlet>
+</div>
+</div>

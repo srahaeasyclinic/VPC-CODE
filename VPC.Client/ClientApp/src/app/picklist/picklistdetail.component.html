@@ -1,0 +1,85 @@
+<div class="text-header">{{entityInfo.pluralName}}</div>
+<div class="detailsMenu">
+  <div class="msg-tips-left">
+    <!-- <div class="msg-entrance">
+      <span class="fa fa-users fa-fw"></span>
+    </div>
+    <div class="msg-entrance">
+      <span class="fa fa-cloud-upload fa-fw"></span>
+    </div> -->
+  </div>
+  <!-- <div class="msg-tips-wrap">
+    <div class="msg-entrance">
+      <span class="fa fa-th fa-fw"></span>
+    </div>
+    <div class="msg-entrance">
+      <span class="fa fa-th-large fa-fw"></span>
+    </div>
+    <div class="msg-entrance">
+      <span class="fa fa-filter fa-fw"></span>
+    </div>
+    <div class="msg-entrance">
+      <span class="fa fa-star fa-fw"></span>
+    </div>
+    <div class="msg-entrance">
+      <span class="fa fa-info-circle fa-fw"></span>
+    </div>
+  </div> -->
+</div>
+<div class="page-content" id="page-content-wrapper" [ngClass]="{'sticky' : isSticky}">
+    
+  <div class="card-wrapper">
+    <div class="card-block">
+      <div class="card-row">
+        <div class="text-less-important">{{getResourceValue("EntityName")}}</div>
+        <div class="text-label-preview margin-top-15">{{entityInfo.name}}</div>
+      </div>
+      <div class="card-row">
+        <div class="text-less-important">{{getResourceValue("DisplayName")}}</div>
+        <div class="text-label-preview margin-top-15">{{entityInfo.displayName}}</div>
+      </div>
+      <div class="card-row">
+        <div class="text-less-important">{{getResourceValue("DisplayNames")}}</div>
+        <div class="text-label-preview margin-top-15">{{entityInfo.pluralName}}</div>
+      </div>
+    </div>
+
+    <div class="card-block">
+      <div class="card-row">
+        <div class="text-less-important">{{getResourceValue("Workflow")}}</div>
+        <div class="text-label-preview margin-top-15">
+          <span> {{entityInfo.supportWorkflow ? "Yes" : "No"}}</span>
+        </div>
+      </div>
+      <div class="card-row">
+        <div class="text-less-important">{{getResourceValue("Import")}}</div>
+        <div class="text-label-preview margin-top-15">
+          <span> {{entityInfo.configurations && entityInfo.configurations.allowImpor ? "Yes" : "No"}}</span>
+        </div>
+      </div>
+      <div class="card-row">
+        <div class="text-less-important">{{getResourceValue("Export")}}</div>
+        <div class="text-label-preview margin-top-15">
+          <span> {{entityInfo.configurations && entityInfo.configurations.allowExport ? "Yes" : "No"}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-block">
+      <div class="card-row">
+        <div class="text-less-important">{{getResourceValue("Type")}}</div>
+        <div class="text-label-preview margin-top-15">{{entityInfo.type}}</div>
+      </div>
+    </div>
+
+
+  </div>
+  <div class="tab-block">
+    <nav mat-tab-nav-bar>
+      <a mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" routerLinkActive #rla="routerLinkActive"
+        [active]="rla.isActive">
+        {{link.label}}
+      </a>
+    </nav>
+    <router-outlet></router-outlet>
+  </div>
+</div>

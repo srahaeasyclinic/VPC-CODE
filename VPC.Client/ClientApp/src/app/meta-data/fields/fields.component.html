@@ -1,0 +1,43 @@
+<div class="tab-section">
+<kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true"
+   [style.height.%]="100">
+  <kendo-grid-column field="name" title="{{getResourceValue('FieldName')}}" [width]="120"></kendo-grid-column>
+  <kendo-grid-column field="DisplayName" title="{{getResourceValue('DisplayName')}}" [width]="140">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <span>{{getResourceValue(gridData.name)}}</span>
+      <span *ngIf="getRequired(gridData.validators)" class="text-mandatory margin-left-3">*</span>
+    </ng-template>
+  </kendo-grid-column>
+  <kendo-grid-column field="dataType" title="{{getResourceValue('DataType')}}" [width]="120">
+  </kendo-grid-column>
+  <kendo-grid-column field="controlType" title="{{getResourceValue('ControlType')}}" [width]="100">
+  </kendo-grid-column>
+  <!-- <kendo-grid-column [width]="25">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <label *ngIf="getRequired(gridData.validators)" class="text-danger">
+        <span><i class="fa fa-asterisk"></i></span>
+      </label>
+    </ng-template>
+  </kendo-grid-column> -->
+  <kendo-grid-column [width]="100">
+    <ng-template kendoGridCellTemplate let-gridData>
+      <!-- <div ngbDropdown class="grdDropdown pull-right" *ngIf="gridData.validators">
+        <a ngbDropdownToggle>Actions</a>
+        <div ngbDropdownMenu>
+          <a class="dropdown-item" (click)="validationRule('validationModal')">Validation rule</a>
+        </div>
+      </div> -->
+      <button mat-icon-button [matMenuTriggerFor]="menu" class="actions" *ngIf="gridData.validators">
+        <mat-icon>
+          ...
+        </mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <a class="dropdown-item" (click)="validationRule('validationModal')">
+          {{getResourceValue("ValidationRule")}}
+        </a>
+      </mat-menu>
+    </ng-template>
+  </kendo-grid-column>
+</kendo-grid>
+</div>

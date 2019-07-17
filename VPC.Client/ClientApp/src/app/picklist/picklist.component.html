@@ -1,0 +1,27 @@
+<div class="text-header">Pick list</div>
+    <div class="page-content">
+        
+    <kendo-grid [kendoGridBinding]="gridData"
+                [pageSize]="10"
+                [pageable]="true"
+                [sortable]="true"
+                [filterable]="true"
+                [groupable]="true"
+                [style.height.%]="100"
+                [scrollable]="none">
+      <kendo-grid-column [width]="140" title="{{getResourceValue('Picklist')}}"> 
+        <ng-template kendoGridCellTemplate let-gridData> 
+          <a class="gridLink" *ngIf="gridData.customizeValue" (click)="goToPicklistDetails(gridData.name)">
+            <!-- {{resourceData[generateResourceName(gridData.name)]}} -->
+            {{gridData.name}}
+          </a>
+          <label *ngIf="!gridData.customizeValue">
+            <!-- {{resourceData[generateResourceName(gridData.name)]}} -->
+            {{gridData.name}}
+          </label>
+        </ng-template>
+      </kendo-grid-column> 
+    <kendo-grid-column field="name" [width]="120" title="{{getResourceValue('FieldName')}}"></kendo-grid-column> 
+    <kendo-grid-column field="type" [width]="130" title="{{getResourceValue('Type')}}"></kendo-grid-column> 
+  </kendo-grid>
+</div>

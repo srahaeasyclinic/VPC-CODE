@@ -1,0 +1,83 @@
+.breadcrumb {
+    background: 0 0;
+    line-height: normal;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 22px;
+    left: 246px;
+}
+
+.breadcrumb li {
+    color: #ffffff;
+    line-height: normal;
+    max-width: 15rem;
+    overflow: hidden;
+    white-space: nowrap;
+    word-wrap: normal;
+    text-overflow: ellipsis;
+    -ms-text-overflow: ellipsis;
+}
+
+.breadcrumb li a.active,
+.breadcrumb li.active {
+
+    color: #fff;
+    font-size: 0.8rem;
+    cursor: pointer;
+    /* text-decoration: underline; */
+}
+.breadcrumb li a.active:hover,
+.breadcrumb li.active:hover {
+    
+     text-decoration: underline;
+     cursor: pointer;
+}
+
+.breadcrumb li a.inactive,
+.breadcrumb li.inactive {
+    color: #fff;
+    font-size: 0.8rem;
+    cursor: default;
+    /* text-decoration: underline; */
+}
+.breadcrumb li a.inactive:hover,
+.breadcrumb li.inactive:hover {
+     text-decoration: none;
+     cursor: default;
+}
+
+
+.breadcrumb li span{
+    color:#fff;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+
+.breadcrumb > li + li:before {
+    font-weight: 300;
+    line-height: 1;
+    display: inline-block;
+    color: #fff;
+    content: "\00a0 \003E";
+    padding-left: .3rem;
+    padding-right: .5rem;
+    z-index: 10
+}
+
+.breadcrumb-subdued.breadcrumb-container {
+    background: 0 0;
+    padding: 0;
+    margin-bottom: 0
+}
+
+.breadcrumb-subdued.breadcrumb-container .breadcrumb {
+    padding: 1.25rem 0
+}
+
+.breadcrumb-subdued.breadcrumb-fluid .container {
+    width: 100% !important;
+    padding-right: 2rem !important;
+    padding-left: 2rem !important
+}
