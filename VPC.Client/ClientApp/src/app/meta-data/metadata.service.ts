@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -20,11 +20,12 @@ export class MetadataService {
   private metadataByName: any = {};
 
   query: string = '?&pagingParameter.pageNumber=1' + '&pagingParameter.pageSize=10';
+  showToolbar=  new EventEmitter();
   constructor(private http: HttpClient) { }
 
-  public getEntities(): Observable<any> {
+  public getEntities(entityType:string=""): Observable<any> {
     var entitiesUrl = `${environment.apiUrl}` + this.entities;
-    return this.http.get<Entities[]>(entitiesUrl);
+    return this.http.get<Entities[]>(entitiesUrl, {params: {entityType: entityType}});
   }
 
 
@@ -56,6 +57,12 @@ export class MetadataService {
     {
       return undefined;
     }
+  }
+
+
+  public clearCacheMetadata()
+  {
+    this.metadataByName = {};
   }
 
 

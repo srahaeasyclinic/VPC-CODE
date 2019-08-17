@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Metadata.Business.DataAnnotations;
 using VPC.Metadata.Business.DataTypes;
 using VPC.Metadata.Business.Entity;
@@ -24,7 +25,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
 
         public override PicklistContext PicklistContext => new PicklistContext(PicklistType.MenuType);
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [NonQueryable]
         public override InternalId InternalId { get; set; }
 

@@ -1,127 +1,150 @@
-<div class="text-header">{{generateResourceName("Communication")}}</div>
+<div class="text-header">{{generateResourceName("communication_header")}}</div>
 <div class="detailsMenu">
   <div class="msg-tips-left">
-    <div class="msg-entrance" ngbTooltip="{{generateResourceName('Save')}}" container="body" (click)="saveCommunication(addvalidatecontent)">
-      <i class="fa fa-save"></i>{{generateResourceName('communicationsettingsSave')}}
+    <div class="msg-entrance" ngbTooltip="{{generateResourceName('communication_operation_save')}}" container="body"
+      (click)="saveCommunication(addvalidatecontent)">
+      <i class="fa fa-save"></i>{{generateResourceName('communication_operation_save')}}
     </div>
   </div>
 </div>
 <div class="page-content">
   <mat-tab-group animationDuration="0ms">
-
     <div *ngFor="let item of context">
-      <mat-tab label="Email setting" *ngIf="item.name=='Email'">
+      <mat-tab label="{{generateResourceName('communication_tabhead_emailsetting')}}" *ngIf="item.name=='Email'">
         <div class="row margin-top-15">
-          <div class="col-md-3 margin-top-20">
-            <div class="icon">
-              <i class="fa fa-server"></i>
+          <div class="col-md-12" *ngIf="helpBlock">
+            <div class="help-container">
+              <div class="heading">{{generateResourceName('communication_field_emailsettings')}}</div>
+              <div class="info">
+                <p>{{generateResourceName('communication_field_emailsettingsinfo')}}</p>
+              </div>
+              <div class="close-btn" (click)="closeHelpBlock()">×</div>
             </div>
-            <div class="page-heading">{{generateResourceName('page-heading-emailsettings')}}</div>
+            <!-- <div class="page-heading">{{generateResourceName('common_field_emailsettings')}}</div>
             <div class="page-info">
-              <p>{{generateResourceName('emailsettingsInfo')}}
+              <p>{{generateResourceName('common_field_emailsettingsinfo')}}
               </p>
-            </div>
+            </div> -->
           </div>
           <div class="col-md-3">
             <div class="row">
               <div class="col-md-12 form-group">
-                	<label>{{generateResourceName('emaillabelserver')}}<span class="text-mandatory margin-left-3">*</span></label>
+                <label>{{generateResourceName('communication_field_emaillabelserver')}}<span
+                    class="text-mandatory margin-left-3">*</span></label>
                 <label></label>
                 <input type="text" class="input-control" [(ngModel)]="emailInfoModel.emailServer">
               </div>
               <div class="col-md-12 form-group">
-                <label>{{generateResourceName('emaillabelport')}}<span class="text-mandatory margin-left-3">*</span></label>
+                <label>{{generateResourceName('communication_field_emaillabelport')}}<span
+                    class="text-mandatory margin-left-3">*</span></label>
                 <label></label>
                 <input type="text" class="input-control" [(ngModel)]="emailInfoModel.emailPort">
               </div>
               <div class="col-md-12 form-group">
-               <label>{{generateResourceName('emaillabelemail')}}<span class="text-mandatory margin-left-3">*</span></label>
+                <label>{{generateResourceName('communication_field_emaillabelemail')}}<span
+                    class="text-mandatory margin-left-3">*</span></label>
                 <label></label>
                 <input type="text" class="input-control" [(ngModel)]="emailInfoModel.emailEmail">
               </div>
               <div class="col-md-12 form-group">
-               <label>{{generateResourceName('emaillabelusername')}}<span class="text-mandatory margin-left-3">*</span></label>
+                <label>{{generateResourceName('communication_field_emaillabelusername')}}<span
+                    class="text-mandatory margin-left-3">*</span></label>
                 <label></label>
                 <input type="text" class="input-control" [(ngModel)]="emailInfoModel.emailUserName">
               </div>
-              <div class="col-md-12 form-group">
-                <label>{{generateResourceName('emaillabelpassword')}}<span class="text-mandatory margin-left-3">*</span></label>
-                <label></label>
-                <input type="password" class="input-control" [(ngModel)]="emailInfoModel.emailPassword">
-              </div>
-              <!-- <div class="col-md-3 form-group">
-                    <label>Key</label>
-                    <input type="text" class="input-control" [(ngModel)]="emailInfoModel.emailKey">
-                  </div> -->
-              <div class="col-md-12 form-group">
-               <label>{{generateResourceName('emaillabelsender')}}<span class="text-mandatory margin-left-3">*</span></label>
-                <label></label>
-                <input type="text" class="input-control" [(ngModel)]="emailInfoModel.emailSender">
-              </div>
             </div>
           </div>
-
-
-
+          <div class="col-md-3">
+            <div class="col-md-12 form-group">
+              <label>{{generateResourceName('communication_field_emaillabelpassword')}}<span
+                  class="text-mandatory margin-left-3">*</span></label>
+              <label></label>
+              <input type="password" class="input-control" [(ngModel)]="emailInfoModel.emailPassword">
+            </div>
+            <!-- <div class="col-md-3 form-group">
+                      <label>Key</label>
+                      <input type="text" class="input-control" [(ngModel)]="emailInfoModel.emailKey">
+                    </div> -->
+            <div class="col-md-12 form-group">
+              <label>{{generateResourceName('communication_field_emaillabelsender')}}<span
+                  class="text-mandatory margin-left-3">*</span></label>
+              <label></label>
+              <input type="text" class="input-control" [(ngModel)]="emailInfoModel.emailSender">
+            </div>
+          </div>
         </div>
       </mat-tab>
-      <mat-tab label="SMS setting" *ngIf="item.name=='SMS'">
-
+      <mat-tab label="{{generateResourceName('communication_tabhead_smssetting')}}" *ngIf="item.name=='SMS'">
         <div class="row margin-top-15">
-          <div class="col-md-3 margin-top-20">
+          <!-- <div class="col-md-3 margin-top-20">
             <div class="icon">
               <i class="fa fa-server"></i>
             </div>
-            <div class="page-heading">{{generateResourceName('page-heading-smssettings')}}</div>
+            <div class="page-heading">{{generateResourceName('common_field_smssettings')}}</div>
             <div class="page-info">
-              <p>{{generateResourceName('page-heading-smssettingsInfo')}}</p>
+              <p>{{generateResourceName('common_field_smssettingsinfo')}}</p>
+            </div>
+          </div> -->
+          <div class="col-md-12" *ngIf="helpBlock">
+            <div class="help-container">
+              <div class="heading">{{generateResourceName('communication_field_smssettings')}}</div>
+              <div class="info">
+                <p>{{generateResourceName('communication_field_smssettingsinfo')}}</p>
+              </div>
+              <div class="close-btn" (click)="closeHelpBlock()">×</div>
             </div>
           </div>
           <div class="col-md-3">
             <div class="row">
               <div class="col-md-12 form-group">
-                <label>{{generateResourceName('smslabelgatewaytype')}}</label>
+                <label>{{generateResourceName('communication_field_smslabelgatewaytype')}}</label>
                 <select class="input-control">
-                  <option value="1">One Way SMS</option>
-                  <option value="2">Two Way SMS</option>
+                  <option value="1">{{generateResourceName('communication_field_onewaysms')}}</option>
+                  <option value="2">{{generateResourceName('communication_field_twowaysms')}}</option>
                 </select>
               </div>
               <div class="col-md-12 form-group">
-                <label>{{generateResourceName('smslabelbaseurl')}}</label>
+                <label>{{generateResourceName('communication_field_smslabelbaseurl')}}</label>
                 <input type="text" [(ngModel)]="smsInfoModel.smsBaseUrl" class="input-control">
               </div>
               <div class="col-md-12 form-group">
-                <label>{{generateResourceName('smslabelsender')}}</label>
+                <label>{{generateResourceName('communication_field_smslabelsender')}}</label>
                 <input type="text" [(ngModel)]="smsInfoModel.smsSender" class="input-control">
               </div>
               <div class="col-md-12 form-group">
-                <label>{{generateResourceName('smslabelshortcode')}}</label>
+                <label>{{generateResourceName('communication_field_smslabelshortcode')}}</label>
                 <input type="text" [(ngModel)]="smsInfoModel.smsShortCode" class="input-control">
               </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="row">
               <div class="col-md-12 form-group">
-                <label>{{generateResourceName('smslabelusername')}}</label>
+                <label>{{generateResourceName('communication_field_smslabelusername')}}</label>
                 <input type="text" [(ngModel)]="smsInfoModel.smsUserName" class="input-control">
               </div>
               <div class="col-md-12 form-group">
-                <label>{{generateResourceName('smslabelhash')}}</label>
+                <label>{{generateResourceName('communication_field_smslabelhash')}}</label>
                 <input type="text" [(ngModel)]="smsInfoModel.smsHash" class="input-control">
               </div>
-              <div class="col-md-12 form-group">
-                <label>{{generateResourceName('smslabelapikey')}}</label>
+              <div class="col-md-12 form-group rrr">
+                <label>{{generateResourceName('communication_field_smslabelapikey')}}</label>
+                <a class="help-icon" placement="right" ngbPopover="{{generateResourceName('communication_field_smssettingsinfo')}}" popoverTitle="{{generateResourceName('communication_field_smssettings')}}">
+                  ?
+                </a>
+
                 <input type="text" [(ngModel)]="smsInfoModel.smsApiKey" class="input-control">
               </div>
               <!-- <div class="col-md-3 form-group">
-          <label>Password</label>
-          <input type="password" [(ngModel)]="smsInfoModel.smsPassword" class="input-control">
-        </div> -->
+    <label>Password</label>
+    <input type="password" [(ngModel)]="smsInfoModel.smsPassword" class="input-control">
+  </div> -->
               <div class="col-md-12 form-group">
-                <label>{{generateResourceName('smslabelreceipturl')}}</label>
+                <label>{{generateResourceName('communication_field_smslabelreceipturl')}}</label>
                 <input type="text" [(ngModel)]="smsInfoModel.smsReceiptUrl" class="input-control">
               </div>
             </div>
           </div>
-
-
         </div>
       </mat-tab>
     </div>
@@ -130,23 +153,25 @@
 
 <ng-template #addvalidatecontent let-modal>
   <div class="modal-header">
-    <label id="modal-title">{{generateResourceName('CommunicationRequiredfields')}}</label>
+    <label id="modal-title">{{generateResourceName('communication_required_fields')}}</label>
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <div class="modal-body">
-   
-      <div class="col-md-12 form-group">
-        <label>
-          <ul class="bullet-point">
-            <li *ngFor="let validateMessage of validateMessages">{{generateResourceName(validateMessage) +' '+generateResourceName('IsrequiredValidator_message')}} </li>
-          </ul>
-        </label>
-      </div>
-    
+
+    <div class="col-md-12 form-group">
+      <label>
+        <ul class="bullet-point">
+          <li *ngFor="let validateMessage of validateMessages">
+            {{validateMessage}} </li>
+        </ul>
+      </label>
+    </div>
+
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{generateResourceName('Cancel')}}</button>
+      <button type="button" class="btn btn-secondary"
+        (click)="modal.dismiss('cancel click')">{{generateResourceName('task_cancel')}}</button>
     </div>
   </div>
 </ng-template>

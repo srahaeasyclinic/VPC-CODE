@@ -10,6 +10,7 @@ import { TosterService } from '../services/toster.service';
 import { MenuService } from '../services/menu.service';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { truncateSync } from 'fs';
+import { RoutelocalizationService } from '../services/routelocalization.service';
 
 @Component({
   selector: 'app-changepassword',
@@ -38,10 +39,11 @@ export class ChangePasswordComponent implements OnInit {
   constructor(private formBuilder: FormBuilder, private loginService: LoginService, private router: Router,
     public userinfoService: UserInfoService, private location: Location, private resourceService: ResourceService
     , private toster: TosterService, private menuService: MenuService, private route: ActivatedRoute,
-    private globalResourceService: GlobalResourceService) { }
+    private globalResourceService: GlobalResourceService,
+    private localization:RoutelocalizationService ) { }
 
   ngOnInit() {
-    this.returnUrl = 'home';
+    this.returnUrl = this.localization.getDefaultUrl();
     var data: any = this.userinfoService.userInfo
     this.userInfo = this.userinfoService.userInfo
     if (data == null) {

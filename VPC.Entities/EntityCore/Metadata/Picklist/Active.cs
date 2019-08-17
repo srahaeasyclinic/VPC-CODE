@@ -8,18 +8,24 @@ using ComponentModel = System.ComponentModel;
 
 namespace VPC.Entities.EntityCore.Metadata.Picklist
 {
-    [TableProperties("[dbo].[PickListValue]", "[Id]")]
-    [Operation(Operations.Create, Operations.Update, Operations.UpdateStatus, Operations.Delete)]
-    [DisplayName("Active")]
-    [PluralName("Actives")]
-    //[SupportWorkflow(false)]
-    [FixedValue]
-    [Standard]
+    // [TableProperties("[dbo].[PickListValue]", "[Id]")]
+    // [Operation(Operations.Create, Operations.Update, Operations.UpdateStatus, Operations.Delete)]
+     [DisplayName("Active")]
+     [PluralName("Actives")]
+    // //[SupportWorkflow(false)]
+     [FixedValue]
+     [Standard]
     public class Active : SimplePicklist
     {
         public override PicklistContext PicklistContext => new PicklistContext(PicklistType.Active);
+
+        [DisplayName("Tenant Id")]
         public override InternalId TenantId { get; set; }
+
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
+
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         public override DataTable GetValues()

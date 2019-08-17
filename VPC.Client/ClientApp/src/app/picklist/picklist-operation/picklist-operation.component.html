@@ -5,7 +5,7 @@
             [sortable]="true"
             [filterable]="true"
             >
-  <kendo-grid-column field="name" [width]="80" title="{{getResourceValue('Name')}}">
+  <kendo-grid-column field="name" [width]="80" title="{{getResourceValue('metadata_field_name')}}">
     <ng-template kendoGridCellTemplate let-gridData>
       <!-- {{resource[generateResourceName(gridData.name)]}} -->
       {{gridData.name}}
@@ -15,7 +15,7 @@
     <!--</a>
     </ng-template>-->
   </kendo-grid-column>
-  <kendo-grid-column field="type" [width]="80" title="{{getResourceValue('Type')}}"></kendo-grid-column>
+  <kendo-grid-column field="type" [width]="80" title="{{getResourceValue('metadata_field_type')}}"></kendo-grid-column>
 </kendo-grid>
 
 </div>

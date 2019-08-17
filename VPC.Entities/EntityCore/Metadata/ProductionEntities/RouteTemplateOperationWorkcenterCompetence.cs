@@ -25,23 +25,32 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
   
     public class RouteTemplateOperationWorkcenterCompetence : PrimaryEntity, IItem<Item>
     {
+         [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.RouteTemplateOperationWorkcenterCompetence);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+         [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+         [DisplayName("Name")]
         public override Name Name { get; set; }
 
+         [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20020-ST01", "Standard"}
         };
 
+         [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+
+         [DisplayName("Operation workcenter Id")]
         public Guid OperationWorkcenterId { get; set; }
+
+         [DisplayName("Competence Id")]
         public PickList<Competence> CompetenceId { get; set; }
     }
 }

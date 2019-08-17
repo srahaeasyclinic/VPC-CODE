@@ -10,7 +10,7 @@ namespace VPC.Metadata.Business.Tasks
     {
         public Guid MergeTo { get; set; }
         public Guid MergeFrom { get; set; }
-        public MergeTaskAttribute(string name,string task,string verb="" ,string taskDisplay="") : base(name,task,verb,taskDisplay)
+        public MergeTaskAttribute(string name,string task,string verb="" ,string taskDisplay="Merge") : base(name,task,verb,taskDisplay)
         {
         }
     }   

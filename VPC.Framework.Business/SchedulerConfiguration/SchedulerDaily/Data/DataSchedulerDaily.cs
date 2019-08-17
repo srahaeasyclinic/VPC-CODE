@@ -71,7 +71,7 @@ namespace VPC.Framework.Business.SchedulerConfiguration.SchedulerDaily.Data
     #region Review
       internal SchedulerDailyInfo GetSchedulerDaily(Guid tenantId,Guid schedulerId )
         {
-            SchedulerDailyInfo info =null;
+            SchedulerDailyInfo info =new SchedulerDailyInfo();
             try
             {
                 var cmd = CreateProcedureCommand("dbo.SchedulerDaily_GetBySchedulerId");

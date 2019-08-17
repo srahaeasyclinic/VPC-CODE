@@ -1,31 +1,23 @@
-<div *ngIf=subscriptionInfo class="text-header">{{subscriptionInfo.name}}</div>
-<div class="detailsMenu">
-  <div class="msg-tips-left">
-    <!-- <div class="msg-entrance" (click)="open(addsubscriptioncontent)" ngbTooltip="Add subscription"> -->
-    <div class="msg-entrance" ngbTooltip="{{getResourceValue('Addsubscription')}}" container="body">
-      <span class="fa fa-plus"></span>
-    </div>
-  </div>
-</div>
+<div *ngIf=subscriptionInfo class="text-header">{{getResourceValue('subscription_label_edit')}}</div>
 <div class="page-content">
   <div class="card-wrapper">
     <div class="card-block">
       <div class="text-large text-center">23</div>
-      <div class="text-less-important text-center">{{getResourceValue("ActiveCustomers")}}</div>
+      <div class="text-less-important text-center">{{getResourceValue("subscription_field_label_activecustomers")}}</div>
     </div>
     <div></div>
     <div></div>
     <div></div>
   </div>
-  <div *ngIf="subscriptionInfo" class="tab-block">
+  <div *ngIf="subscriptionInfo" class="">
     <div class="row">
       <div class="col-md-3 col-xs-12 form-group">
-        <label>{{getResourceValue("Name")}}</label>
+        <label>{{getResourceValue("subscription_field_name")}}</label>
         <input type="text" class="input-control" [(ngModel)]="subscriptionInfo.name" (change)="updateSubscription()"
           name="name" />
       </div>
       <div class="col-md-3 col-xs-12 form-group">
-        <label>{{getResourceValue("Group")}}</label>
+        <label>{{getResourceValue("subscription_field_category")}}</label>
         <kendo-autocomplete [data]="subsGroups" [filterable]="true" class="input-control" [valueField]="'text'"
           [value]="subscriptionInfo.group.name" (valueChange)="onGroupChange($event)"
           (filterChange)="handleFilter($event)">
@@ -34,7 +26,7 @@
     </div>
     <div class="row">
       <div class="col-md-3 col-xs-12">
-        <label>{{getResourceValue("RecuringPrice")}}(NOK)</label>
+        <label>{{getResourceValue("subscription_field_price")}} (NOK)</label>
         <div class="row">
           <div class="col-md-6 col-xs-12">
             <input type="number" (change)="updateSubscription()" [(ngModel)]="subscriptionInfo.recurringPrice"
@@ -42,7 +34,7 @@
           </div>
           <div class="col-md-6 col-xs-12">
             <div class="form-group">
-              <select class="input-control" placeholder="getResourceValue('Duration')"
+              <select class="input-control" placeholder="getResourceValue('subscription_field_duration')"
                 (ngModelChange)="onRecurringDurationChange($event)" [(ngModel)]="subscriptionInfo.recurringDuration"
                 name="recurringDuration">
                 <option *ngFor="let recurringDur of recurringDurations" value={{recurringDur.id}}>
@@ -54,7 +46,7 @@
         </div>
       </div>
       <div class="col-md-3 col-xs-12 form-group">
-        <label>{{getResourceValue("OneTimeSetupPrice")}}(NOK)</label>
+        <label>{{getResourceValue("subscription_field_onetimesetupprice")}} (NOK)</label>
         <input type="number" [(ngModel)]="subscriptionInfo.setUpPrice" (change)="updateSubscription()" name="setUpPrice"
           class="input-control">
       </div>
@@ -62,7 +54,7 @@
     <div class="row">
       <div class="col-md-12">
         <mat-tab-group animationDuration="0ms">
-          <mat-tab label="Entities">
+          <mat-tab label="{{getResourceValue('metedata_field_entity_pluralname')}}">
             <div class="row">
               <div class="col-md-4 col-sm-6 col-xs-12">
                 <kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true"
@@ -75,7 +67,7 @@
                       </label>
                     </ng-template>
                   </kendo-grid-column>
-                  <kendo-grid-column field="name" title="{{getResourceValue('EntityName')}}" [width]="300">
+                  <kendo-grid-column field="name" title="{{getResourceValue('metedata_field_entity_displayname')}}" [width]="300">
                     <ng-template kendoGridCellTemplate let-gridData>
                       <a class="gridLink" (click)="currentSubscriptionEntity(gridData)">{{gridData.name}}</a>
                     </ng-template>
@@ -95,7 +87,7 @@
                     <label class="text-large">{{subscriptionEntity.entityId}}</label>
                   </div>
                   <div class="col-md-12">
-                    <label>{{getResourceValue("LimitNoOf")}}
+                    <label>{{getResourceValue("subscription_field_limitnoof")}}
                       {{subscriptionEntity.entityId | lowercase }}s?</label>
                     <label class="margin-left-10">
                       <i class="fa fa-question-circle-o fa-lg" placement="bottom" ngbPopover="This is test data">
@@ -108,7 +100,7 @@
                           (change)="updateSubscriptionEntity()" name="limtNumber" class="input-control">
                       </div>
                       <div class="col-md-2 col-xs-6">
-                        <select class="input-control" placeholder="getResourceValue('Duration')"
+                        <select class="input-control" placeholder="getResourceValue('subscription_field_duration')"
                           [ngClass]="{disabledDiv: !selectedSubscriptionEntity.entityChecked}"
                           (ngModelChange)="onLimitTypeChange($event)" [(ngModel)]="subscriptionEntity.limitType"
                           name="limitType">
@@ -123,13 +115,13 @@
                 <div class="row">
                   <div class="col-md-12">
                     <div class="pnl-feature">
-                      <div class="heading">{{getResourceValue("Features")}}</div>
+                      <div class="heading">{{getResourceValue("subscription_label_feature")}}</div>
                       <table class="table">
                         <thead>
                           <tr>
                             <th></th>
-                            <th>{{getResourceValue("AdditionalRecurringPrice")}}(NOK)</th>
-                            <th>{{getResourceValue("OneTimeCharge")}}</th>
+                            <th>{{getResourceValue("subscription_label_additionalrecurringprice")}} (NOK)</th>
+                            <th>{{getResourceValue("subscription_label_onetimecharge")}}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -151,7 +143,8 @@
                                   (change)="featureReportDashlet_Update(subscriptionFeature)" name="recurringPrice">
                               </div>
                               <div class="pull-left">
-                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                <select class="input-control"
+                                  placeholder="getResourceValue('subscription_field_duration')"
                                   [ngClass]="{disabledDiv: !subscriptionFeature.infoChecked}"
                                   (ngModelChange)="detailRecurringDuration_OnChange($event,subscriptionFeature)"
                                   [(ngModel)]="subscriptionFeature.recurringDuration" name="recurringDuration">
@@ -169,7 +162,8 @@
                                   (change)="featureReportDashlet_Update(subscriptionFeature)" name="oneTimePrice">
                               </div>
                               <div class="pull-left">
-                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                <select class="input-control"
+                                  placeholder="getResourceValue('subscription_field_duration')"
                                   [ngClass]="{disabledDiv: !subscriptionFeature.infoChecked}"
                                   (ngModelChange)="detailOneTimeDuration_OnChange($event,subscriptionFeature)"
                                   [(ngModel)]="subscriptionFeature.oneTimeDuration" name="oneTimeDuration">
@@ -184,13 +178,13 @@
                       </table>
                     </div>
                     <div class="pnl-feature">
-                      <div class="heading">{{getResourceValue("Reports")}}</div>
+                      <div class="heading">{{getResourceValue("subscription_label_report")}}</div>
                       <table class="table">
                         <thead>
                           <tr>
                             <th></th>
-                            <th>{{getResourceValue("AdditionalRecurringPrice")}}(NOK)</th>
-                            <th>{{getResourceValue("OneTimeCharge")}}</th>
+                            <th>{{getResourceValue("subscription_label_additionalrecurringprice")}} (NOK)</th>
+                            <th>{{getResourceValue("subscription_label_onetimecharge")}}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -212,7 +206,8 @@
                                   (change)="featureReportDashlet_Update(subscriptionReport)" name="recurringPrice">
                               </div>
                               <div class="pull-left">
-                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                <select class="input-control"
+                                  placeholder="getResourceValue('subscription_field_duration')"
                                   [ngClass]="{disabledDiv: !subscriptionReport.infoChecked}"
                                   (ngModelChange)="detailRecurringDuration_OnChange($event,subscriptionReport)"
                                   [(ngModel)]="subscriptionReport.recurringDuration" name="recurringDuration">
@@ -230,7 +225,8 @@
                                   (change)="featureReportDashlet_Update(subscriptionReport)" name="oneTimePrice">
                               </div>
                               <div class="pull-left">
-                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                <select class="input-control"
+                                  placeholder="getResourceValue('subscription_field_duration')"
                                   [ngClass]="{disabledDiv: !subscriptionReport.infoChecked}"
                                   (ngModelChange)="detailOneTimeDuration_OnChange($event,subscriptionReport)"
                                   [(ngModel)]="subscriptionReport.oneTimeDuration" name="oneTimeDuration">
@@ -245,13 +241,13 @@
                       </table>
                     </div>
                     <div class="pnl-feature">
-                      <div class="heading">{{getResourceValue("Dashlets")}}</div>
+                      <div class="heading">{{getResourceValue("subscription_label_dashlet")}}</div>
                       <table class="table">
                         <thead>
                           <tr>
                             <th></th>
-                            <th>{{getResourceValue("AdditionalRecurringPrice")}}(NOK)</th>
-                            <th>{{getResourceValue("OneTimeCharge")}}</th>
+                            <th>{{getResourceValue("subscription_label_additionalrecurringprice")}} (NOK)</th>
+                            <th>{{getResourceValue("subscription_label_onetimecharge")}}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -273,7 +269,8 @@
                                   class="input-control">
                               </div>
                               <div class="pull-left">
-                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                <select class="input-control"
+                                  placeholder="getResourceValue('subscription_field_duration')"
                                   [ngClass]="{disabledDiv: !subscriptionDashlet.infoChecked}"
                                   (ngModelChange)="detailRecurringDuration_OnChange($event,subscriptionDashlet)"
                                   [(ngModel)]="subscriptionDashlet.recurringDuration" name="recurringDuration">
@@ -291,7 +288,8 @@
                                   class="input-control">
                               </div>
                               <div class="pull-left">
-                                <select class="input-control" placeholder="getResourceValue('Duration')"
+                                <select class="input-control"
+                                  placeholder="getResourceValue('subscription_field_duration')"
                                   [ngClass]="{disabledDiv: !subscriptionDashlet.infoChecked}"
                                   (ngModelChange)="detailOneTimeDuration_OnChange($event,subscriptionDashlet)"
                                   [(ngModel)]="subscriptionDashlet.oneTimeDuration" name="oneTimeDuration">

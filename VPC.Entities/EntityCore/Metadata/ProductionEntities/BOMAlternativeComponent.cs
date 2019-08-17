@@ -25,25 +25,35 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
   
     public class BOMAlternativeComponent : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.BOMAlternativeComponent);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20026-ST01", "Standard"}
         };
 
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+
+        [DisplayName("BOM component Id")]
         public Guid BOMComponentId { get; set; }
         [ColumnName("test")]
+        [DisplayName("Pos")]
         public NumericType Pos { get; set; }
+
+        [DisplayName("Product vendor Id")]
         public Lookup<ProductVendor> ProductVendorId { get; set; }
     }
 }

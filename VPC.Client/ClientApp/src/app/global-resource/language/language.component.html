@@ -34,8 +34,8 @@
 
                 <div class="profile">
                     <ul>
-                        <li *ngFor="let language of languages">
-                            <a (click)="onLanguageClick(language)">{{language.text}}</a>
+                        <li *ngFor="let language of languages" (click)="onLanguageClick(language)" [ngClass]="(language.key==selectedLangeKey) ? 'selected' : 'de-selected'">
+                            <a>{{language.text}}</a>
                         </li>
                     </ul>
                 </div>

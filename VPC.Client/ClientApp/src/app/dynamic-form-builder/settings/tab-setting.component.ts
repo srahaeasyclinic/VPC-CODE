@@ -13,7 +13,7 @@ import {getTreenodeinstanceWithObject } from '../../model/treeNode';
   selector: 'Tab-setting',
   template: `
   <div class="modal-header">
-    <label id="modal-title">{{getResourceValue('EditTab')}}</label>
+    <label id="modal-title">{{getResourceValue('metadata_label_edittab')}}</label>
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -24,7 +24,7 @@ import {getTreenodeinstanceWithObject } from '../../model/treeNode';
 
 
       <div class="row">
-        <div class="col-md-12"><label>{{getResourceValue('Tabs')}}</label></div>        
+        <div class="col-md-12"><label>{{getResourceValue('metadata_tabs')}}</label></div>        
       </div>
 
       <div class="row"  *ngFor="let item of node.tabs">
@@ -32,20 +32,20 @@ import {getTreenodeinstanceWithObject } from '../../model/treeNode';
           <input type="text" [(ngModel)]="item.name" class="input-control">
         </div>   
         <div class="col-md-1 margin-top-5 btn-small-action">
-        <i class="fa fa-times" ngbTooltip="{{getResourceValue('Delete')}}" container="body" placement="left" (click)="deleteTab(item.name)"></i>
+        <i class="fa fa-times" ngbTooltip="{{getResourceValue('menuitem_operation_delete')}}" container="body" placement="left" (click)="deleteTab(item.name)"></i>
         </div>     
       </div>
 
       <div class="row">
         <div class="col-md-12">
-        <button type="button" class="btn btn-primary" (click)="addTab()">{{getResourceValue('AddTab')}}</button>
+        <button type="button" class="btn btn-primary" (click)="addTab()">{{getResourceValue('metadata_operation_addtab')}}</button>
         </div>
 
       </div>
 
       <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('Cancel')}}</button>
-      <button type="button" class="btn btn-primary" (click)="saveTabs()">{{getResourceValue('Save')}}</button>
+      <button type="button" class="btn btn-primary" (click)="saveTabs()">{{getResourceValue('operation_save')}}</button>
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
     </div>
     
   </div>

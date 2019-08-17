@@ -1,0 +1,128 @@
+<div class="text-header">{{getResourceValue("applicationmenugroup_pluralname")}}</div>
+<div class="detailsMenu">
+    <div class="msg-tips-left">
+        <div class="msg-entrance" (click)="addMenuPopup(menu)"
+            ngbTooltip="{{getResourceValue('menugroup_operation_create')}}" container="body">
+            <i class="fa fa-plus"></i>{{getResourceValue("operation_create")}}
+        </div>
+    </div>
+</div>
+<div class="page-content">
+
+    <kendo-grid [kendoGridBinding]="gridData" [filterable]="true" [pageSize]="10" [pageable]="true" [sortable]="true"
+        [groupable]="true" [resizable]="true">
+        <kendo-grid-column field="name" title="{{getResourceValue('applicationmenugroup_field_name')}}">
+            <ng-template kendoGridCellTemplate let-gridData>
+                <a class="gridLink" (click)="editMenuPopup(menu, gridData.id)">{{gridData.name}}</a>
+            </ng-template>
+        </kendo-grid-column>
+        <kendo-grid-column field="parentId" title="{{getResourceValue('menugroup_field_parent')}}"></kendo-grid-column>
+
+        <kendo-grid-column field="menucode" title="{{getResourceValue('menuitem_field_menucode')}}"></kendo-grid-column>
+        <kendo-grid-column field="sortItem" title="{{getResourceValue('menuitem_field_sortitem')}}"></kendo-grid-column>
+        <kendo-grid-column>
+            <ng-template kendoPagerTemplate kendoGridCellTemplate let-gridData let-rowIndex="rowIndex">
+                <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+                    <mat-icon>
+                        ...
+                    </mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <a class="dropdown-item"
+                        (click)="deleteMenu(gridData)">{{getResourceValue("operation_delete")}}</a>
+                </mat-menu>
+            </ng-template>
+        </kendo-grid-column>
+    </kendo-grid>
+</div>
+
+<!-- ----------------Add MenuGroup Popup----------------- -->
+
+<ng-template #menu let-modal>
+    <div class="modal-header">
+        <label>{{addMenuLabel}}</label>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-6 col-xs-12">
+                <div class="form-group">
+                    <label>{{getResourceValue("menuitem_field_title")}}</label><label
+                        class="text-mandatory margin-left-3">*</label>
+                    <input type="text" [(ngModel)]="menugroupModel.name" class="input-control">
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xs-12">
+                <div class="form-group">
+                    <label>{{getResourceValue("menuitem_field_parentmenugroup")}}</label>
+                    <select class="input-control" [(ngModel)]="parentmenu" (ngModelChange)="onGroupChange($event)">
+                        <option></option>
+                        <option *ngFor="let vals of parentmenuGroupList" [ngValue]="vals.id">{{vals.name}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xs-12">
+                <div class="form-group">
+                    <label>{{getResourceValue("menuitem_field_menucode")}}</label><label
+                        class="text-mandatory margin-left-3"></label>
+                    <label> {{menugroupModel.menucode}}</label>
+                </div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <div class="form-group">
+                    <label>{{getResourceValue("menuitem_field_sequence")}}</label><label
+                        class="text-mandatory margin-left-3"></label>
+                    <input type="number" [(ngModel)]="menugroupModel.sortItem" class="input-control">
+                </div>
+            </div>
+            <div *ngIf="showsection" class="col-md-6 col-xs-12">
+                <div class="form-group">
+                    <label>{{getResourceValue("menuitem_field_sectiongroup")}}</label><label
+                        class="text-mandatory margin-left-3">*</label>
+                    <select class="input-control" [(ngModel)]="menugroupModel.groupId">
+                        <option *ngFor="let vals of menuGroupList" [ngValue]="vals.internalId">{{vals.text}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xs-12">
+                <div class="form-group">
+                    <label>{{getResourceValue("menuitem_field_icon") }}</label>
+                    <select class="input-control fontawesome-select" [(ngModel)]="menugroupModel.menuIcon">
+                        <option value='fa fa-th-large'>&#xf009; &nbsp;Organization</option>   
+                        <option value='fa fa-product-hunt'>&#xf288; &nbsp;Product</option>
+                        <option value='fa fa-truck'>&#xf0d1; &nbsp;Logistic</option>   
+                        <option value='fa fa-industry'>&#xf275; &nbsp;Production</option>
+                        <option value='fa fa-desktop'>&#xf108; &nbsp;Resource</option>
+                        <option value='fa fa-money'>&#xf0d6; &nbsp;Finance</option>
+                        <option value='fa fa-tachometer'>&#xf0e4; &nbsp;Dashboard</option>
+                        <option value='fa fa-line-chart'>&#xf201; &nbsp;Report</option>
+                        <option value='fa fa-download'>&#xf019; &nbsp;import / export</option>
+                        <option value='fa fa-cogs'>&#xf085; &nbsp;Settings</option>
+                        <option value='fa fa-plug'>&#xf1e6; &nbsp;Integration</option>
+                        <option value='fa fa-bars'>&#xf0c9; &nbsp;Picklist</option>
+                        <option value='fa fa-object-ungroup'>&#xf248; &nbsp;Entity metadata</option>
+                        <option value='fa fa-bug'>&#xf188; &nbsp;Diagnostics</option>
+                        <option value='fa fa-building'>&#xf1ad; &nbsp;Tenant</option>
+                        <option value='fa fa-user-circle'>&#xf2bd; &nbsp;User</option>
+                        <option value='fa fa-users'>&#xf0c0; &nbsp;Users</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-primary" (click)="saveMenu()">{{editUpdate}}</button>
+            <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">
+                {{getResourceValue("task_cancel")}}
+            </button>
+            <!-- <button class="btn btn-primary">Save and add another</button> -->
+           
+        </div>
+    </div>
+</ng-template>

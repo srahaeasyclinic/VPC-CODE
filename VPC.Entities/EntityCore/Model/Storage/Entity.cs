@@ -29,5 +29,9 @@ namespace VPC.Entities.EntityCore.Model.Storage
         public List<RowLevelOperations> RowLevelOperations { get; set; }
         public Entity ActivityEntity { get; set; }
 
+        public Entity VersionControl { get; set; }
+        public Entity VersionOf { get; set; }
+        public List<ErrorCode> ErrorCodes { get; set; }
+
     }
 }

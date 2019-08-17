@@ -28,13 +28,20 @@ namespace VPC.WebApi.Controllers.MetadataController
         [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
-        public IActionResult GetEntities()
+        public IActionResult GetEntities([FromQuery] string entityType = "")
         {
             try
             {
                 var stopwatch = StopwatchLogger.Start(_log);
                 _log.Info("Called MetadataController GetEntities");
+
                 var result = _iMetadataManager.GetEntities(false).OrderBy(t=>t.Name);
+
+                if(entityType.ToLower() == "primaryentity")
+                {
+                    result = result.Where(a => a.Type.ToLower() == "primaryentity" || a.Type.ToLower() == "detailentity" || a.Type.ToLower() == "intersectentity").OrderBy(t=>t.Name);
+                }                
+               
                 stopwatch.StopAndLog("GetEntities of MetadataController");
                 return _iJsonMessage.IgnoreNullableObject(result);
 

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Broadcaster } from '../messaging/broadcaster';
 import {MessageEvent} from "../messaging/message.event"
+import { LayoutModel } from 'src/app/model/layoutmodel';
 @Injectable()
 export class TreeService {
   private picklists: string = '/api/picklists';
@@ -44,6 +45,12 @@ export class TreeService {
   getLastValue(name: any): any {
     var arr = name.split(".");
     return arr[arr.length-1];        
+  }
+
+
+  getDefaultLayout(name: string, type: string, subtype: string, context: string):  Observable<any> {
+    var layoutById = `${environment.apiUrl}` + this.layout + '/' + name + '/layouts/default?type='+type+"&subtype="+subtype+"&context="+context;
+    return this.http.get<LayoutModel[]>(layoutById);
   }
 }
 

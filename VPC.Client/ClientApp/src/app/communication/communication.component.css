@@ -6,3 +6,44 @@
 color:#237EE5;
 font-size: 1.5rem;
 }
+
+.help-container{
+    padding: 15px;
+    min-height: 100px;
+    border-radius: 5px;
+    box-shadow: 0 0px 1px -3px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.05), 0 1px 5px 0 rgba(0, 0, 0, .12);
+    background-color: #f3f8ff;
+    margin-bottom: 30px;
+    position: relative;
+    border-left: 3px solid #ee8e20;
+}
+
+.help-container .heading{
+    font-size: 1rem;
+    font-weight: 500;
+    color:#484848;
+    margin-bottom: 5px;
+}
+
+
+.help-container .info p{
+    font-size: 0.8rem;
+    font-weight: 400;
+    color:#969696;
+    line-height: 22px;
+}
+
+.help-container .close-btn{
+    position: absolute;
+    right: 15px;
+    top: 0px;
+    color: #969696;
+    font-size: 1.5rem;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.help-container .close-btn:hover{
+    color: #484848;
+}
+

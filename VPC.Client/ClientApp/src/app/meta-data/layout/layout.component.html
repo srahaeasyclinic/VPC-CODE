@@ -1,45 +1,109 @@
 <div class="tab-section">
-<a class="btn btn-primary margin-top-10 margin-bottom-10" (click)="open()">{{getResourceValue('AddLayout')}}</a>
-<br />
+  <a class="btn btn-primary margin-bottom-10"
+    (click)="open()">{{getResourceValue('metadata_task_add')}}</a>
+  <br />
 
 
-<kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true">
-  <kendo-grid-column field="name" [title]="getResourceValue('Name')" [width]="130">
-    <ng-template kendoGridCellTemplate let-gridData>
-      <a class="gridLink" (click)="goToLayoutDetail(gridData.id,gridData.layoutTypeName)">{{gridData.name}}</a>
-    </ng-template>
-  </kendo-grid-column>
-  <kendo-grid-column field="layoutTypeName" [title]="getResourceValue('Type')"  [width]="130"></kendo-grid-column>
-  <kendo-grid-column field="subtypeeName" [title]="getResourceValue('SubType')" [width]="130"></kendo-grid-column>
-  <kendo-grid-column field="contextName" [title]="getResourceValue('Context')" [width]="130"></kendo-grid-column>
-  <kendo-grid-column field="modifiedDate" format='{0:MM/dd/yyyy h:mm a}' [title]="getResourceValue('UpdatedOn')" [width]="130">
-  </kendo-grid-column>
-  <kendo-grid-column [title]="getResourceValue('Default')" [width]="50">
-    <ng-template kendoGridCellTemplate let-gridData>
-      <div ngbTooltip="{{getResourceValue('defaultLayout')}}" container="body" placement="left" filter="a" *ngIf="gridData.defaultLayout">
-        <a class="statusRoundedGreen">{{getResourceValue('D')}}</a>
-      </div>
-    </ng-template>
-  </kendo-grid-column>
-  <kendo-grid-column [width]="120" [style]="{'overflow': 'visible'}">
-    <ng-template kendoGridCellTemplate let-gridData>
-      <!-- <div ngbDropdown class="grdDropdown pull-right" *ngIf="!gridData.DefaultLayout">
+  <kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true">
+    <kendo-grid-column field="name" [title]="getResourceValue('metadata_field_name')" [width]="130">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <a class="gridLink" (click)="goToLayoutDetail(gridData.id,gridData.layoutTypeName)">{{gridData.name}}</a>
+      </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-column field="layoutTypeName" [title]="getResourceValue('metadata_field_type')" [width]="130">
+    </kendo-grid-column>
+    <kendo-grid-column field="subtypeeName" [title]="getResourceValue('metadata_field_subtype')" [width]="130">
+    </kendo-grid-column>
+    <kendo-grid-column field="contextName" [title]="getResourceValue('metadata_field_context')" [width]="130">
+    </kendo-grid-column>
+    <kendo-grid-column field="modifiedDate" format='{0:MM/dd/yyyy h:mm a}'
+      [title]="getResourceValue('metadata_field_updatedon')" [width]="130">
+    </kendo-grid-column>
+    <kendo-grid-column [title]="getResourceValue('metadata_field_default')" [width]="50">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <div ngbTooltip="{{getResourceValue('metadata_field_default')}}" container="body" placement="left"
+          filter="a" *ngIf="gridData.defaultLayout">
+          <a class="statusRoundedGreen">{{'D'}}</a>
+        </div>
+      </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-column [width]="120" [style]="{'overflow': 'visible'}">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <!-- <div ngbDropdown class="grdDropdown pull-right" *ngIf="!gridData.DefaultLayout">
         <a id="dropdownBasic1" ngbDropdownToggle>Actions</a>
         <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
           <a class="dropdown-item" (click)="deleteLayout(gridData)">Delete</a>
           <a class="dropdown-item" (click)="saveLayoutDefault(gridData)">Set default</a>
         </div>
       </div> -->
-      <button mat-icon-button [matMenuTriggerFor]="menu" class="actions" *ngIf="!gridData.defaultLayout">
-        <mat-icon>
-          ...
-        </mat-icon>
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+          <mat-icon>
+            ...
+          </mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <a class="dropdown-item" (click)="deleteLayout(gridData)" *ngIf="!gridData.defaultLayout">{{getResourceValue('operation_delete')}}</a>
+          <a class="dropdown-item"
+            (click)="saveLayoutDefault(gridData)" *ngIf="!gridData.defaultLayout">{{getResourceValue('task_setdefault')}}</a>
+          <a class="dropdown-item"
+            (click)="cloneLayout(gridData, content)">{{getResourceValue('metadata_clonelayout')}}</a>
+        </mat-menu>
+      </ng-template>
+    </kendo-grid-column>
+  </kendo-grid>
+
+  <ng-template #content let-modal>
+    <div class="modal-header">
+      <label>{{getResourceValue("metadata_clonelayout")}}</label>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
       </button>
-      <mat-menu #menu="matMenu">
-        <a class="dropdown-item" (click)="deleteLayout(gridData)">{{getResourceValue('Delete')}}</a>
-          <a class="dropdown-item" (click)="saveLayoutDefault(gridData)">{{getResourceValue('SetDefault')}}</a>
-      </mat-menu>
-    </ng-template>
-  </kendo-grid-column>
-</kendo-grid>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="layoutForm" (ngSubmit)="submitForm()">
+        <div class="form-group">
+          <label>{{getResourceValue('metadata_field_name')}}</label>
+          <input type="text" formControlName="layoutName" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f.layoutName.errors }" />
+          <div *ngIf="submitted && f.layoutName.errors" class="invalid-feedback">
+            <div *ngIf="f.layoutName.errors.required">
+              {{getRequiredValidatorMessageFromResource('metadata_field_name')}}</div>
+          </div>
+        </div>       
+        <div class="form-group" *ngIf="showSubType">
+          <label>{{getResourceValue('metadata_field_subtype')}}</label>
+          <select class="form-control" formControlName="drpSubtype"
+            [ngClass]="{ 'is-invalid': submitted && f.drpSubtype.errors }">
+            <option *ngFor="let subType of subTypes" value={{subType.id}}>
+              {{subType.name}}
+            </option>
+          </select>
+          <div *ngIf="submitted && f.drpSubtype.errors" class="invalid-feedback">
+            <div *ngIf="f.drpSubtype.errors.required">
+              {{getRequiredValidatorMessageFromResource('metadata_field_subtype')}}</div>
+          </div>
+        </div>
+        <div class="form-group" *ngIf="showSubType">
+          <label>{{getResourceValue('metadata_field_context')}}</label>
+          <select class="form-control" formControlName="drpContext"
+            [ngClass]="{ 'is-invalid': submitted && f.drpContext.errors }">
+            <option *ngFor="let context of contexts" value={{context.id}}>
+              {{context.name}}
+            </option>
+          </select>
+          <div *ngIf="submitted && f.drpContext.errors" class="invalid-feedback">
+            <div *ngIf="f.drpContext.errors.required">
+              {{getRequiredValidatorMessageFromResource('metadata_field_context')}}</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-primary">{{getResourceValue('operation_submit')}}</button>
+          <button type="button" class="btn btn-secondary"
+            (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
+        </div>
+      </form>
+    </div>
+
+  </ng-template>
 </div>

@@ -197,7 +197,7 @@ export class ListPreviewComponent implements OnInit {
 
       } else {
         isvalid = false;
-        this.toster.showWarning(this.resource[this.generateResourceName("NoFieldsFound")] );
+        this.toster.showWarning(this.getResourceValue("metadata_operation_warning_notfoundmessage"));
       }
 
 
@@ -441,12 +441,15 @@ export class ListPreviewComponent implements OnInit {
 
       } else {
         isvalid = false;
-        this.toster.showWarning(this.resource[this.generateResourceName("NoFieldsFound")]);
+        this.toster.showWarning(this.getResourceValue("metadata_operation_warning_notfoundmessage"));
       }
     }
   }
 
   public configToggle(): void {
     this.isExpanded = !this.isExpanded;
+  }
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
   }
 }

@@ -11,7 +11,7 @@ namespace VPC.Metadata.Business.Tasks
     {
         public Guid PrintDocument { get; set; }
         public Guid PrintTemplate { get; set; }
-        public RoleTaskAttribute(string name,string task,string verb="" ,string taskDisplay="" ) : base(name,task,verb,taskDisplay)
+        public RoleTaskAttribute(string name,string task,string verb="" ,string taskDisplay="Role" ) : base(name,task,verb,taskDisplay)
         {
         }
     }   

@@ -18,7 +18,7 @@ export class FieldsComponent implements OnInit {
   private entity: Entities;
   public view: Observable<GridDataResult>;
   public gridData: any = this.entity;
-  private name: string;
+  public name: string;
   public resource: Resource;
   constructor(
     private route: ActivatedRoute,

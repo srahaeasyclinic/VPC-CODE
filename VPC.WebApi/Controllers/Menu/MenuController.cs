@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -8,6 +9,7 @@ using NLog;
 using VPC.Entities.EntityCore.Metadata;
 using VPC.Framework.Business.Menu.Contracts;
 using VPC.Framework.Business.MetadataManager.Contracts;
+using VPC.Framework.Business.ResourceManager.Contracts;
 using VPC.WebApi.Utility;
 
 namespace VPC.WebApi.Controllers.Menu
@@ -19,12 +21,14 @@ namespace VPC.WebApi.Controllers.Menu
         private readonly IMenuManager _iMenuManager;
         private readonly IJsonMessage _iJsonMessage;
         private readonly IMetadataManager _iMetadataManager;
+        private readonly IResourceManager _resourceManager;
 
-        public MenuController(IMenuManager iMenuManager, IJsonMessage iJsonMessage)
+        public MenuController(IMenuManager iMenuManager, IJsonMessage iJsonMessage, IResourceManager resourceManager)
         {
             _iMenuManager = iMenuManager;
             _iJsonMessage = iJsonMessage;
             _iMetadataManager = new MetadataManager();
+            _resourceManager = resourceManager;
         }
 
         [HttpGet]
@@ -34,7 +38,6 @@ namespace VPC.WebApi.Controllers.Menu
         [ProducesResponseType(404)]
         public IActionResult GetMenu([FromQuery] int pageIndex, int pageSize, string groupName)
         {
-            var entityName = "";
 
             try
             {
@@ -49,22 +52,7 @@ namespace VPC.WebApi.Controllers.Menu
                     menus = _iMenuManager.GetMenu(TenantCode, groupName, pageIndex, pageSize);
                     //menus = _iMenuManager.GetMenu(tenantId, groupName, pageIndex, pageSize);
 
-                    foreach (var menuItem in menus)
-                    {
-                        if (menuItem.ReferenceEntityId != null && menuItem.ReferenceEntityId != "")
-                        {
-                            if (menuItem != null && menuItem.MenuTypeId == 1)
-                            {
-                                entityName = _iMetadataManager.GetEntityNameByEntityContext(menuItem.ReferenceEntityId, false);
-                            }
-                            else if (menuItem != null && menuItem.MenuTypeId == 2)
-                            {
-                                entityName = _iMetadataManager.GetEntityNameByEntityContext(menuItem.ReferenceEntityId, true);
-                            }
-                            menuItem.ReferenceEntityId = entityName;
-                        }
 
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -78,6 +66,46 @@ namespace VPC.WebApi.Controllers.Menu
                 settings.NullValueHandling = NullValueHandling.Ignore;
                 settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 return Json(menus, settings);
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ExceptionFormatter.SerializeToString(ex));
+                return StatusCode((int)HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            }
+        }
+
+        [HttpGet]
+        [Route("all")]
+        [ProducesResponseType(200, Type = typeof(List<MenuItem>))]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(404)]
+        public IActionResult GetAllMenu()
+        {
+            try
+            {
+                var stopwatch = StopwatchLogger.Start(_log);
+                _log.Info("Called MenuController GetMenu");
+
+                List<MenuItem> Objmenu = new List<MenuItem>();
+
+                try
+                {
+
+                    Objmenu = _iMenuManager.GetMenuBytenant(TenantCode);
+
+                }
+                catch (Exception ex)
+                {
+                    _log.Error(ExceptionFormatter.SerializeToString(ex));
+                    return BadRequest("Incorrect Type.");
+                }
+
+                stopwatch.StopAndLog("GetMenu of MenuController");
+
+                var settings = new JsonSerializerSettings();
+                settings.NullValueHandling = NullValueHandling.Ignore;
+                settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                return Json(Objmenu, settings);
             }
             catch (Exception ex)
             {
@@ -217,10 +245,35 @@ namespace VPC.WebApi.Controllers.Menu
                     }
                 }
 
-                var retVal = _iMenuManager.CreateMenu(menuItem, UserId, TenantCode);
+                using (TransactionScope ts = new TransactionScope ()) {
+                    //create menu
+                    var retVal = _iMenuManager.CreateMenu (menuItem, UserId, TenantCode);
+                    _iMenuManager.ClearMenuCache (TenantCode);
 
-                stopwatch.StopAndLog("CreateMenu method of MenuController");
-                return Ok(retVal);
+                    //create resource
+                    //get language key value
+                    string langKey = "";
+                    string langValue = "";
+                    var retLan = _resourceManager.GetDefaultLanguageByTenant (TenantCode);
+                    if (retLan != null && retLan.Key != null) {
+                        langKey = Convert.ToString (retLan.Key);
+                    }
+                    if (retLan != null && retLan.Text != null) {
+                        langValue = Convert.ToString (retLan.Text);
+                    }
+
+                    //check resource by key
+                    var retRes = _resourceManager.GetResourcesByKey (TenantCode, menuItem.Menucode);
+                    if (retRes.Count == 0) {
+                        string msg = "";
+                        _resourceManager.Create (TenantCode, new Entities.EntityCore.Model.Resource.Resource (menuItem.Menucode, menuItem.Name, langKey, langValue, menuItem.ReferenceEntityId, false), UserId, ref msg);
+                    }
+
+                    ts.Complete ();
+
+                    stopwatch.StopAndLog ("CreateMenu method of MenuController");
+                    return Ok (retVal);
+                }
             }
             catch (Exception ex)
             {
@@ -261,10 +314,45 @@ namespace VPC.WebApi.Controllers.Menu
 
                 menuItem.ModifiedBy = UserId;
 
-                _iMenuManager.UpdateMenu(TenantCode, id, menuItem);
+                using (TransactionScope ts = new TransactionScope ()) {
+                    //update resource
+                    //get language key value
+                    string langKey = "";
+                    string langValue = "";
+                    var retLan = _resourceManager.GetDefaultLanguageByTenant (TenantCode);
+                    if (retLan != null && retLan.Key != null) {
+                        langKey = Convert.ToString (retLan.Key);
+                    }
+                    if (retLan != null && retLan.Text != null) {
+                        langValue = Convert.ToString (retLan.Text);
+                    }
 
-                stopwatch.StopAndLog("UpdateMenu method of MenuController");
-                return Ok(HttpStatusCode.OK);
+                    //get resource id
+                    var retVal = _resourceManager.GetResourcesByMenuId (TenantCode, id);
+
+                    if (retVal != null && retVal.Count > 0) {
+                        if (retVal[0].Key != null) {
+                            //if same key do nothing
+                            if (retVal[0].Key.ToLower () != menuItem.Menucode.ToLower ()) {
+                                //else delete
+                                _resourceManager.DeleteByKey (TenantCode, retVal[0].Key);
+
+                                //create resource
+                                string msg = "";
+                                _resourceManager.Create (TenantCode, new Entities.EntityCore.Model.Resource.Resource (menuItem.Menucode, menuItem.Name, langKey, langValue, menuItem.ReferenceEntityId, false), UserId, ref msg);
+                            }
+                        }
+                    }                  
+
+                     //update menu
+                    _iMenuManager.UpdateMenu (TenantCode, id, menuItem);
+                    _iMenuManager.ClearMenuCache (TenantCode);
+
+                    ts.Complete ();
+                }
+
+                stopwatch.StopAndLog ("UpdateMenu method of MenuController");
+                return Ok (HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -289,6 +377,7 @@ namespace VPC.WebApi.Controllers.Menu
                     return BadRequest("Menu id required !");
 
                 _iMenuManager.DeleteMenu(TenantCode, id);
+                _iMenuManager.ClearMenuCache(TenantCode);
                 stopwatch.StopAndLog("DeleteMenu method of MenuController");
                 return Ok(true);
             }
@@ -299,5 +388,74 @@ namespace VPC.WebApi.Controllers.Menu
             }
         }
 
+        [HttpGet]
+        [Route("clear-cache")]
+        public IActionResult Clear()
+        {
+            try
+            {
+                var retVal = _iMenuManager.ClearMenuCache(TenantCode);
+                return this.Ok(retVal);
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ExceptionFormatter.SerializeToString(ex));
+                return StatusCode((int)HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            }
+        }
+
+        [HttpPost]
+        [Route("initilizationmenu")]
+        public IActionResult initilizationMenu(Guid rootTenantCode, Guid initilizedTenantCode)
+        {
+            try
+            {
+                _iMenuManager.InitilizeParentMenuFromAPI(rootTenantCode, initilizedTenantCode,UserId);
+                return this.Ok();
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ExceptionFormatter.SerializeToString(ex));
+                return StatusCode((int)HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            }
+        }
+
+        [HttpPost]
+        [Route ("initilizationresource")]
+        public IActionResult initilizationResource (Guid initilizedTenantCode) {
+            try {
+                //get language key value
+                string langKey = "";
+                string langValue = "";
+                var retLan = _resourceManager.GetDefaultLanguageByTenant (initilizedTenantCode);
+                if (retLan != null && retLan.Key != null) {
+                    langKey = Convert.ToString (retLan.Key);
+                }
+                if (retLan != null && retLan.Text != null) {
+                    langValue = Convert.ToString (retLan.Text);
+                }
+
+                List<MenuItem> allmenus = _iMenuManager.GetMenuBytenant (initilizedTenantCode);
+
+                if (allmenus != null && allmenus.Count > 0) {
+                    foreach (var item in allmenus) {
+                        if (item.Menucode != null && item.Menucode != "") {
+                            var retRes = _resourceManager.GetResourcesByKey (initilizedTenantCode, item.Menucode);
+                            if (retRes.Count == 0) {
+                                string msg = "";
+                                _resourceManager.Create (initilizedTenantCode, new Entities.EntityCore.Model.Resource.Resource (item.Menucode, item.Name, langKey, langValue, "", false), UserId, ref msg);
+                            }
+                        }
+
+                    }
+                }
+
+                return this.Ok ();
+                
+            } catch (Exception ex) {
+                _log.Error (ExceptionFormatter.SerializeToString (ex));
+                return StatusCode ((int) HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            }
+        }
     }
 }

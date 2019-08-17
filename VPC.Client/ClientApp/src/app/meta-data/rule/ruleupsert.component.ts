@@ -5,89 +5,20 @@ import { Target } from 'src/app/model/target';
 import { MetadataService } from '../metadata.service';
 import { TosterService } from '../../services/toster.service';
 import { element } from '@angular/core/src/render3';
-import{GlobalResourceService} from '../../global-resource/global-resource.service';
+import { GlobalResourceService } from '../../global-resource/global-resource.service';
+import { jsonpCallbackContext } from '@angular/common/http/src/module';
 
 @Component({
   selector: 'rule-upsert',
-  template: `
-  <div class="modal-header">
-  <label>{{globalResourceService.getResourceByKey(header)}}</label>
-  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
-<div class="modal-body">
- 
-    <div class="row">
-
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="ruleName">{{globalResourceService.getResourceByKey("Name")}}</label><label
-            class="text-mandatory margin-left-3">*</label>
-              <input type="text" [name]="ruleName" [(ngModel)]="data.ruleName" class="form-control"  #ruleName="ngModel" >
-         </div>
-      </div>
-
-
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="ruleTypeName">{{globalResourceService.getResourceByKey("ruleType")}}</label><label
-            class="text-mandatory margin-left-3">*</label>
-          <select name="ruleTypeName" class="form-control"   [(ngModel)]="selectedRuleType" (ngModelChange)="onRuleTypeChange($event)" >
-            <option *ngFor="let vals of ruleTypes" [ngValue]="vals">{{vals.text}}</option>
-          </select>
-        </div>
-      </div>
-
-
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="targetName">{{globalResourceService.getResourceByKey("Target")}}</label><label
-            class="text-mandatory margin-left-3">*</label>
-            <!--data.targetList-->
-          <select class="form-control" name="targetName" [(ngModel)]="data.targetList[0].selectedItem" (ngModelChange)="onTargetChange($event)">
-            <option *ngFor="let opt of fieldSource" [ngValue]="opt">
-              {{opt.name}}
-            </option>
-          </select> 
-        </div>
-      </div>
-    </div>
-    <div>
-      <label>{{globalResourceService.getResourceByKey("Sources")}}</label><label
-        class="text-mandatory margin-left-3">*</label>
-      <a class="margin-left-10 text-link"
-        (click)="onSourceAddClick()">{{globalResourceService.getResourceByKey("AddSource")}}</a>
-      <div class="row" *ngFor="let s of data.sourceList; let i = index">
-        <div class="col-md-6">
-        <div class="form-group">    
-        <select name={{i}} [(ngModel)]="s.selectedItem"  class="input-control" (ngModelChange)="onSourceChange($event, s)">
-          <option *ngFor="let item of fieldSource" [ngValue]="item">{{item.name}}</option>
-        </select>
-      </div>
-        </div>
-        <div class="col-md-5">
-          <my-tree *ngIf="s.selectedItem!=null" [mode]="1" [rootNode]="s.selectedItem" [resource]="resource"
-            [selectedNode]="s.value" class="tree-role">
-          </my-tree>
-        </div>
-        <div class="col-md-1">
-          <a class="btn-small-action pull-right margin-top-5" *ngIf="data.sourceList.length>1" 
-          (click)="onSourceRemoveClick(s)"  ngbTooltip="{{globalResourceService.getResourceByKey('Delete')}}" container="body">
-            <i class="fa fa-times"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary"
-      (click)="modal.dismiss('cancel click')">{{globalResourceService.getResourceByKey("Cancel")}}</button>
-      <button class="btn btn-primary" (click)="upsertRule()">{{globalResourceService.getResourceByKey(button)}}</button>
-  </div>
-  
-</div>
-`
+  templateUrl: './ruleupsert.component.html',
+  styles: [`
+    .enabled{
+      display:block;
+    }
+    .not-enabled{
+      display:none;
+    }
+  `]
 })
 export class RuleUpsertComponent {
   @Input() name: string;
@@ -102,20 +33,34 @@ export class RuleUpsertComponent {
   @Output() updateEvent: EventEmitter<any> = new EventEmitter();
   @Output() errorEvent: EventEmitter<any> = new EventEmitter();
   @Output() warningEvent: EventEmitter<any> = new EventEmitter();
-  public sourceCheck: Target = null;
+  public sourceList: Target[];
+  public targetList: Target[];
   public selectedRuleType: RuleType = new RuleType();
+  public newFieldSource: Target[];
+  private noSourceRuleTypes: any[];
+  private noTargetRuleTypes: any[];
+  private clonetargetList: any[];
   constructor(
-    public modal: NgbActiveModal, 
+    public modal: NgbActiveModal,
     private metadataService: MetadataService,
     private toster: TosterService,
-    public globalResourceService:GlobalResourceService,
-    ) {}
+    private globalResourceService: GlobalResourceService,
+  ) { }
   ngOnInit(): void {
+    // this.fieldSource.forEach(a => {
+    //   a['useIndex'] = 0;
+    // });
+    // this.sourceList=[...this.fieldSource];
+    // this.targetList=[...this.fieldSource.filter(a => a.required != true)];
+
     if (this.data) {
-      this.mapSources(this.data.sourceList);
       this.mapSources(this.data.targetList);
+      this.clonetargetList = this.data.targetList;
+      this.mapSources(this.data.sourceList);
       this.mapRuleType();
+      //this.checkFieldSource();
     }
+    this.noSourceRuleTypes = [2];
   }
   public mapRuleType() {
     if (this.ruleTypes) {
@@ -143,15 +88,46 @@ export class RuleUpsertComponent {
       });
     }
   }
-  // public generateResourceName(word) {
-  //   if (!word) return word;
-  //   return word[0].toLowerCase() + word.substr(1);
-  // }
+  public mapTarget(mapper: Target[]) {
+    if (mapper && this.fieldSource) {
+      mapper.forEach(element => {
+        this.fieldSource.forEach(field => {
+          if (element.name == field.name) {
+            element.selectedItem = field;
+            element.selectedItem.value = element.value;
+            return;
+          }
+        });
+        if (element.selectedItem) {
+          return;
+        }
+      });
+    }
+  }
+  public onTargetAddClick() {
+    //if (this.targetList.filter(a => a['useIndex'] != 1).length > 0) {
+    var flag = this.validTarget();
+    if (flag) {
+      this.warningEvent.emit(this.getResourceValue("rule_field_target_invalid_message"))
+    }
+    else {
+      var target = new Target();
+      target.controlType = "";
+      target.name = "";
+      target.id = Math.floor(Math.random() * 100) + 1;
+      this.data.targetList.push(target);
+    }
+    // } else {
+    //   this.warningEvent.emit(this.getResourceValue("rule_field_metadetails_notavailable_message"));
+    // }
+
+  }
 
   public onSourceAddClick() {
-    var flag = this.validate();
+    //if (this.sourceList.filter(a => a['useIndex'] != 1).length > 0) {
+    var flag = this.validateSource();
     if (flag) {
-      this.warningEvent.emit( this.globalResourceService.getResourceByKey("PleaseEnterProperSourceValueFirst"))
+      this.warningEvent.emit(this.getResourceValue("rule_field_source_invalid_message"));
     }
     else {
       var source = new Target();
@@ -160,67 +136,98 @@ export class RuleUpsertComponent {
       source.id = Math.floor(Math.random() * 100) + 1;
       this.data.sourceList.push(source);
     }
+    // } else {
+    //   this.warningEvent.emit(this.getResourceValue("rule_field_metadetails_notavailable_message"));
+    // }
+
   }
 
   public onSourceRemoveClick(source: Target) {
     this.data.sourceList.splice(this.data.sourceList.indexOf(source), 1);
+    //this.checkFieldSource();
+  }
+  public onTargetRemoveClick(t: Target) {
+    this.data.targetList.splice(this.data.targetList.indexOf(t), 1);
+    //this.checkFieldSource();
   }
 
   public onSourceChange(selectedItem: any, mapdata: Target) {
-    this.sourceCheck = this.data.sourceList.find(a => a.name == selectedItem.name);
-    if (this.sourceCheck == null) {
-      mapdata.name = selectedItem.name;
-      mapdata.controlType = selectedItem.controlType;
-      mapdata.value = null;
-    }
-    else {
-
-     this.errorEvent.emit(this.sourceCheck.name+" " + this.globalResourceService.getResourceByKey("Alreadyadded"));
-    }
+    mapdata.name = selectedItem.name;
+    mapdata.controlType = selectedItem.controlType;
+    mapdata.value = null;
+    //this.checkFieldSource();
 
   }
-  public onTargetChange(selectedItem: any) {
-    this.data.targetList[0].name = selectedItem.name;
-    this.data.targetList[0].controlType = selectedItem.controlType;
-    this.data.targetList[0].value = 'true';
+  public onTargetChange(selectedItem: any, index: any) {
+    this.data.targetList[index].name = selectedItem.name;
+    this.data.targetList[index].controlType = selectedItem.controlType;
+    this.data.targetList[index].value = 'true';
+    //this.checkFieldSource();
   }
   public onRuleTypeChange(selectedItem: any) {
     this.data.ruleType = selectedItem.internalId;
+    //console.log('this.data ', this.data);
+    if (this.checkSourceRequired(this.data.ruleType) == 2) {
+      this.data.sourceList = null;
+      this.data.targetList = this.clonetargetList.filter(d=>d.name.indexOf(".")>-1);
+    }
+    else {
+      this.data.sourceList = [new Target()];
+      this.data.targetList = this.clonetargetList;
+    }
+  }
+  private checkSourceRequired(argRuleType) {
+    if(this.noSourceRuleTypes.length > 0)
+    {
+      return this.noSourceRuleTypes.findIndex(t => (t.toString() === argRuleType));
+    }
+    else
+    {
+      return -1;
+    }
+  }
+  private checkTargetRequired(argRuleType) {
+    if(this.noSourceRuleTypes.length > 0)
+    {
+      return this.noTargetRuleTypes.findIndex(t => (t.toString() === argRuleType));
+    }
+    else
+    {
+      return -1;
+    }
   }
   public upsertRule(): void {
     let errorMessage: string = "";
 
     if (this.data.ruleName === "" || this.data.ruleName === undefined) {
-      errorMessage +=  this.globalResourceService.getResourceByKey("Nameisrequired")+"<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("rule_field_name") + "<br/>";
     }
     if (this.data.ruleType === "" || this.data.ruleType === undefined) {
-      errorMessage += this.globalResourceService.getResourceByKey("Ruletypeisrequired")+"<br/>";
-    }   
-    if ( this.data.targetList[0].name === "" ||  this.data.targetList[0].name === undefined) {
-      errorMessage +=  this.globalResourceService.getResourceByKey("Targetisrequired")+"<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("rule_field_ruletype") + "<br/>";
     }
-    // if ( this.data.sourceList === null ||  this.data.sourceList === undefined) {
-    //   errorMessage += "Sources is required!<br/>";
-    // }
-
-    this.data.sourceList.forEach(a => {
-      if ((a.selectedItem==null || a.selectedItem.value == '' || a.selectedItem.value == null)) {
-        errorMessage += this.globalResourceService.getResourceByKey("Sourceisrequired")+"<br/>";
+    if (this.data.sourceList !== null) {
+      if (this.data.sourceList.find(a => a.selectedItem == null || a.selectedItem.value == '' || a.selectedItem.value == null)) {
+        errorMessage += this.globalResourceService.requiredValidator("rule_field_source") + "<br/>";
       }
-    });
+    }
+
+    if (this.data.targetList.find(a => a.name === "" || a.name === undefined)) {
+      errorMessage += this.globalResourceService.requiredValidator("rule_field_target") + "<br/>";
+    }
+
 
     if (errorMessage != "") {
       this.toster.showError(errorMessage);
       return;
     }
-    var flag = this.validate();
-    if (flag) {
-      this.warningEvent.emit(this.globalResourceService.getResourceByKey("PleaseEnterProperSourceValueFirst"))
-    }
     else {
-      this.data.sourceList.forEach(a => {
-        a.value =a.selectedItem.value;
-      });
+      if (this.data.sourceList !== null) {
+        this.data.sourceList.forEach(a => {
+          a.value = a.selectedItem.value;
+          a.name = a.selectedItem.name;
+        });
+      }
+
       if (this.data.id) {
         this.updateRule();
       } else {
@@ -240,10 +247,19 @@ export class RuleUpsertComponent {
 
   }
 
-  public validate(): boolean {
+  public validateSource(): boolean {
     var flag: boolean = false;
     this.data.sourceList.forEach(a => {
-      if ((a.selectedItem==null || a.selectedItem.value == '' || a.selectedItem.value == null)) {
+      if ((a.selectedItem == null || a.selectedItem.value == '' || a.selectedItem.value == null)) {
+        flag = true;
+      }
+    });
+    return flag;
+  }
+  private validTarget(): boolean {
+    var flag: boolean = false;
+    this.data.targetList.forEach(a => {
+      if ((a.selectedItem == null || a.selectedItem.name == '')) {
         flag = true;
       }
     });
@@ -260,7 +276,33 @@ export class RuleUpsertComponent {
         this.errorEvent.emit(error.error.text);
       });
   }
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
+  }
 
 
+  checkFieldSource() {
+    this.newFieldSource = [];
+    this.newFieldSource = this.data.sourceList.map(function (item) { return item.selectedItem });
+    this.newFieldSource = this.newFieldSource.concat(this.data.targetList.map(function (item) { return item.selectedItem }));
+    this.newFieldSource = this.newFieldSource.filter(a => a);
 
+    if (this.newFieldSource) {
+      this.sourceList.forEach(element => {
+        if (this.newFieldSource.find(a => a.name == element.name)) {
+          element['useIndex'] = 1;
+        } else {
+          element['useIndex'] = 0;
+        }
+      });
+      this.targetList.forEach(element => {
+        if (this.newFieldSource.find(a => a.name == element.name)) {
+          element['useIndex'] = 1;
+        } else {
+          element['useIndex'] = 0;
+        }
+      });
+    }
+
+  }
 }

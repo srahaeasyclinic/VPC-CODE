@@ -20,6 +20,8 @@ namespace VPC.Metadata.Business.DataTypes
             this.APIUrl = "/api/metadata";
             var requiredValidator1 = new RequiredValidator();
             this.AddValidator(requiredValidator1);
+             var defaultValueValidattor = new DefaultValueValidator (ControlType);
+            this.AddValidator (defaultValueValidattor);
         }
 
         //public override string APIUrl { get => ApiUrl; set => ApiUrl = value; }

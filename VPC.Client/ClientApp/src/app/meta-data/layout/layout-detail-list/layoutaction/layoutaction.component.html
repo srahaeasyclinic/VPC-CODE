@@ -1,15 +1,22 @@
 <div class="component-layout">
   <div class="pnl-block">
     <div class="pnl-block-header">
-        <label>{{getResourceValue("AvailableFields")}}</label>
+        <label>{{getResourceValue("metadata_availablefields")}}</label>
+        <div class="list-search-block">
+          <div class="margin-right-10">
+              <input type="text" class="list-search" [(ngModel)]="searchText" />
+          </div>
+          <div class="search-filter"></div> 
+          <div class="reset-filter" *ngIf="(searchText!='' && searchText!=undefined) " (click)="resetAvailableFilter()"></div>    
+        </div>
     </div>
     <div class="pnl-block-body">
       <div class="tableStyle">
         <table class="table withoutborder margin-bottom-0">
           <tbody>
-            <tr *ngFor="let item of actionSource">
+            <tr *ngFor="let item of actionSource | filter : searchText">
               <td (click)="mainItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
-                <div [className]="item.isAdded ? 'text-less-important line-through' : 'text-less-important'">{{getResourceValue(item.name)}}</div>
+                <div [className]="item.isAdded ? 'text-less-important line-through' : 'text-less-important'">{{item.name}}</div>
               </td>
             </tr>
           </tbody>
@@ -27,15 +34,22 @@
   </div>
   <div class="pnl-block">
     <div class="pnl-block-header">
-        <label>{{getResourceValue("SelectedFields")}}</label>
+        <label>{{getResourceValue("metadata_selectedfields")}}</label>
+        <div class="list-search-block">
+          <div class="margin-right-10">
+              <input type="text" class="list-search" [(ngModel)]="addedItemToMainList.name" />
+          </div>
+          <div class="search-filter"></div> 
+          <div class="reset-filter" *ngIf="(addedItemToMainList.name!='' && addedItemToMainList.name!=undefined)" (click)="resetItemFilter()"></div>    
+        </div>
     </div>
     <div class="pnl-block-body">
       <div class="tableStyle">
         <table class="table withoutborder margin-bottom-0">
           <tbody>
-            <tr *ngFor="let item of addedItemToMainList">
+            <tr *ngFor="let item of addedItemToMainList | filter : addedItemToMainList.name">
               <td (click)="slectedItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
-                <div [className]="text-less-important">{{getResourceValue(item.name)}}</div>
+                <div [className]="text-less-important">{{item.name}}</div>
               </td>
             </tr>
           </tbody>

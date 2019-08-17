@@ -13,15 +13,20 @@ export class EntityValueService {
   private relations: string = '/api/relations/';
   private pageindex: number = 1;
   private pageSize: number = 10;
-  
+
 
   getEntityValues(entityName, fields): Observable<any> {
-    let url = `${environment.apiUrl}` +this.api + entityName + '?fields=' + fields;
+    let url = `${environment.apiUrl}` + this.api + entityName + '?fields=' + fields;
     return this.http.get<any[]>(url);
   }
 
-  getEntityDetails(entityName: string,id:string,subtype:string): Observable<any> {
-    let url = `${environment.apiUrl}` + this.api  + entityName + '/' + id +'?subType=' + subtype; 
+  getEntityDetails(entityName: string, id: string, subtype: string, versionId: string = ""): Observable<any> {
+    var route = `${environment.apiUrl}` + this.api + entityName + '/' + id;
+    var queryParam = "subType=" + subtype;
+    if (versionId != "") {
+      route += "/versions/" + versionId;
+    }
+    let url = route + '?' + queryParam;
     return this.http.get<any[]>(url);
   }
 
@@ -36,23 +41,26 @@ export class EntityValueService {
     return this.http.put(url, metaDataObj);
   }
 
-  deleteEntityValue(entityName: string,id:string): Observable<any> {
-    let url = `${environment.apiUrl}` + this.api + entityName + '/' + id; 
+  deleteEntityValue(entityName: string, id: string): Observable<any> {
+    let url = `${environment.apiUrl}` + this.api + entityName + '/' + id;
     return this.http.delete(url);
   }
 
   getEntitySubTypes(entityName): Observable<any> {
-    let url = `${environment.apiUrl}` +this.apiMetadata + entityName +'/sub-types' ;
+    let url = `${environment.apiUrl}` + this.apiMetadata + entityName + '/sub-types';
     return this.http.get<any[]>(url);
   }
 
-  getDetailEntities(entityName:string, id:string, detailEntityName:string,query:string) : Observable<any>
-  {
+  getDetailEntities(entityName: string, id: string, detailEntityName: string, query: string): Observable<any> {
     //var queryString = "?pageIndex=" + this.pageindex + "&pageSize=" + this.pageSize;
-    var layoutUrl = `${environment.apiUrl}` + this.api + entityName + '/' + id + '/' + detailEntityName +  query;
+    var layoutUrl = `${environment.apiUrl}` + this.api + entityName + '/' + id + '/' + detailEntityName + query;
     return this.http.get<any[]>(layoutUrl);
   }
 
+  getClientFieldValue(entityName: string, id: string, fieldName: string): Observable<any> {
+    var layoutUrl = `${environment.apiUrl}` + this.api + entityName.toLowerCase() + '/' + id + '/fields/' + fieldName.toLowerCase();
+    return this.http.get<any[]>(layoutUrl);
+  }
   // updateIntersect(entityName: string, id: string, intersectEntityName: string, linkerEntityName:string, obj:object): Observable<any> {
   //   let url = `${environment.apiUrl}` + this.relations + entityName + '/' + id + '/'+intersectEntityName+"/"+linkerEntityName;
 

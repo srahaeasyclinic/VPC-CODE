@@ -1,0 +1,43 @@
+
+<div class="text-header">{{getResourceValue('batchitem_pluralname')}}</div>
+
+
+<div class="page-content">
+  <kendo-grid [kendoGridBinding]="gridData" [pageSize]="pageSize" [pageable]="true" [sortable]="true" [resizable]="true" [style.maxHeight.px]="750">
+  
+    <kendo-grid-column field="name"  title="{{getResourceValue('batchitem_field_name')}}"  >
+    </kendo-grid-column>
+
+  
+
+    <kendo-grid-column field="entityId" title="{{getResourceValue('batchitem_field_entityname')}}" >
+    </kendo-grid-column>
+
+    <kendo-grid-column field="nextRunTime" title="{{getResourceValue('batchitem_field_nextruntime')}}"  *ngIf="showReadyToSend()">
+        <ng-template kendoGridCellTemplate let-gridData>
+            <span >
+              {{gridData.nextRunTime | date :  "dd/MM/yyyy"  }} 
+            </span>
+          
+          </ng-template>
+    </kendo-grid-column>
+
+    <kendo-grid-column field="retryCount" title="{{getResourceValue('batchitem_field_retrycount')}}" *ngIf="showFailed()">
+    </kendo-grid-column>
+
+    <kendo-grid-column field="failedReason" title="{{getResourceValue('batchitem_field_failedReason')}}" *ngIf="showFailed()">
+    </kendo-grid-column>
+
+
+    <kendo-grid-column field="gridData.status" title="{{getResourceValue('batchitem_field_status')}}" [width]="130">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <span *ngIf="gridData.status">
+          {{getResourceValue("batchitem_field_queued")}} 
+        </span>
+        <span *ngIf="!gridData.status">
+          {{getResourceValue("batchitem_field_errored")}} 
+        </span>
+      </ng-template>
+    </kendo-grid-column>
+  </kendo-grid>
+</div>

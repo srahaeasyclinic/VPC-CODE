@@ -8,7 +8,7 @@ import { PicklistUiService } from "../picklist-ui/picklist-ui.service";
 import { ITreeNode } from 'src/app/dynamic-form-builder/tree.module';
 import { CommonService } from 'src/app/services/common.service';
 import { TosterService } from 'src/app/services/toster.service';
-import { error } from '@angular/compiler/src/util';
+import { error, stringify } from '@angular/compiler/src/util';
 import { MenuService } from '../services/menu.service';
 import { Observable } from 'rxjs';
 import { GridDataResult, DataStateChangeEvent } from '@progress/kendo-angular-grid';
@@ -23,6 +23,7 @@ import { MetadataService } from '../meta-data/metadata.service';
 import { PicklistService } from '../picklist/picklist.service';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { Resource } from '../model/resource';
+import { generateRandomNo } from '../model/treeNode';
 
 @Component({
   selector: 'app-menu-item',
@@ -42,7 +43,7 @@ export class MenuItemComponent implements OnInit {
   private layoutContext: number = 1;
   public view: Observable<GridDataResult>;
   private menuList: MenuItem[];
-  private entityName: string = 'MenuGroup';
+  private entityName: string = 'ApplicationMenuGroup';
   public gridData: any = this.menuList;
   private name: string;
   private defaultLayout: LayoutModel = new LayoutModel();
@@ -52,14 +53,15 @@ export class MenuItemComponent implements OnInit {
   private results: any;
   private totalRecords: number = 0;
   private pageindex: number = 1;
-  private pageSize: number = 10;
-  public menuGroupList: MenuGroup[];
+  private pageSize: number = this.commonService.defaultPageSize();
+  public menuGroupList: NewMenuItem[];
   public menuType: string = "";
   public referenceEntity: any;
   public layoutlist: any;
   private menuItemModel = new NewMenuItem();
   public menuItemName: string = "";
-  public groupId: string = "";
+  public menugroupId: string = "";
+  public menuSubgroupId: string = null;
   public menuTypeId: number;
   public referenceEntityId: string = "";
   public layoutId: string = ""
@@ -68,8 +70,13 @@ export class MenuItemComponent implements OnInit {
   public addMenuLabel: string = "";
   public wellKnownLink: string = "";
   public editUpdate: string = "";
-
+  public menuItemSort: number = -0;
   public displayRule: any;
+  public menuSubGroupList: any[];
+  public ItemIcon: string = "";
+  public menucode: string = "";
+  //private parentmenugroup: NewMenuItem;
+  
 
   constructor(
     private router: Router,
@@ -95,22 +102,12 @@ export class MenuItemComponent implements OnInit {
   }
 
   private getResource(): void {
-    // this.resourceService.getResources()
-    //   .pipe(first())
-    //   .subscribe(
-    //     data => {
-    //       if (data) {
+    
     this.resource = this.globalResourceService.getGlobalResources();//data;
     this.getDefaultLayout(this.entityName);
     this.getMenuList();
-    this.getMenuGroup(this.entityName);
-    //this.getRuleList(this.entityName);
-    //     }
-    //   },
-    //   error => {
-    //     console.log(error)
-    //   }
-    // );
+     this.getMenuGroup("maingroup");
+    
   }
 
 
@@ -119,9 +116,12 @@ export class MenuItemComponent implements OnInit {
       .pipe(first())
       .subscribe(
         data => {
-          if (data && data) {
-            this.lastRowIndex = data.length;
-            this.gridData = data;
+          if (data) {
+           // this.lastRowIndex = data.length;
+            this.gridData = data.filter(w => w.isMenuGroup != true);
+            this.lastRowIndex = this.gridData.length;
+            //console.log('data ',JSON.stringify(data));
+            
           }
         },
         error => {
@@ -137,34 +137,58 @@ export class MenuItemComponent implements OnInit {
 
 
   private deleteMenu(data): void {
-    swal({
-      title: this.getResourceValue("Areyousure"),
-      text: this.getResourceValue("Youwntbeabletorevertthis"),
-      type: this.getResourceValue('warning'),
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: this.getResourceValue('Yesdeleteit'),
-      showLoaderOnConfirm: true,
-    })
-      .then((willDelete) => {
-        if (willDelete.value) {
-          this.menuService.deleteMenu(data.id).subscribe(result => {
-            if (result) {
-              this.getMenuList();
-            }
-          });
 
-        } else {
-          //write the code for cancel click
+    this.globalResourceService.openDeleteModal.emit()
+
+
+    this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+      this.menuService.deleteMenu(data.id).subscribe(result => {
+        if (result) {
+          this.getMenuList();
         }
-
       });
+       
+      });
+
+
+
+
+
+
+
+
+    // swal({
+    //   title: this.getResourceValue("common_message_areyousure"),
+    //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+    //   type: 'warning',
+    //   showCancelButton: true,
+    //   confirmButtonColor: '#3085d6',
+    //   cancelButtonColor: '#d33',
+    //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+    //   showLoaderOnConfirm: true,
+    // })
+    //   .then((willDelete) => {
+    //     if (willDelete.value) {
+    //       this.menuService.deleteMenu(data.id).subscribe(result => {
+    //         if (result) {
+    //           this.getMenuList();
+    //         }
+    //       });
+
+    //     } else {
+    //       //write the code for cancel click
+    //     }
+
+    //   });
   }
 
   public addMenuPopup(menu): void {
-    this.addMenuLabel = this.getResourceValue("AddMenu");
-    this.editUpdate = this.getResourceValue("Save");
+    this.menuId = "";
+     
+   // this.menuSubgroupId = "";
+
+    this.addMenuLabel = this.getResourceValue("menuitem_label_add");
+    this.editUpdate = this.getResourceValue("menuitem_operation_update");
     this.clearModal();
     let ngbModalOptions: NgbModalOptions = {
       backdrop: 'static',
@@ -174,7 +198,9 @@ export class MenuItemComponent implements OnInit {
   }
 
   private editMenuPopup(menu, id): void {
-    this.editUpdate = this.getResourceValue("Update");
+    
+   // this.menuSubgroupId = "";
+    this.editUpdate = this.getResourceValue("menuitem_operation_update");
     this.menuService.getMenuById(id)
       .pipe(first())
       .subscribe(
@@ -182,8 +208,20 @@ export class MenuItemComponent implements OnInit {
           if (data) {
             this.menuId = id;
             this.menuItemName = data.name;
-            this.groupId = data.groupId;
+
+             this.getMenuGroup("maingroup");
+
+           
+            this.setEditpopup(data.parentId);
+            
+            this.menuSubgroupId = data.parentId;
+            
             this.menuTypeId = data.menuTypeId;
+           
+            this.menuItemSort = data.sortItem;
+            this.ItemIcon = data.menuIcon;
+            this.menucode = data.menucode;
+
             if (this.menuTypeId) {
               this.onMenuTypeChange(this.menuTypeId);
             }
@@ -195,13 +233,14 @@ export class MenuItemComponent implements OnInit {
             this.actionTypeId = data.actionTypeId;
             this.wellKnownLink = data.wellKnownLink;
 
-            this.addMenuLabel = this.getResourceValue("EditMenu");
+            this.addMenuLabel = this.getResourceValue("menuitem_label_edit");
 
             let ngbModalOptions: NgbModalOptions = {
               backdrop: 'static',
               keyboard: false
             };
             this.modalReference = this.modalService.open(menu, ngbModalOptions);
+
           }
         },
         error => {
@@ -257,7 +296,7 @@ export class MenuItemComponent implements OnInit {
       .subscribe(
         data => {
           this.modalReference.close();
-          this.toster.showSuccess(this.entityName + ' ' + this.getResourceValue("SavedSuccessfully"));
+          this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("applicationmenugroup_displayname"));
         },
         error => {
 
@@ -268,40 +307,43 @@ export class MenuItemComponent implements OnInit {
   public saveMenu(): void {
 
     let errorMessage: string = "";
-
+    let mainsubgroup = (this.menuSubGroupList!=undefined && this.menuSubGroupList!=null)?this.menuSubGroupList.find(w => w.id == this.menuSubgroupId): undefined;
+   
+    if (this.menugroupId == "" || this.menugroupId == null || this.menugroupId == "00000000-0000-0000-0000-000000000000") {
+      errorMessage += this.globalResourceService.requiredValidator("menuitem_field_menugroup") + "<br/>";
+    }
+    if (this.menuSubgroupId === "" || this.menuSubgroupId == null || this.menuSubgroupId == "00000000-0000-0000-0000-000000000000" || mainsubgroup==undefined) {
+      errorMessage += this.globalResourceService.requiredValidator("menuitem_field_subgroup") + "<br/>";
+   }
+   
     if (this.menuItemName === "") {
-      errorMessage += this.getResourceValue("NameIsRequired") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("menuitem_field_name") + "<br/>";
     }
-
-    if (this.groupId === "") {
-      errorMessage += this.getResourceValue("GroupIsRequired") + "<br/>";
-    }
-
     if (this.menuTypeId <= 0) {
-      errorMessage += this.getResourceValue("MenuTypeIsRequired") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("menuitem_field_type") + "<br/>";
     }
     else if (this.menuTypeId > 0) {
       if (this.menuTypeId === 3) {
         if (this.actionTypeId <= 0) {
-          errorMessage += this.getResourceValue("ActionTypeIsRequired") + "<br/>";
+          errorMessage += this.globalResourceService.requiredValidator("menuitem_field_actiontype") + "<br/>";
         }
       }
-      else if (this.menuTypeId === 4) {
-        if (this.wellKnownLink === "") {
-          errorMessage += this.getResourceValue("WellknownIsRequired") + "<br/>";
-        }
+      else if (this.menuTypeId === 4 && this.wellKnownLink === "") {
+        
+          errorMessage += this.globalResourceService.requiredValidator("menuitem_field_path") + "<br/>";
+        
       }
       else {
-        if (this.referenceEntityId === "") {
-          errorMessage += this.getResourceValue("ReferenceEntityIsRequired") + "<br/>";
+        if (this.menuTypeId != 4 && this.referenceEntityId === "") {
+          errorMessage += this.globalResourceService.requiredValidator("menuitem_field_entityreference") + "<br/>";
         }
 
-        if (this.layoutId === "") {
-          errorMessage += this.getResourceValue("LayoutIsRequired") + "<br/>";
+        if ( this.menuTypeId != 4 && this.layoutId === "") {
+          errorMessage += this.globalResourceService.requiredValidator("menuitem_field_layout") + "<br/>";
         }
       }
     }
-
+   
     if (errorMessage != "") {
       this.toster.showError(errorMessage);
       return;
@@ -316,13 +358,28 @@ export class MenuItemComponent implements OnInit {
     // this.menuItemModel.layoutId = this.layoutId;
     // this.menuItemModel.actionTypeId = this.actionTypeId;
     // this.menuItemModel.wellKnownLink = this.wellKnownLink;
+   let maingroup = this.menuGroupList.find(w => w.id == this.menugroupId);
+   
 
+  //  console.log("this.menuSubGroupList", this.menuSubGroupList);
+  //  console.log("this.menuGroupList", this.menuGroupList);
+
+  //  console.log("this.menuSubgroupId", this.menuSubgroupId);
+  // console.log("this.menuSubgroupId", this.menuSubgroupId);
+   
     this.menuItemModel.name = this.menuItemName;
-    this.menuItemModel.groupId = this.groupId;
+    this.menuItemModel.groupId = maingroup.groupId;
     this.menuItemModel.menuTypeId = this.menuTypeId;
-    this.menuItemModel.actionTypeId = this.actionTypeId;
-
-    if (this.menuTypeId === 3 || this.menuTypeId === 4) {
+   this.menuItemModel.actionTypeId = this.actionTypeId;
+   this.menuItemModel.parentId = this.menuSubgroupId;
+   this.menuItemModel.isMenuGroup = false;
+   this.menuItemModel.sortItem = this.menuItemSort;
+   
+   this.menuItemModel.menucode = "menu_" + this.commonService.getTrimmenuStr(maingroup.name).toLowerCase() +
+     "_" + this.commonService.getTrimmenuStr(mainsubgroup.name).toLowerCase() +
+     "_" + this.commonService.getTrimmenuStr(this.menuItemName).toLowerCase();
+    
+   if (this.menuTypeId === 3 || this.menuTypeId === 4) {
       this.menuItemModel.wellKnownLink = this.wellKnownLink;
       //this.menuItemModel.referenceEntityId = this.referenceEntityId;
       this.menuItemModel.layoutId = "00000000-0000-0000-0000-000000000000";
@@ -341,7 +398,7 @@ export class MenuItemComponent implements OnInit {
         if (result) {
           this.clearModal();
           this.modalReference.close();
-          this.toster.showSuccess(this.getResourceValue('MenuUpdatedSuccessfully'));
+          this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("menuitem_displayname"));
           this.getMenuList();
         }
       });
@@ -351,7 +408,7 @@ export class MenuItemComponent implements OnInit {
         if (result) {
           this.clearModal();
           this.modalReference.close();
-          this.toster.showSuccess(this.getResourceValue('MenuSavedSuccessfully'));
+          this.toster.showSuccess(this.globalResourceService.createSuccessMessage("menuitem_displayname"));
           this.getMenuList();
         }
       });
@@ -359,114 +416,62 @@ export class MenuItemComponent implements OnInit {
 
   }
 
-  private getMenuGroup(entityName: string): void {
-    this.picklistUiService.getDefaultLayout(entityName, 3, 0)
+
+  private getMenuGroup(type:string): void {
+    let menulist;
+    this.menuService.getMenuList()
       .pipe(first())
       .subscribe(
         data => {
-          if (data) {
-            this.defaultLayout = data;
-            if (this.defaultLayout) {
-
-              //generate the default orderby
-              if (this.defaultLayout.listLayoutDetails) {
-                if (this.defaultLayout.listLayoutDetails.defaultSortOrder) {
-
-                  this.orderBy = this.defaultLayout.listLayoutDetails.defaultSortOrder.name + ',' + this.defaultLayout.listLayoutDetails.defaultSortOrder.value.toUpperCase();
-                  //{dir: "asc", field: "text"}
-                  //var short:SortDescriptor=[{dir: this.defaultLayout.listLayoutDetails.defaultSortOrder.value.toLowerCase(), field: this.defaultLayout.listLayoutDetails.defaultSortOrder.name.toLowerCase()}];
-                  if (!this.sort)
-                    this.sort = [];
-
-                  this.sort.length = 0;
-                  this.sort.push({ dir: this.defaultLayout.listLayoutDetails.defaultSortOrder.value.toLocaleUpperCase() == 'ASC' ? 'asc' : 'desc', field: this.defaultLayout.listLayoutDetails.defaultSortOrder.name.toLowerCase() });
-                }
-              }
-              this.generateListlayout(this.defaultLayout, entityName);
+          if (data && data) {
+            menulist = data.filter(w => w.isMenuGroup == true);
+            
+            if (type.toLowerCase() == "maingroup")
+            {
+              
+              this.menuGroupList = menulist.filter(w => w.parentId == "00000000-0000-0000-0000-000000000000");
+              
+            } 
+            
+            if (type.toLowerCase() == "subgroup")
+            {
+              this.menuSubGroupList = menulist.filter(w => w.parentId == this.menugroupId);
+              
+            } else {
+              this.menuSubGroupList = [];
             }
+            
+            
           }
         },
         error => {
-          console.log(error);
-        });
-  }
-
-  private generateListlayout(layout: LayoutModel, entityName: string): void {
-
-    let isvalid: boolean = true;
-
-    let filters: string = '';
-
-    let maxResult: number;
-
-    if (layout.listLayoutDetails) {
-
-      maxResult = layout.listLayoutDetails.maxResult;
-
-      if (layout.listLayoutDetails.fields || layout.listLayoutDetails.fields.length > 0) {
-        layout.listLayoutDetails.fields = layout.listLayoutDetails.fields.sort().sort(function (a, b) {
-          return a.sequence - b.sequence;
-        });
-        this.selectedFields = '';
-        layout.listLayoutDetails.fields.forEach((item, index) => {
-          if (!this.selectedFields) {
-            this.selectedFields = item.name;
-          }
-          else {
-            this.selectedFields += ',' + item.name;
-          }
-        });
-
-      } else {
-        isvalid = false;
-        this.toster.showWarning(this.getResourceValue('NoFieldsFound'));
-      }
-
-      if (layout.listLayoutDetails.searchProperties && layout.listLayoutDetails.searchProperties.length > 0) {
-        layout.listLayoutDetails.searchProperties.forEach(element => {
-          element.properties.forEach(prop => {
-            if (prop.value != null) {
-              filters += prop.name + ',' + prop.value + '|';
-            }
-          });
-        });
-
-        if (filters != "") {
-          filters = filters.substring(0, filters.length - 1);
+          console.log(error)
         }
-      }
+    );
 
-      if (isvalid) {
-        this.menuGroupList = [];
-        this.totalRecords = 0;
+ }
 
-        this.picklistUiService.getPicklistValues(entityName, this.selectedFields, filters, this.pageindex, this.pageSize, maxResult, this.orderBy, '')
+  private setEditpopup(id:string):void
+  {
+    this.menuService.getMenuById(id)
+      .pipe(first())
+      .subscribe(
+        data => {
+          if (data!=null && data.id!="00000000-0000-0000-0000-000000000000") {
+          //     console.log('id',id);
+          //   console.log('setEditpopup(id:string):void',data);
+          //  // this.parentmenugroup = data;
+            this.menugroupId = data.parentId;
+            this.onGroupChange(this.menugroupId);
+          } else if(this.menuGroupList!=undefined && this.menuGroupList.length>0)
+          {
+            this.onGroupChange(this.menuGroupList[0].id);
+          }
+            
+      });
+   
+}
 
-          .pipe(first())
-          .subscribe(
-            data => {
-              if (data && data) {
-                this.menuGroupList = data.result;
-
-                //below values are requred for kendo grid dynamic paging
-                this.totalRecords = data.totalRow;
-
-
-
-
-
-              }
-            },
-            error => {
-              console.log(error);
-            });
-      }
-    } else {
-      //No layout found
-      this.menuGroupList = [];
-      this.totalRecords = 0;
-    }
-  }
 
   private onMenuTypeChange(event): void {
     if (event) {
@@ -476,7 +481,7 @@ export class MenuItemComponent implements OnInit {
       //entity
       if (this.menuTypeId === 1) {
         this.menuType = "Entity";
-        this.metadataService.getEntities()
+        this.metadataService.getEntities("primaryentity")
           .pipe(first())
           .subscribe(
             data => {
@@ -528,13 +533,24 @@ export class MenuItemComponent implements OnInit {
         });
   }
 
+  private onGroupChange(event): void { 
+    if (event) { 
+      this.getMenuGroup("subgroup");
+    }
+
+  }
+
   private clearModal(): void {
     this.menuItemName = "";
-    this.groupId = "";
+   // this.menugroupId = "";
     this.menuTypeId = 0;
     this.referenceEntityId = "";
     this.actionTypeId = 0;
     this.layoutId = "";
+    this.menugroupId = null;
+    this.menuItemSort = 0;
+    this.menuSubGroupList = null;
+    this.menucode = "";
   }
 
   private refreshMenuItemModel(): void {
@@ -545,6 +561,10 @@ export class MenuItemComponent implements OnInit {
     this.menuItemModel.referenceEntityId = "";
     this.menuItemModel.layoutId = null;
     this.menuItemModel.wellKnownLink = "";
+    this.menuItemModel.sortItem = 0;
+    this.menuItemModel.parentId = null;
+     this.menucode = "";
+
   }
 
   moveUpAndDown(data, currentIndex, nextIndex) {

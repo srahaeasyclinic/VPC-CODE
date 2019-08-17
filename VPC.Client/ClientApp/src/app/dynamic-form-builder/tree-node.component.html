@@ -1,120 +1,163 @@
 <div>
-		<div class="pnl-icon" *ngIf="mode!=1 && mode!=2">
-			<button mat-icon-button [matMenuTriggerFor]="menu">
-				<mat-icon>...</mat-icon>
-			</button>
-			<mat-menu #menu="matMenu">
-				<button mat-menu-item
-					*ngIf="node.controlType.toLowerCase()=='section' || node.controlType.toLowerCase()=='tabs'"
-					(click)="addEvents.emit(node)">
-					<span>{{getResourceValue('Add')}}</span>
+	<div *ngIf="node.controlType!=null" [ngSwitch]="node.controlType | lowercase">
+		<div *ngSwitchCase="'section'" class="m-sec">
+			<div>
+				<div class="drop-block">
+					<div *ngIf="this.node.setting!=null && this.node.setting.showHeader" class="drop-block-header">
+						<div class="page-header">{{makeCamelCase(node)}}</div>
+					</div>
+					<div class="drop-block-body"
+						[ngClass]="{'drop-in': (node.fields!=null && node.fields.length>0), 'drop-out': !(node.fields!=null && node.fields.length>0)}"
+						(drop)="dropEvents.emit(node)" (dragover)="allowDrop($event)" (dragleave)="allowDrop($event)" (mouseover)="allowDrop($event)" (mouseup)="allowDrop($event)">
+
+						<div *ngIf="node.fields!=null && node.fields.length" class="row">
+							<ng-template ngFor let-child [ngForOf]="node.fields">
+								<my-tree-node [className]="'col-md-'+child.setting.columnWidth + ' pnl-display'"
+									[node]="child" [resource]="resource" [selectedNode]="selectedNode"
+									(select)="onselect($event)" (drop)="ondrop($event)"
+									(close)="closeEvents.emit($event)" (edit)="editEvents.emit($event)"
+									(add)="addEvents.emit($event)" [mode]="mode" [entityInfo]="entityInfo"
+									[entityName]="entityName" (applyRuleEmitter)="onApplyRule($event)" [selectedField]="selectedField">
+								</my-tree-node>
+							</ng-template>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="sec-icon" *ngIf="mode!=1 && mode!=2 && node['itemIndex']!='s0'">
+				<button *ngIf="!node.required" mat-icon-button [matMenuTriggerFor]="menu">
+					<mat-icon>...</mat-icon>
 				</button>
-				<button mat-menu-item (click)="editEvents.emit(node)">
-					<span>{{getResourceValue('Edit')}}</span>
-				</button>
-				<button mat-menu-item *ngIf="!node.required" (click)="closeEvents.emit(node)">
-					<span>{{getResourceValue('Delete')}}</span>
-				</button>
-			</mat-menu>
+				<mat-menu #menu="matMenu">
+					<button mat-menu-item
+						*ngIf="node.controlType.toLowerCase()=='section' || node.controlType.toLowerCase()=='tabs'"
+						(click)="addEvents.emit(node)">
+						<span>{{getResourceValue('operation_create')}}</span>
+					</button>
+					<button mat-menu-item (click)="editEvents.emit(node)">
+						<span>{{getResourceValue('operation_edit')}}</span>
+					</button>
+					<button mat-menu-item *ngIf="!node.required" (click)="closeEvents.emit(node)">
+						<span>{{getResourceValue('operation_delete')}}</span>
+					</button>
+				</mat-menu>
+			</div>
 		</div>
-		<div *ngIf="node.controlType!=null" [ngSwitch]="node.controlType | lowercase">
-			<div *ngSwitchCase="'section'" class="m-sec">
-				<div>
-					<div class="drop-block">
-	
-						<div *ngIf="this.node.setting!=null && this.node.setting.showHeader" class="drop-block-header">
-							<div class="page-header">{{makeCamelCase(node)}}</div>
-						</div>
-	
-						<div class="drop-block-body"
-							[ngClass]="(node.fields!=null && node.fields.length>0)?'drop-in':'drop-out'"
-							(drop)="dropEvents.emit(node)" (dragover)="allowDrop($event)">
-	
-							<div *ngIf="node.fields!=null && node.fields.length" class="row">
-								<ng-template ngFor let-child [ngForOf]="node.fields">
-									<my-tree-node [className]="'col-md-'+child.setting.columnWidth + ' pnl-display'"
-										[node]="child" [resource]="resource" [selectedNode]="selectedNode"
-										(select)="selectEvents.emit($event)" (drop)="dropEvents.emit($event)"
-										(close)="closeEvents.emit($event)" (edit)="editEvents.emit($event)"
-										(add)="addEvents.emit($event)" [mode]="mode" [ruleinfo]="ruleinfo"
-										[entityInfo]="entityInfo">
-									</my-tree-node>
-								</ng-template>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-	
-			<div *ngSwitchCase="'tabs'" class="row">
-				<div class="col-md-12">
-					<mat-tab-group animationDuration="0ms">
-						<mat-tab *ngFor="let tab of node.tabs" label="{{tab.name}}">
-							<div *ngIf="tab.fields!=null && tab.fields.length">
-								<ng-template ngFor let-child [ngForOf]="tab.fields">
-									<my-tree-node [className]="child.setting.columnWidth" [node]="child"
-										[resource]="resource" [selectedNode]="selectedNode"
-										(select)="selectEvents.emit($event)" (drop)="dropEvents.emit($event)" 
-										(close)="closeEvents.emit($event)" (edit)="editEvents.emit($event)" 
-										(add)="addEvents.emit($event)" [mode]="mode" [ruleinfo]="ruleinfo" 
-										[entityInfo]="entityInfo">
-									</my-tree-node>
-								</ng-template>
-							</div>
-						</mat-tab>
-					</mat-tab-group>
-				</div>
-			</div>
-	
-			<div *ngSwitchDefault class="c-sec" [draggable]="(mode === null || mode === undefined) ? true : false"
-			(dragstart)="selectEvents.emit(node)" (drop)="dropEvents.emit(node)" id="tn_{{node.name}}">
-	
-				<div [ngSwitch]="node.controlType | lowercase" class="chk-display">
-					<checkbox *ngSwitchCase="'checkbox'" [field]="node" [mode]="mode"
-						(changeEmitter)="onChangeEvent($event)"></checkbox>
-				</div>
-	
-	
-        <div *ngIf="node.controlType!='custom'" class="preview-item">
-          <!--<label *ngIf="mode===1 || mode===2" id={{node.name}}>{{makeCamelCase(node)}}<span
-            class="text-mandatory margin-left-3" *ngIf="node.required || isRequired(node)">*</span></label>
-          <label *ngIf="mode===null || mode===undefined" id={{node.name}}>{{makeCamelCase(node)}}<span
-            class="text-mandatory margin-left-3" *ngIf="node.required || isRequired(node)">*</span></label>-->
 
-          <label *ngIf="mode===1 || mode===2" id={{node.name}}>
-            {{getResourceValue(node.name)}}<span class="text-mandatory margin-left-3" *ngIf="node.required || isRequired(node)">*</span>
-          </label>
-          <label *ngIf="mode===null || mode===undefined" id={{node.name}}>
-            {{getResourceValue(node.name)}}<span class="text-mandatory margin-left-3" *ngIf="node.required || isRequired(node)">*</span>
-          </label>
+		<div *ngSwitchCase="'tabs'" class="row" (dragover)="allowDrop($event)" 
+			(dragleave)="allowDrop($event)" (mouseover)="allowDrop($event)" (mouseup)="allowDrop($event)">
+			<div class="col-md-12">
+				<mat-tab-group animationDuration="0ms">
+					<mat-tab *ngFor="let tab of node.tabs" label="{{tab.name}}">
+						<div *ngIf="tab.fields!=null && tab.fields.length">
+							<ng-template ngFor let-child [ngForOf]="tab.fields">
+								<my-tree-node [className]="child.setting.columnWidth" [node]="child"
+									[resource]="resource" [selectedNode]="selectedNode"
+									(select)="selectEvents.emit($event)" (drop)="dropEvents.emit($event)"
+									(close)="closeEvents.emit($event)" (edit)="editEvents.emit($event)"
+									(add)="addEvents.emit($event)" [mode]="mode" [entityInfo]="entityInfo"
+									[entityName]="entityName" (applyRuleEmitter)="onApplyRule($event)" [selectedField]="selectedField">
+								</my-tree-node>
+							</ng-template>
+						</div>
+					</mat-tab>
+				</mat-tab-group>
+			</div>
+			<div class="tab-icon" *ngIf="mode!=1 && mode!=2">
+				<button mat-icon-button [matMenuTriggerFor]="menu">
+					<mat-icon>...</mat-icon>
+				</button>
+				<mat-menu #menu="matMenu">
+					<button mat-menu-item
+						*ngIf="node.controlType.toLowerCase()=='section' || node.controlType.toLowerCase()=='tabs'"
+						(click)="addEvents.emit(node)">
+						<span>{{getResourceValue('operation_create')}}</span>
+					</button>
+					<button mat-menu-item (click)="editEvents.emit(node)">
+						<span>{{getResourceValue('operation_edit')}}</span>
+					</button>
+					<button mat-menu-item *ngIf="!node.required" (click)="closeEvents.emit(node)">
+						<span>{{getResourceValue('operation_delete')}}</span>
+					</button>
+				</mat-menu>
+			</div>
+		</div>
 
-        </div>
+		<div *ngSwitchDefault class="c-sec" [draggable]="(mode === null || mode === undefined) ? true : false"
+			(dragstart)="selectEvents.emit(node)" (drop)="dropEvents.emit(node)" id="tn_{{node.name}}"
+			 (applyRuleEmitter)="onApplyRule($event)"
+			[ngClass]="{'hidden': (node['visibility']===false)? true: false, 'dragover': (node['dragover']) ? true : false}"  (dragover)="setDropZone(node)" (dragleave)="hideDropZone(node)"
+			(mouseover)="allowDrop($event)" (mouseup)="allowDrop($event)">
+
+			<div [ngSwitch]="node.controlType | lowercase" class="chk-display">
+				<checkbox *ngSwitchCase="'checkbox'" [field]="node" [mode]="mode"
+					(changeEmitter)="onChangeEvent($event)"></checkbox>
+			</div>
+
+			<div *ngIf="node.controlType!='custom'" class="preview-item">
+				<!--<label *ngIf="mode===1 || mode===2" id={{node.name}}>{{makeCamelCase(node)}}<span
+		class="text-mandatory margin-left-3" *ngIf="node.required || isRequired(node)">*</span></label>
+	  <label *ngIf="mode===null || mode===undefined" id={{node.name}}>{{makeCamelCase(node)}}<span
+		class="text-mandatory margin-left-3" *ngIf="node.required || isRequired(node)">*</span></label>-->
+
+				<label *ngIf="mode===1 || mode===2" id={{node.name}}>
+					{{getResourceValue(entityName+'_field_'+node.name)}}<span class="text-mandatory margin-left-3"
+						*ngIf="node.required || isRequired(node)">*</span>
+				</label>
+				<label *ngIf="mode===null || mode===undefined" id={{node.name}}>
+					{{getResourceValue(entityName+'_field_'+node.name)}}<span class="text-mandatory margin-left-3"
+						*ngIf="node.required || isRequired(node)">*</span>
+				</label>
+
+			</div>
+
+			<div [ngSwitch]="node.controlType | lowercase">
+				<textbox *ngSwitchCase="'textbox'" [field]="node" [mode]="mode" (changeEmitter)="onChangeEvent($event)">
+				</textbox>
+				<textbox *ngSwitchCase="'label'" [field]="node" [mode]="mode" (changeEmitter)="onChangeEvent($event)">
+				</textbox>
+				<textbox *ngSwitchCase="'text'" [field]="node" [mode]="mode" (changeEmitter)="onChangeEvent($event)">
+				</textbox>
+				<text-area *ngSwitchCase="'textarea'" [field]="node" [mode]="mode"
+					(changeEmitter)="onChangeEvent($event)"></text-area>
+
+				<dropdown *ngSwitchCase="'dropdown'" [field]="node" [mode]="mode"
+					(changeEmitter)="onChangeEvent($event)"></dropdown>
+				<multiselect-dropdown *ngSwitchCase="'multiselectdropdown'" [field]="node" [mode]="mode">
+				</multiselect-dropdown>
+				<radio *ngSwitchCase="'radio'" [field]="node" [mode]="mode"></radio>
+				<file *ngSwitchCase="'file'" [field]="node"></file>
+				<calander *ngSwitchCase="'calendar'" [field]="node" [mode]="mode"></calander>
+				<richtextbox *ngSwitchCase="'richtext'" [field]="node" [mode]="mode"
+					(changeEmitter)="onChangeEvent($event)"></richtextbox>
+
+				<link-item *ngSwitchCase="'link'" [field]="node" [mode]="mode" (changeEmitter)="onChangeEvent($event)">
+				</link-item>
+			</div>
+			<div class="item">
+
 				<div [ngSwitch]="node.controlType | lowercase">
-					<textbox *ngSwitchCase="'textbox'" [field]="node" [mode]="mode" (changeEmitter)="onChangeEvent($event)">
-					</textbox>
-					<textbox *ngSwitchCase="'label'" [field]="node" [mode]="mode" (changeEmitter)="onChangeEvent($event)">
-					</textbox>
-					<textbox *ngSwitchCase="'text'" [field]="node" [mode]="mode" (changeEmitter)="onChangeEvent($event)">
-					</textbox>
-					<text-area *ngSwitchCase="'textarea'" [field]="node" [mode]="mode"
-						(changeEmitter)="onChangeEvent($event)"></text-area>
-	
-					<dropdown *ngSwitchCase="'dropdown'" [field]="node" [mode]="mode"
-						(changeEmitter)="onChangeEvent($event)"></dropdown>
-					<multiselect-dropdown *ngSwitchCase="'multiselectdropdown'" [field]="node" [mode]="mode">
-					</multiselect-dropdown>
-					<radio *ngSwitchCase="'radio'" [field]="node" [mode]="mode"></radio>
-					<file *ngSwitchCase="'file'" [field]="node"></file>
-					<calander *ngSwitchCase="'calendar'" [field]="node" [mode]="mode"></calander>
-					<richtextbox *ngSwitchCase="'richtext'" [field]="node" [mode]="mode"
-						(changeEmitter)="onChangeEvent($event)"></richtextbox>
-	
+					<custom *ngSwitchCase="'custom'" [field]="node" [mode]="mode"></custom>
 				</div>
-				<div class="item">
-					<div [ngSwitch]="node.controlType | lowercase">
-						<custom *ngSwitchCase="'custom'" [field]="node" [mode]="mode"></custom>
-					</div>
-				</div>
+			</div>
+			<div class="pnl-icon" *ngIf="mode!=1 && mode!=2">
+				<button mat-icon-button [matMenuTriggerFor]="menu">
+					<mat-icon>...</mat-icon>
+				</button>
+				<mat-menu #menu="matMenu">
+					<button mat-menu-item
+						*ngIf="node.controlType.toLowerCase()=='section' || node.controlType.toLowerCase()=='tabs'"
+						(click)="addEvents.emit(node)">
+						<span>{{getResourceValue('operation_create')}}</span>
+					</button>
+					<button mat-menu-item (click)="editEvents.emit(node)">
+						<span>{{getResourceValue('operation_edit')}}</span>
+					</button>
+					<button mat-menu-item *ngIf="!node.required" (click)="closeEvents.emit(node)">
+						<span>{{getResourceValue('operation_delete')}}</span>
+					</button>
+				</mat-menu>
 			</div>
 		</div>
 	</div>
+</div>

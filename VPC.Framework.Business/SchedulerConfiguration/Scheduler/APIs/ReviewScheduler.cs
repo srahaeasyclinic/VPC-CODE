@@ -1,4 +1,5 @@
 using System;
+using VPC.Entities.BatchType;
 using VPC.Entities.SchedulerConfiguration;
 using VPC.Framework.Business.SchedulerConfiguration.Scheduler.Data;
 
@@ -6,15 +7,15 @@ namespace VPC.Framework.Business.SchedulerConfiguration.Scheduler.APIs
 {
  public interface IReviewScheduler
     {        
-      SchedulerInfo GetScheduler(Guid tenantId,Guid batchTypeId );
+      BatchTypeScheduler GetScheduler(Guid tenantId,Guid schedulerId );
     }
     internal  class ReviewScheduler : IReviewScheduler
     {
         private readonly DataScheduler _data = new DataScheduler();
 
-        SchedulerInfo IReviewScheduler.GetScheduler(Guid tenantId, Guid batchTypeId)
+        BatchTypeScheduler IReviewScheduler.GetScheduler(Guid tenantId, Guid schedulerId)
         {
-           return _data.GetScheduler(tenantId,batchTypeId);
+           return _data.GetScheduler(tenantId,schedulerId);
         }
     }
 }

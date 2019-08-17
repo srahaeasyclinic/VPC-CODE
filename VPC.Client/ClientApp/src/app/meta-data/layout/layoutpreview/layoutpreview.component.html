@@ -1,6 +1,6 @@
 <div class="detailsMenu">
   <div class="msg-tips-wrap">
-    <div class="msg-entrance" (click)="configToggle()" ngbTooltip="{{getResourceValue('SearchFilter')}}" container="body">
+    <div class="msg-entrance" (click)="configToggle()" ngbTooltip="{{getResourceValue('metadata_searchfilter')}}" container="body">
       <span class="fa fa-search" *ngIf="!isExpanded"></span>
       <span class="fa fa-chevron-right" *ngIf="isExpanded"></span>
     </div>
@@ -13,11 +13,11 @@
         <div *ngFor="let item of layoutInfo.listLayoutDetails.searchProperties">
           <div *ngIf="item.properties.length > 0">
             <div *ngIf="item.name == 'FreeTextSearch'" class="form-group">
-              <label>{{getResourceValue(item.name)}}</label>
+              <label>{{getResourceValue('metadata_'+item.name.toLowerCase())}}</label>
               <input type="text" class="input-control" [(ngModel)]="freetextsearch" (ngModelChange)="onFieldChange($event)" />
             </div>
             <div *ngIf="item.name == 'SimpleSearch'">
-              <label class="text-important">{{getResourceValue(item.name)}}</label>
+              <label class="text-important">{{getResourceValue(entityname+'_field_'+item.name.toLowerCase())}}</label>
               <div *ngFor="let prop of item.properties">
                 <div *ngIf="prop.controlType==='TextBox'" class="form-group">
                   <input type="text" class="input-control" [(ngModel)]="prop.value" (change)="onChange()" />
@@ -38,7 +38,7 @@
               </div>
             </div>
             <div *ngIf="item.name == 'AdvanceSearch'">
-              <a class="gridLink" (click)="openAdvanceSearch(content)">{{getResourceValue(item.name)}}</a>
+              <a class="gridLink" (click)="openAdvanceSearch(content)">{{getResourceValue(+'metadata_'+item.name.toLowerCase())}}</a>
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@
 
 <ng-template #content let-modal>
   <div class="modal-header">
-    <label class="text-important">{{getResourceValue('advanceSearch')}}</label>
+    <label class="text-important">{{getResourceValue('metadata_advanceSearch')}}</label>
     <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -94,12 +94,12 @@
         <div *ngIf="item.name === 'AdvanceSearch'">
           <div *ngFor="let prop of item.properties">
             <div *ngIf="prop.controlType==='TextBox'">
-              <label>{{getResourceValue(prop.name)}}</label>
+              <label>{{getResourceValue(entityname+'_field_'+prop.name.toLowerCase())}}</label>
               <input type="text" class="input-control" [(ngModel)]="prop.value">
               <br />
             </div>
             <div *ngIf="prop.controlType==='Dropdown'">
-              <label>{{prop.name}}</label>
+              <label>{{getResourceValue(entityname+'_field_'+prop.name.toLowerCase())}}</label>
               <select class="input-control" [(ngModel)]='prop.value'>
                 <option *ngFor="let vals of prop.values" [ngValue]="vals.id">{{vals.value}}</option>
               </select>
@@ -107,7 +107,7 @@
             </div>
             <div *ngIf="prop.controlType==='Radio'">
               <label class="control control--radio" *ngFor="let option of prop.values">
-                  {{ option.value }}
+                  {{getResourceValue(entityname+'_field_'+prop.name.toLowerCase())}}
                 <input type="radio" [(ngModel)]="prop.value" [value]="option.id" name="radiogroup1">
                 <span class="control__indicator"></span>
               </label>
@@ -116,8 +116,9 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('cancel')}}</button>
-        <button type="button" class="btn btn-primary" (click)="AdvanceSearch()">{{getResourceValue('submit')}}</button>
+          <button type="button" class="btn btn-primary" (click)="AdvanceSearch()">{{getResourceValue('operation_submit')}}</button>
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
+        
       </div>
     
   </div>

@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationEnd, NavigationStart, NavigationError,Event } from '@angular/router';
 import { Spinkit } from 'ng-http-loader';
-import { MenuService } from './services/menu.service';
 import { MenuItem } from './model/menuItem';
 import { NewMenuItem } from './model/menuItem';
 import { first } from 'rxjs/operators';
 import { TosterService } from './services/toster.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { MenuService } from './services/menu.service';
+import { DeletepopupComponent } from './deletepopup/deletepopup.component';
+import { GlobalResourceService } from './global-resource/global-resource.service';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +18,7 @@ import { TosterService } from './services/toster.service';
 export class AppComponent implements OnInit {
 
   title = 'app';
-
+  @ViewChild(DeletepopupComponent) deletepopupComponent:DeletepopupComponent;
   public spinkit = Spinkit;
   public leftmenuItems: Array<MenuItem>;
   public leftmenuItemsNew: any;
@@ -25,16 +28,25 @@ export class AppComponent implements OnInit {
 
   public menus:Array<NewMenuItem>;
   public currentMenu:NewMenuItem;
-  constructor(private menuService: MenuService, private router: Router,private toster:TosterService) {   
 
+  constructor( 
+    private router: Router,
+    private toster:TosterService,
+    private modalService: NgbModal,
+    public menuService: MenuService,
+    private globalResourceService: GlobalResourceService,) {   
+    
+       
     router.events.subscribe( (event: Event) => {
 
       if (event instanceof NavigationStart) {
           // Show loading indicator
+      
       }
 
       if (event instanceof NavigationEnd) {
          this.toster.dismissAllToastr();
+         this.modalService.dismissAll();
       }
 
       if (event instanceof NavigationError) {
@@ -46,7 +58,9 @@ export class AppComponent implements OnInit {
   });
 }
   ngOnInit(): void {
-
+    this.globalResourceService.openDeleteModal.subscribe(x=>{
+      this.deletepopupComponent.openModal();
+    })
 
   }
 

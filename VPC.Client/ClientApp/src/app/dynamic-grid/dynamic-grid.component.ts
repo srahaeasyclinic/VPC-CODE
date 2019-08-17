@@ -1,23 +1,27 @@
 import { Component, OnInit, EventEmitter, ChangeDetectionStrategy, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
+import{ActivatedRoute} from '@angular/router';
 import { GridDataResult, DataStateChangeEvent, SelectableSettings } from '@progress/kendo-angular-grid';
 import { SortDescriptor, GroupDescriptor, process } from '@progress/kendo-data-query';
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import * as moment from 'moment';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { LayoutModel } from '../model/layoutmodel';
 import { CommonService } from '../services/common.service';
+import { MenuService, editableColumnname } from '../services/menu.service';
+import { BreadcrumbsService } from '../bread-crumb/BreadcrumbsService';
 
 
 @Component({
   selector: 'dynamic-grid',
   templateUrl: './dynamic-grid.component.html',
   styleUrls: ['./dynamic-grid.component.css'],
-  inputs: ["gridData", "totalRecords", "resources", "defaultLayout", "defaultSortOrder", "currentPage", "dataSkip", "groupBy"],
+  inputs: ["gridData", "totalRecords", "resources", "defaultLayout", "defaultSortOrder", "currentPage", "dataSkip", "groupBy", "pageSize", "pageable"],
   outputs: ["rowColumnClickEvent:columnClick", "actionClickEvent:onActionClick", "gridChangeEvent:onGridChangeEvent"],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DynamicGridComponent implements OnChanges, OnInit {
   public resources: any | null;
+  public entityName:string;
   public gridData: any | null;
   public totalRecords: number;
   public defaultLayout: LayoutModel = new LayoutModel();
@@ -38,10 +42,10 @@ export class DynamicGridComponent implements OnChanges, OnInit {
   private dateFormat = this.commonService.defaultDateformat();
   public skip = 0;
   private pageindex: number = 1;
-  private pageSize: number = 10;
+  public pageSize: number = this.commonService.defaultPageSize();
   public selectableSettings: SelectableSettings;
 
-  constructor(private commonService: CommonService,public globalResourceService:GlobalResourceService) {
+  constructor(private breadcrumsService: BreadcrumbsService,private commonService: CommonService,public globalResourceService:GlobalResourceService,private route:ActivatedRoute,private menuService: MenuService) {
     this.gridData = null;
     this.resources = null;
     this.rowColumnClickEvent = new EventEmitter();
@@ -58,9 +62,9 @@ export class DynamicGridComponent implements OnChanges, OnInit {
     let totalData: any;
     let total: number;
 
-    if (changes.resources && changes.resources.currentValue) {
-      this.resources = changes.resources.currentValue;
-    }
+    // if (changes.resources && changes.resources.currentValue) {
+    //   this.resources = changes.resources.currentValue;
+    // }
 
     if (changes.defaultLayout && changes.defaultLayout.currentValue) {
       this.defaultLayout = changes.defaultLayout.currentValue;
@@ -101,7 +105,10 @@ export class DynamicGridComponent implements OnChanges, OnInit {
   }
 
   ngOnInit() {
-
+    // this.route.parent.params.subscribe((urlPath) => {
+    //   this.entityName = urlPath["name"];
+    // });
+    this.getMenuparameterName();
   }
 
 
@@ -127,22 +134,56 @@ export class DynamicGridComponent implements OnChanges, OnInit {
       }
 
       //Status type picklist
-      if (field.dataType == 'PickList') {
+      // if (field.dataType == 'PickList') {
+      //   results.forEach((result, index) => {
+      //     if (field.name.toLocaleLowerCase() in result) {
+      //       if (result.active) {
+      //         result.active = 'Enabled';
+      //         if (field.values && field.values.length > 0) {
+      //           result.css = field.values.filter(x => x.id == '1')[0].value;
+      //         }
+      //       } else {
+      //         result.active = 'Disabled';
+      //         if (field.values && field.values.length > 0) {
+      //           result.css = field.values.filter(x => x.id == '0')[0].value;
+      //         }
+      //       }
+      //     }
+
+      //   });
+      // }
+
+      if (field && field.dataType == 'PickList' && field.name.toLocaleLowerCase() == 'active') {
+        //console.log('picklist'+JSON.stringify(field));
         results.forEach((result, index) => {
           if (field.name.toLocaleLowerCase() in result) {
-            if (result.active) {
-              result.active = 'Enabled';
+            if (result.active === true) {
+              result.active = 'Enable';
               if (field.values && field.values.length > 0) {
                 result.css = field.values.filter(x => x.id == '1')[0].value;
               }
-            } else {
-              result.active = 'Disabled';
+            } else if (result.active === false) {
+              result.active = 'Disable';
               if (field.values && field.values.length > 0) {
                 result.css = field.values.filter(x => x.id == '0')[0].value;
               }
             }
           }
 
+        });
+      }
+      if (field && field.dataType == 'PickList' && field.name.toLocaleLowerCase() != 'active') {
+        //console.log('PickList && field.name.toLocaleLowerCase() !== active '+JSON.stringify(results));
+        //console.log('picklist'+JSON.stringify(field));
+        results.forEach((r, index) => {
+          let fieldname = this.commonService.camelize(field.name);
+          if (fieldname in r) {
+            if (field.values && field.values.length > 0) {
+              r.PickListvalue = r[fieldname];
+              let dd = field.values.filter(x => x.id == r.PickListvalue);
+              r.PickListcss = field.values.filter(x => x.id == r.PickListvalue).value;
+            }
+          }
         });
       }
 
@@ -195,29 +236,36 @@ export class DynamicGridComponent implements OnChanges, OnInit {
         let isClickableField: boolean = false;
         let isDateField: boolean = false;
         let isBooleanField: boolean = false;
+        let isPicklisttype: boolean = false;
 
         isFieldAvailable = fields.filter(x => x.name.toLowerCase().includes(key.toLowerCase()) && !x.values && !x.hidden).length > 0 ? true : false;
-        isStatusField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'PickList'.toLocaleLowerCase() && !x.hidden && x.values && x.values.length > 0).length > 0 ? true : false;
+        //isStatusField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'PickList'.toLocaleLowerCase() && !x.hidden && x.values && x.values.length > 0).length > 0 ? true : false;
+        isStatusField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'PickList'.toLocaleLowerCase() && !x.hidden && x.values && x.values.length > 0 && x.name.toLowerCase()=='active').length > 0 ? true : false;
         isClickableField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.clickable == true && !x.hidden).length > 0 ? true : false;
         isDateField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'DateTime'.toLocaleLowerCase() && !x.hidden).length > 0 ? true : false;
         isBooleanField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'Bool'.toLocaleLowerCase() && !x.hidden).length > 0 ? true : false;
+        isPicklisttype=fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'PickList'.toLocaleLowerCase() && !x.hidden && x.values && x.values.length > 0 && x.name.toLowerCase()!='active').length > 0 ? true : false;
 
         let widthValue: number = 40;
         if (isStatusField) {
           widthValue = 20;
         }
 
-        let columnObj = { field: '', title: '', width: widthValue, isVisible: isFieldAvailable, isStatus: isStatusField, position: 0, isClickable: isClickableField, isAction: false, isDateField: isDateField, isBooleanField: isBooleanField };
+        let columnObj = { field: '', title: '', width: widthValue, isVisible: isFieldAvailable, isStatus: isStatusField, position: 0, isClickable: isClickableField, isAction: false, isDateField: isDateField, isBooleanField: isBooleanField, isPicklisttype:isPicklisttype };
 
         let columnTitle: string = '';
         if (isFieldAvailable) {
-          columnTitle = that.getResourceValue((fields.filter(x => x.name.toLowerCase().includes(key.toLowerCase()) && !x.values && !x.hidden)[0].name));
+          columnTitle = that.getResourceValue(that.entityName.toLowerCase()+'_field_'+(fields.filter(x => x.name.toLowerCase().includes(key.toLowerCase()) && !x.values && !x.hidden)[0].name).replace('.','_').toLowerCase());
         }
+          if (isPicklisttype) {
+              columnTitle = that.getResourceValue(key.replace('.', '_').toLowerCase());
+        }
+
         columnObj.field = key.replace('.', '_');
         columnObj.title = columnTitle;
         columnObj.position = i;
 
-        if (columnObj.isVisible || columnObj.isStatus) {
+        if (columnObj.isVisible || columnObj.isStatus||isPicklisttype) {
           that.columns.push(columnObj);
         }
       });
@@ -227,7 +275,7 @@ export class DynamicGridComponent implements OnChanges, OnInit {
     //console.table(that.columns);
 
     if (isActionsAvailable) {
-      let actionColumnObj = { field: actions.length > 1 ? 'Actions' : 'Action', title: actions.length > 1 ? 'Actions' : 'Action', width: 20, isVisible: true, isStatus: false, position: 0, isAction: true, isDateField: false };
+      let actionColumnObj = { field: actions.length > 1 ? 'Actions' : 'Action', title: actions.length > 1 ? that.getResourceValue('metadata_actions') : that.getResourceValue('metadata_action'), width: 20, isVisible: true, isStatus: false, position: 0, isAction: true, isDateField: false };
       that.columns.push(actionColumnObj);
     }
 
@@ -274,7 +322,10 @@ export class DynamicGridComponent implements OnChanges, OnInit {
 
   //Events
   //First editable column click in grid
-  private rowEditableColumnClick(id: string): void {
+  private rowEditableColumnClick(id: string, fieldvalue: string,coulmnname:string): void {
+
+    this.setbreadcrums(fieldvalue,coulmnname);
+
     this.rowColumnClickEvent.emit({ internalId: id });
   }
 
@@ -336,9 +387,25 @@ export class DynamicGridComponent implements OnChanges, OnInit {
     this.gridChangeEvent.emit({ pageIndex: this.pageindex, pageSize: this.pageSize, orderBy: orderBy, skip: this.skip, sort: state.sort, groupBy: this.groups })
 
   }
- 
+
 
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
+  }
+
+  // BreadCrums
+  setbreadcrums(fieldvalue:string,coulmnname:string)
+  {
+     let objeditableColumnname=new editableColumnname();
+    objeditableColumnname.name = fieldvalue;
+    objeditableColumnname.columnname = coulmnname;
+    localStorage.setItem("editableColumnname", JSON.stringify(objeditableColumnname));
+    this.breadcrumsService.setchildMenuBreadcums([{ elementName: "preview", 'elementURL': "" ,'isGroup':false}, { elementName: fieldvalue, 'elementURL': "",'isGroup':false }]);
+  }
+  //MenuContext
+  getMenuparameterName()
+  {
+      let result=this.menuService.getMenuconext();
+      this.entityName = result.param_name;
   }
 }

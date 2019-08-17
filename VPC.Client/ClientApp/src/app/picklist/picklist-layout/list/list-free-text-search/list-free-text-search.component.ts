@@ -20,6 +20,7 @@ export class ListFreeTextSearchComponent implements OnInit {
   private isdatamainlist: boolean = false;
   public layoutInfo: LayoutModel = new LayoutModel();
   public resource: Resource;
+  public searchText: string ='';
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -216,5 +217,14 @@ export class ListFreeTextSearchComponent implements OnInit {
       a++;
     });
   }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
+  }
+
 
 }

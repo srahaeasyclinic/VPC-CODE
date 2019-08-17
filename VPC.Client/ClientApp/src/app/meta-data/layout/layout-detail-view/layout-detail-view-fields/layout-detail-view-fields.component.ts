@@ -31,7 +31,7 @@ export class LayoutDetailViewFieldsComponent implements OnInit {
   private isdataexistsvalues: boolean = false;
   public layoutInfo: LayoutModel = new LayoutModel();
   public clickableColumn: string = '';
-  public searchText: any;
+  public searchText: string = '';
   resource: Resource;
   constructor(
     private layoutService: LayoutService,
@@ -343,4 +343,12 @@ export class LayoutDetailViewFieldsComponent implements OnInit {
       a++;
     });
   }
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
+  }
+
 }

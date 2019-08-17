@@ -8,25 +8,35 @@ import { Resource } from '../../model/resource';
   selector: 'textbox-setting',
   template: `
   <div class="modal-header">
-    <label class="text-important" id="modal-title">{{getResourceValue('TextboxSettings')}}</label>
+    <label class="text-important" id="modal-title">{{getResourceValue(node.entityName.toLowerCase()+'_field_'+node.name.toLowerCase())}}</label>
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <div class="modal-body">
     
-        <div *ngFor="let validatorItem of node.validators" class="margin-bottom-15">
-          <label class="text-important">{{getResourceValue(validatorItem.name)}}</label>         
+        <div *ngFor="let validatorItem of node.validators" class="margin-bottom-15">                   
             <div [ngSwitch]="validatorItem.name | lowercase">           
                 <required-validator *ngSwitchCase="'requiredvalidator'" [node]="node" [validator]="validatorItem"></required-validator>
               <length-validator *ngSwitchCase="'lengthvalidator'" [validator]="validatorItem"></length-validator> 
-              <range-validator *ngSwitchCase="'rangevalidator'" [validator]="validatorItem"></range-validator>    
+              <!-- <range-validator *ngSwitchCase="'rangevalidator'" [validator]="validatorItem"></range-validator> -->    
                <emailformat-validator *ngSwitchCase="'emailformatvalidator'" [validator]="validatorItem"></emailformat-validator>          
-            </div>          
+               <defaultvalue-validator *ngSwitchCase="'defaultvaluevalidator'" [validator]="validatorItem" [datatype]="node.dataType" [typeof]="node.typeOf" ></defaultvalue-validator>
+            </div>        
         </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="sel1">{{getResourceValue('metadata_label_width')}}</label>
+              <select [(ngModel)]="node.setting.columnWidth" class="input-control">
+                <option *ngFor="let w of widths" [value]="w.id">{{w.name}}</option>
+              </select>
+            </div>
+          </div>
+      </div>
         <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('Cancel')}}</button>
-        <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('Submit')}}</button>
+        <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('operation_submit')}}</button>
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
       </div>
   </div>
   
@@ -39,6 +49,12 @@ export class TextboxSettingComponent implements OnInit {
   @Output() saveEvent: EventEmitter<any> = new EventEmitter();
   private columns = [];
   public resource = Resource;
+  public widths = [
+    {id:12, name:"100%"},
+    {id:9, name:"75%"},
+    {id:6, name:"50%"},
+    {id:3, name:"25%"}
+  ];
   constructor(public modal: NgbActiveModal, public globalResourceService: GlobalResourceService) {
 
   }
@@ -53,10 +69,11 @@ export class TextboxSettingComponent implements OnInit {
   }
   //save called....
   public saveSattings() {
-    // console.log("test lenght"+JSON.stringify(this.node));
+    console.log("test lenght"+JSON.stringify(this.node));
     this.saveEvent.emit(this.node);
   }
   getResourceValue(key) {
+    key=key.replace('.', '_');
     return this.globalResourceService.getResourceValueByKey(key);
   }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using VPC.Entities.EntityCore.Metadata.Runtime;
+using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Metadata.Business.DataAnnotations;
 using VPC.Metadata.Business.DataTypes;
 using VPC.Metadata.Business.Entity;
@@ -20,33 +21,40 @@ namespace VPC.Entities.EntityCore.Metadata
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public InternalId TenantId { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [BasicColumn]
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [BasicColumn]
         [ColumnName("[Name]")]
         [NotNull]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [DefaultValue(InfoType.Role)]
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.Role);
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN10004-ST01", "Standard"}
         };
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
 
-        [AccessibleLayout(1, 2, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.Form, (int)LayoutType.List)]
         [ColumnName("[Type]")]
+        [DisplayName("Type")]
         public NumericType Type { get; set; }
     }
 }

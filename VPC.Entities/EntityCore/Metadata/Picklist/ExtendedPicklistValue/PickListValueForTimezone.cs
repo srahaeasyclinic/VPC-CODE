@@ -17,6 +17,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public override InternalId TenantId { get; set; }
 
         public override PicklistContext PicklistContext => new PicklistContext(0);
@@ -25,28 +26,34 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [ForeignKey("[dbo].[PickListValue]", "[Id]")]
         [ColumnName("[PickListValueId]")]
         [NotNull]
+        [DisplayName("Picklist value")]
         public InternalId PicklistValueId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[GmtDeviation]")]
         [NotNull]
+        [DisplayName("GMT deviation")]
         public DecimalType GmtDeviation { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[SummerTimeStart]")]
+        [DisplayName("Summer time start")]
         public XLargeText SummerTimeStart { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[WinterTimeStart]")]
+        [DisplayName("Winter time start")]
         public XLargeText WinterTimeStart { get; set; }
     }
 }

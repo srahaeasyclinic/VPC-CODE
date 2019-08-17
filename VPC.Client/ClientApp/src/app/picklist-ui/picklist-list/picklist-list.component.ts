@@ -1,8 +1,8 @@
-import { Component, Input, Output, OnInit } from '@angular/core';
+import { Component, Input, Output, OnInit,OnDestroy } from '@angular/core';
 import { GridDataResult, DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { SortDescriptor, GroupDescriptor } from '@progress/kendo-data-query';
 import { Router, ActivatedRoute, NavigationExtras, Params, NavigationEnd } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { debounceTime, distinctUntilChanged } from 'rxjs/internal/operators';
 
@@ -14,7 +14,7 @@ import { CommonService } from '../../services/common.service';
 import { ResourceService } from '../../services/resource.service';
 import { Data } from '../../services/storage.data';
 
-import { MenuService } from '../../services/menu.service';
+import { MenuService, MenuType } from '../../services/menu.service';
 
 import swal from 'sweetalert2';
 import { GlobalResourceService } from '../../global-resource/global-resource.service'
@@ -24,12 +24,14 @@ import { GlobalResourceService } from '../../global-resource/global-resource.ser
   templateUrl: './picklist-list.component.html',
   styleUrls: ['./picklist-list.component.css']
 })
-export class PicklistListComponent implements OnInit {
+export class PicklistListComponent implements OnInit,OnDestroy {
 
   constructor(private router: Router, private picklistService: PicklistUiService,
     private toster: TosterService, private resourceService: ResourceService,
     private commonService: CommonService, private route: ActivatedRoute, private data: Data,
-    private globalResourceService: GlobalResourceService) {
+    private globalResourceService: GlobalResourceService,
+    private menuService: MenuService
+  ) {
 
   }
 
@@ -57,25 +59,35 @@ export class PicklistListComponent implements OnInit {
   private entityName: string = '';
   private layoutType: number = 3; // List page
   public pageindex: number = 1;
-  private pageSize: number = 10;
+  public pageSize: number = 10;
   public totalRecords: number = 0;
   public resource: any;
   private orderBy: string = '';
   public storage: any;
   public filters: string = '';
   public selectedFields: string = '';
+  private subscrib:Subscription;
   ngOnInit() {
+
+   // console.log('PicklistListComponent');
     //Get the resources for display rendering
-    this.getResource();
-    this.freetextsearchChanged
-      .pipe(debounceTime(500), distinctUntilChanged())
-      .subscribe(model => {
-        this.freetextsearch = model;
+    let result=this.menuService.getMenuconext();
+      this.entityName = result.param_name;
+      if (result && result.menuType == MenuType.Picklist) {
+        this.getResource();
+        this.freetextsearchChanged
+          .pipe(debounceTime(500), distinctUntilChanged())
+          .subscribe(model => {
+            this.freetextsearch = model;
+            this.generateListlayout(this.defaultLayout, this.entityName);
+          });
+        this.resource = this.globalResourceService.getGlobalResources();
+      }
+      this.subscrib=this.globalResourceService.resourcePopulated.subscribe(a=>{
         this.generateListlayout(this.defaultLayout, this.entityName);
       });
-      this.resource = this.globalResourceService.getGlobalResources();
+  
   }
-
 
   //Events sections
   public onFreeTextSearch(query: string): void {
@@ -92,33 +104,50 @@ export class PicklistListComponent implements OnInit {
     //console.log(actionName);
     //console.log(id); 
     if (event.actionName.toLowerCase() == 'Delete'.toLowerCase()) {
-      swal({
-        title: this.getResourceValue("Areyousure"),
-        text: this.getResourceValue("Youwntbeabletorevertthis"),
-        type: this.getResourceValue('warning'),
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: this.getResourceValue('Yesdeleteit'),
-        showLoaderOnConfirm: true,
-      })
-        .then((willDelete) => {
-          if (willDelete.value) {
-            this.picklistService.deletePicklistValues(this.entityName, event.internalId).subscribe(result => {
-              if (result) {
-                this.generateListlayout(this.defaultLayout, this.entityName)
-              }
-            });
 
-          } else {
-            //write the code for cancel click
+      this.globalResourceService.openDeleteModal.emit()
+
+      this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+        this.picklistService.deletePicklistValues(this.entityName, event.internalId).subscribe(result => {
+          if (result) {
+              // this.toster.showSuccess(this.globalResourceService.deleteSuccessMessage(this.entityName.toLowerCase() + "_displayname"));
+            this.generateListlayout(this.defaultLayout, this.entityName)
           }
-
         });
+         
+        });
+
+
+
+
+      // swal({
+      //   title: this.getResourceValue("common_message_areyousure"),
+      //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+      //   type: 'warning',
+      //   showCancelButton: true,
+      //   confirmButtonColor: '#3085d6',
+      //   cancelButtonColor: '#d33',
+      //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+      //   showLoaderOnConfirm: true,
+      // })
+      //   .then((willDelete) => {
+      //     if (willDelete.value) {
+      //       this.picklistService.deletePicklistValues(this.entityName, event.internalId).subscribe(result => {
+      //         if (result) {
+      //           this.toster.showSuccess(this.getResourceValue(this.entityName.toLowerCase() + "_operation_delete_success_message"));
+      //           this.generateListlayout(this.defaultLayout, this.entityName)
+      //         }
+      //       });
+
+      //     } else {
+      //       //write the code for cancel click
+      //     }
+
+      //   });
     }
 
     if (event.actionName.toLowerCase() == 'UpdateStatus'.toLowerCase()) {
-      this.toster.showWarning(this.getResourceValue("MethodNotImplemented"));
+      this.toster.showWarning(this.getResourceValue("metadata_method_notimplement_message"));
     }
 
   }
@@ -236,7 +265,7 @@ export class PicklistListComponent implements OnInit {
 
       } else {
         isvalid = false;
-        this.toster.showWarning(this.getResourceValue("NoFieldsFound"));
+        this.toster.showWarning(this.getResourceValue("metadata_operation_warning_notfoundmessage"));
       }
     }
   }
@@ -253,15 +282,15 @@ export class PicklistListComponent implements OnInit {
         break;
       }
       case "send email": {
-        this.toster.showWarning(this.getResourceValue("NotYetImplemented"));
+        this.toster.showWarning(this.getResourceValue("metadata_method_notimplement_message"));
         break;
       }
       case "print": {
-        this.toster.showWarning(this.getResourceValue("NotYetImplemented"));
+        this.toster.showWarning(this.getResourceValue("metadata_method_notimplement_message"));
         break;
       }
       default: {
-        this.toster.showWarning( this.getResourceValue("NotYetImplemented"));
+        this.toster.showWarning( this.getResourceValue("metadata_method_notimplement_message"));
         break;
       }
     }
@@ -278,17 +307,17 @@ export class PicklistListComponent implements OnInit {
     //       if (data) {
             this.resource = this.globalResourceService.getGlobalResources();
 
-            this.route.parent.params.subscribe(params => {
-              this.entityName = params["name"];
+            // this.route.parent.params.subscribe(params => {
+              
               if (this.entityName) {
                 this.pageindex = 1;
                 this.skip = 0;
                 this.freetextsearch = '';
                 this.getDefaultLayout(this.entityName);
               } else {
-                this.toster.showWarning( this.getResourceValue("UrlTemperedorNoEntityNameoridFoundorEntityNotYetDecorated"));
+                this.toster.showWarning( this.getResourceValue("metadata_operation_alert_warning_message"));
               }
-            });
+            // });
             // //Get the picklist entity name from URL route 
             // this.route.url.subscribe((urlPath) => {
             //   console.log("urlPath", urlPath)
@@ -414,7 +443,7 @@ export class PicklistListComponent implements OnInit {
 
       } else {
         isvalid = false;
-        this.toster.showWarning( this.getResourceValue("NoFieldsFound"));
+        this.toster.showWarning( this.getResourceValue("metadata_operation_warning_notfoundmessage"));
       }
 
       if (layout.listLayoutDetails.searchProperties && layout.listLayoutDetails.searchProperties.length > 0) {
@@ -490,4 +519,10 @@ export class PicklistListComponent implements OnInit {
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
   }
+ ngOnDestroy(){
+   if(this.subscrib){
+     this.subscrib.unsubscribe();
+   }
+ }
+
 }

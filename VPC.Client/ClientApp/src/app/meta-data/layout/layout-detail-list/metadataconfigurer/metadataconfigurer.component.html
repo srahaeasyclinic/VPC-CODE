@@ -1,0 +1,227 @@
+<div class="component-layout">
+  <div class="pnl-block">
+
+    <div class="pnl-block-header">
+
+      <label>
+        {{(type=='toolbar' || type=='action')==true?getResourceValue("metadata_availableaction"):getResourceValue("metadata_availablefields")}}
+      </label>
+
+
+      <div class="list-search-block">
+        <div class="margin-right-10">
+          <input type="text" class="list-search" [(ngModel)]="searchText" />
+        </div>
+        <div class="search-filter"></div>
+        <div class="reset-filter" *ngIf="(searchText!='' && searchText!=undefined) " (click)="resetAvailableFilter()">
+        </div>
+      </div>
+    </div>
+    <div class="pnl-block-body">
+      <div class="tableStyle">
+        <table class="table withoutborder">
+          <tbody>
+            <tr *ngFor="let item of fieldSource | filter : searchText">
+              <td (click)="mainItemClickEvent(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                <div [className]="item.isAdded ? 'text-less-important line-through' : 'text-less-important'">
+                  {{item.name}}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnlBtnLayout">
+    <a class="btnListLayout margin-bottom-10" (click)="addItem()">
+      <i class="fa fa-share"></i>
+    </a>
+    <a class="btnListLayout" (click)="removeItem()">
+      <i class="fa fa-reply"></i>
+    </a>
+  </div>
+  <div class="pnl-block">
+    <div class="pnl-block-header">
+      <label>
+        {{(type=='toolbar' || type=='action')==true?getResourceValue("metadata_selectedaction"):getResourceValue("metadata_selectedfields")}}
+      </label>
+
+
+      <div class="list-search-block">
+        <div class="margin-right-10">
+          <input type="text" class="list-search" [(ngModel)]="addedItemToMainList.name" />
+        </div>
+        <div class="search-filter"></div>
+        <div class="reset-filter" *ngIf="(addedItemToMainList.name!='' && addedItemToMainList.name!=undefined)"
+          (click)="resetItemFilter()"></div>
+      </div>
+    </div>
+    <div class="pnl-block-body">
+      <div class="tableStyle">
+        <table class="table withoutborder">
+          <tbody>
+            <tr *ngFor="let item of addedItemToMainList | filter : addedItemToMainList.name">
+              <td (click)="slectedFieldClick(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
+                <div class="text-less-important">{{item.name}}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnlBtnLayout">
+    <a class="btnListLayout margin-bottom-10" (click)="upItem()">
+      <i class="fa fa-share fa-rotate-270"></i>
+    </a>
+    <a class="btnListLayout" (click)="downItem()">
+      <i class="fa fa-share fa-rotate-90"></i>
+    </a>
+  </div>
+
+  <ng-container *ngIf="displayFieldsmodal && config.allowConfiguration">
+    <div class="pnl-block" *ngIf="type=='fields'">
+      <div class="pnl-block-header">
+        <label>
+          {{(type=='toolbar' || type=='action')==true?getResourceValue("metadata_actionconfiguration"):getResourceValue("metadata_fieldconfiguration")}}
+        </label>
+      </div>
+      <div class="pnl-block-body">
+        <div class="margin-left-5">
+          <label class="control control--checkbox">
+            {{getResourceValue("metadata_hidefield")}}
+            <input type="checkbox" [(ngModel)]="isChecked" (change)="onChangeEvent($event)">
+            <span class="control__indicator"></span>
+          </label>
+        </div>
+        <!-- <div *ngIf="!displaySimpleDetailsItem">
+            <label class="control control--checkbox">
+              Clickabe column
+              <input type="checkbox" [(ngModel)]="isClickableChecked" (change)="onClickableEvent($event)">
+              <span class="control__indicator"></span>
+            </label>
+          </div> -->
+        <div *ngIf="displaySimpleDetailsItem" class="margin-top-15">
+          <label class="text-important margin-left-5">{{getResourceValue("metadata_options")}}</label>
+          <div class="tableStyle">
+            <table class="table withoutborder margin-bottom-0">
+              <tbody>
+                <tr *ngFor="let item of pickListSource">
+                  <td>
+                    <div [ngClass]="setCurrentColor(item.color)">{{item.text}}</div>
+
+                  </td>
+                  <td>
+                    <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+                      <mat-icon>
+                        ...
+                      </mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                      <a class="dropdown-item" *ngFor="let fieldcolor of fieldColor"
+                        (click)="setFieldColor(item, fieldcolor.css,item.text)">
+                        <span class="margin-right-10" [ngClass]="fieldcolor.css"></span>{{fieldcolor.text}}
+                      </a>
+                    </mat-menu>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pnl-block" *ngIf="type=='simplesearch' || type=='advancesearch'">
+      <div class="pnl-block-header">
+        <label>{{getResourceValue("metadata_fieldconfiguration")}}</label>
+      </div>
+      <div class="pnl-block-body right-block">
+        <div class="margin-bottom-15">
+          <label>{{getResourceValue("metadata_field_controltype")}}</label>
+          <select class="input-control" [(ngModel)]="simpleSearchControlType" (change)="onChangeEvent($event)">
+            <option value="Dropdown">{{"Dropdown"}}</option>
+            <option value="Radio">{{"Radio"}}</option>
+          </select>
+        </div>
+        <div class="tableStyle">
+          <table class="table withoutborder margin-bottom-0">
+            <tbody>
+              <tr *ngFor="let item of pickListSource">
+                <td>
+                  <label class="control control--checkbox">
+                    &nbsp;
+                    <input type="checkbox" [checked]="item.isChecked" (change)="onCheckboxChecked($event, item)">
+                    <span class="control__indicator"></span>
+                  </label>
+                </td>
+                <td (click)="setDefaultStatusValue(item)">
+                  <div [className]="text-important">{{item.text}}</div>
+                </td>
+                <td *ngIf="item.isEnabled">
+                  <a ngbTooltip="{{getResourceValue('metadata_field_defaultlayout')}}" container="body"
+                    class="statusRoundedGreen">{{'D'}}</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- toolbar -->
+    <div class="pnl-block" *ngIf="type=='toolbar'">
+      <div class="pnl-block-header">
+        <label>{{getResourceValue("metadata_fieldconfiguration")}}</label>
+      </div>
+      <div class="pnl-block-body right-block">
+        <div>
+          <label>{{getResourceValue("metadata_field_group")}}</label>
+          <select class="input-control" [(ngModel)]="toolbarGroup" (change)="onChangeEvent($event)">
+            <option value=""></option>
+            <option value="communication">{{"Communication"}}</option>
+            <option value="print">{{"Print"}} </option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+
+
+
+</div>
+<div class="component-fields" *ngIf="selectedLayout">
+  <div *ngIf="config.displaySortColumn">
+    <label>{{getResourceValue("metadata_sortcolumn")}}</label>
+    <select class="input-control" [(ngModel)]="selectedLayout.defaultSortOrder.name">
+      <option value=""></option>
+      <option class='option' *ngFor='let option of addedItemToMainList' [value]="option.name">{{option.name}}</option>
+    </select>
+  </div>
+  <div *ngIf="config.direction">
+    <label>{{getResourceValue("metadata_sortdirection")}}</label>
+    <select class="input-control" [(ngModel)]="selectedLayout.defaultSortOrder.value">
+      <option value=""></option>
+      <option value="Desc">{{"Desc"}}</option>
+      <option value="Asc">{{"Asc"}}</option>
+    </select>
+  </div>
+  <div *ngIf="config.maxResult">
+    <label>{{getResourceValue("metadata_maximumresults")}}</label>
+    <input type="text" [(ngModel)]="selectedLayout.maxResult" class="input-control" />
+  </div>
+  <div *ngIf="config.groupBy">
+    <label>{{getResourceValue("metadata_groupby")}}</label>
+    <select class="input-control" [(ngModel)]="selectedLayout.defaultGroupBy">
+      <option value=""></option>
+      <option class='option' *ngFor='let option of addedItemToMainList' [value]="option.name">{{option.name}}</option>
+    </select>
+  </div>
+  <div *ngIf="config.clickableColumn">
+    <label>{{getResourceValue("metadata_clickablecolumn")}}</label>
+    <select class="input-control" [(ngModel)]="clickableColumn" (change)="onChangeClickable($event)">
+      <option value=""></option>
+      <!-- <option class='option' *ngFor='let option of addedItemToMainList' [value]="option.name">{{option.name}}</option> -->
+      <option class='option' *ngFor='let option of clickableList' [value]="option.name">{{option.name}}</option>
+    </select>
+  </div>
+</div>

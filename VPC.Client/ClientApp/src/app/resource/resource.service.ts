@@ -10,7 +10,7 @@ import { Resource } from '../model/resource';
 export class ResourceService {
   private allResourcesUrl='/api/resources/all';
   private resourcesUrl: string = '/api/resources';
-  private tenentUrl='/api/tenants'
+  private tenentUrl='/GetInfo/DefaultLanguage'
   private picklistUrl:string='/api/picklists/language/values?orderBy=text&pageIndex=1&pageSize=500'
   query: string = '?pageIndex=1&pageSize=10&orderBy=value';
 
@@ -60,8 +60,16 @@ export class ResourceService {
    if(language!=''){
     this.allResourcesUrl='/api/resources/all?language='+language;
    }
-  var resourceUrl = `${environment.apiUrl}` + this.allResourcesUrl;
-  return this.http.get<any>(resourceUrl);
+  var resourall = `${environment.apiUrl}` + this.allResourcesUrl;
+  return this.http.get<any>(resourall);
+}
+ResetResourcesList(): Observable<any> {
+ var resourceresetUrl = `${environment.apiUrl}` + '/api/resources/reset';
+ return this.http.post<any>(resourceresetUrl,'');
+}
+RepairResourcesList(): Observable<any> {
+var resourcrepaireUrl = `${environment.apiUrl}` + '/api/resources/repair';
+return this.http.post<any>(resourcrepaireUrl,'');
 }
 
 }

@@ -23,21 +23,15 @@ using VPC.Metadata.Business.SearchFilter;
 namespace VPC.Framework.Business.MetadataManager.Contracts {
     public static class MetadataHelper {
         public static QueryContext GetQueryContext (string pickListName, int pageIndex = 1, int pageSize = 10, string filters = "") {
-            var resultQuery = new QueryContext ();
-            resultQuery.PageIndex = pageIndex;
-            resultQuery.PageSize = pageSize;
-            if (string.IsNullOrWhiteSpace (filters)) return resultQuery;
-            var result = filters.Split (',');
-            if (!result.Any ()) return resultQuery;
-            resultQuery.Filters = new List<QueryFilter> ();
-
+            var resultQuery = GetQueryContextBasic (pickListName, pageIndex, pageSize, filters);
             IMetadataManager entityManager = new VPC.Framework.Business.MetadataManager.Contracts.MetadataManager ();
             var entityColumns = entityManager.GetColumnNameByEntityName (pickListName, null);
+            var result = filters.Split (',');
             foreach (var filter in result) {
                 var keyValue = filter.Split ('=');
                 if (!keyValue.Any ()) continue;
-               // var match = entityColumns.FirstOrDefault (t => t.FieldName.ToLower ().Equals (keyValue[0].ToLower ()));
-                var match = entityColumns.FirstOrDefault (t => t.ColumnName.Equals (t.PrimaryKey) && t.EntityFullName.ToLower().Equals(pickListName.ToLower()));
+                // var match = entityColumns.FirstOrDefault (t => t.FieldName.ToLower ().Equals (keyValue[0].ToLower ()));
+                var match = entityColumns.FirstOrDefault (t => t.ColumnName.Equals (t.PrimaryKey) && t.EntityFullName.ToLower ().Equals (pickListName.ToLower ()));
                 if (match != null) {
                     var myContextFilter = new QueryFilter ();
                     myContextFilter.FieldName = match.EntityPrefix + "." + match.ColumnName;
@@ -48,5 +42,38 @@ namespace VPC.Framework.Business.MetadataManager.Contracts {
             }
             return resultQuery;
         }
+        private static QueryContext GetQueryContextBasic (string pickListName, int pageIndex = 1, int pageSize = 10, string filters = "") {
+            var resultQuery = new QueryContext ();
+            resultQuery.PageIndex = pageIndex;
+            resultQuery.PageSize = pageSize;
+            if (string.IsNullOrWhiteSpace (filters)) return resultQuery;
+            var result = filters.Split (',');
+            if (!result.Any ()) return resultQuery;
+            resultQuery.Filters = new List<QueryFilter> ();
+            return resultQuery;
+        }
+
+        public static QueryContext GetVersionQuery (string pickListName, int pageIndex = 1, int pageSize = 10, string filters = "") {
+            var resultQuery = GetQueryContextBasic (pickListName, pageIndex, pageSize, filters);
+            IMetadataManager entityManager = new VPC.Framework.Business.MetadataManager.Contracts.MetadataManager ();
+            var entityColumns = entityManager.GetColumnNameByEntityName (pickListName, null);
+            var result = filters.Split (',');
+            foreach (var filter in result) {
+                var keyValue = filter.Split ('=');
+                if (!keyValue.Any ()) continue;
+             
+                var match = entityColumns.FirstOrDefault (t => t.FieldName.ToLower().Equals (keyValue[0].ToLower()) && t.EntityFullName.ToLower ().Equals (pickListName.ToLower ()));
+                if (match != null) {
+                    var myContextFilter = new QueryFilter ();
+                    myContextFilter.FieldName = match.EntityPrefix + "." + match.ColumnName;
+                    myContextFilter.Value = keyValue[1];
+                    myContextFilter.Operator = "=";
+                    resultQuery.Filters.Add (myContextFilter);
+                }
+            }
+            return resultQuery;
+        }
+
+
     }
 }

@@ -36,6 +36,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [ColumnName("[Key]")]
@@ -43,6 +44,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [FreeTextSearch]
         [NotNull]
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
+        [DisplayName("Key")]
         public SmallText Key { get; set; }
 
         [ColumnName("[Text]")]
@@ -50,6 +52,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [FreeTextSearch]
         [NotNull]
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
+        [DisplayName("Text")]
         public MediumText Text { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -58,6 +61,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [InverseProperty("[Id]")]
         [ColumnName("[UpdatedBy]")]
         [NotNull]
+        [DisplayName("Updated by")]
 
         public Lookup<User> UpdatedBy { get; set; }
 
@@ -66,6 +70,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NonQueryable]
         [ColumnName("[UpdatedDate]")]
         [NotNull]
+        [DisplayName("Updated date")]
         public DateTime UpdatedDate { get; set; }
 
         [DefaultValue("1")]
@@ -73,18 +78,21 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NotNull]
         [SimpleSearch]
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        [DisplayName("Active")]
         public PickList<Active> Active { get; set; }
 
         [DefaultValue("0")]
         [ColumnName("[IsDeletetd]")]
         [NotNull]
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        [DisplayName("Is deleted")] 
         public BooleanType IsDeletetd { get; set; }
 
         [DefaultValue("0")]
         [ColumnName("[Flagged]")]
         [NotNull]
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        [DisplayName("Flagged")]
         public BooleanType Flagged { get; set; }
     }
 }

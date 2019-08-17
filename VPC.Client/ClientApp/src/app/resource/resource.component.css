@@ -6,4 +6,12 @@
   
 }
 
+.bandaid-icon{
+  width: 16px;
+  height: 16px;
+  background-image: url(../../assets/img/bandaid.png);
+  background-repeat: no-repeat;
+  position: absolute;
+  margin-top: 10px;
+}
   

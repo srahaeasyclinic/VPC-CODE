@@ -1,9 +1,9 @@
 <div>
-  <div class="msg-entrance" ngbTooltip="{{resource[generateResourceName('Save')]}}" container="body">
+  <div class="msg-entrance" ngbTooltip="{{getResourceValue('country_operation_save')}}" container="body">
       <a (click)="saveUser()">
           <span class="fa fa-save"></span>
       </a>
   </div>
-  <my-tree [rootNode]="tree" [mode]="1" *ngIf="isTreeReady">
+  <my-tree [rootNode]="tree" [mode]="1" *ngIf="isTreeReady" [entityName]="entityname">
   </my-tree>
 </div>

@@ -63,7 +63,7 @@ export class ListComponent implements OnInit {
 
   public updateLayoutDetails() {
     this.layoutService.updateLayout(this.layoutInfo, this.picklistName, this.id).subscribe(result => {
-      this.toster.showSuccess(this.getResourceValue("LayoutSavedSuccessfully"));
+      this.toster.showSuccess(this.getResourceValue("metadata_operation_save_success_message"));
     });
   }
 

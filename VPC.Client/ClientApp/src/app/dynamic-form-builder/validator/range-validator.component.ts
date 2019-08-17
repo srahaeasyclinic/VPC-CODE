@@ -8,7 +8,7 @@ import { Resource } from '../../model/resource';
     template: `
     <div>
         <div *ngFor="let option of validator.options">
-            <label>{{getResourceValue(option.name)}}</label>
+            <label>{{getResourceValue('metadata_label_'+option.name.toLowerCase())}}</label>
             <div [ngSwitch]="option.controlType | lowercase">
                 <div *ngSwitchCase="'textbox'"><input type="text" class="input-control" [(ngModel)]="option.value"></div>
                 <div *ngSwitchCase="'checkbox'"><input type="checkbox" class="input-control" [(ngModel)]="option.value"></div>
@@ -25,6 +25,7 @@ export class RangeValidatorComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        console.log( JSON.stringify(this.validator));
         //this.resource = this.globalResourceService.getGlobalResources();
     }
     

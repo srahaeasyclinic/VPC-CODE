@@ -19,7 +19,8 @@ using VPC.WebApi.Utility;
 using VPC.Framework.Business.DynamicQueryManager.Core.Enums;
 using VPC.Entities.EntityCore.Model.Query;
 using VPC.Entities.EntityCore.Model.Storage;
-
+using VPC.Framework.Business.Tenant.Contracts;
+ 
 namespace VPC.WebApi.Controllers.Tenant
 {
     [Route("api/tenants")]
@@ -39,20 +40,24 @@ namespace VPC.WebApi.Controllers.Tenant
             _managerEntitySecurity = managerEntitySecurity;
         }
         [HttpGet]
-        [Route("")]
+        [Route("/GetInfo/{fieldName}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
-        public IActionResult Get()
+        public IActionResult GetInfo(string fieldName = "DefaultLanguage")
         {
             try
             {
                 var stopwatch = StopwatchLogger.Start(_log);
-                _log.Info("Called TenantController Get All");
-                var retVal = _manageTenant.GetTenantInfo(TenantCode);
-                dynamic totalRow = retVal.Count;
+                _log.Info("Called TenantController Get Info");
+                if(fieldName==null || fieldName==String.Empty)
+                    fieldName="DefaultLanguage";
+                if(fieldName != "DefaultLanguage")
+                  return StatusCode((int)HttpStatusCode.BadRequest, ApiConstant.CustomErrorMessage);
+                var retVal = _manageTenant.GetTenantLanguageInfo(TenantCode);
+                //dynamic totalRow = 1; // retVal.Count;
                 stopwatch.StopAndLog("End RuleController Get all");
-                return Ok(new { retVal, totalRow });
+                return Ok(retVal); //(new { retVal, totalRow });
 
             }
             catch (FieldAccessException fx)

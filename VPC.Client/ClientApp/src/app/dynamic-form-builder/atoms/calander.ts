@@ -1,7 +1,7 @@
 
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { NativeDateAdapter, DateAdapter, MAT_DATE_FORMATS, MatDatepickerInputEvent } from "@angular/material";
+import { NativeDateAdapter, DateAdapter, MAT_DATE_FORMATS, MatDatepickerInputEvent, MatDatepickerModule } from "@angular/material";
 import { AppDateAdapter, APP_DATE_FORMATS } from '../filter/date.adapter';
 import { Broadcaster } from '../messaging/broadcaster';
 import { MessageEvent } from '../messaging/message.event';
@@ -11,7 +11,7 @@ import { Payload } from '../messaging/payload';
     template: `
     <div *ngIf="mode!==2">
     <mat-form-field>
-        <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="picker" [(ngModel)]="field.value" (dateChange)="changeEvent('change', $event)">
+        <input matInput [min]="minDate"  [matDatepicker]="picker" [(ngModel)]="field.value" (dateChange)="changeEvent('change', $event)">
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
@@ -27,11 +27,11 @@ import { Payload } from '../messaging/payload';
         },
         {
             provide: MAT_DATE_FORMATS, useValue: APP_DATE_FORMATS
-        }
+        },MatDatepickerModule
     ]
 })
 
-// <input type="date" name="startDate" id="startDate"  [(ngModel)]="field.value | date:'yyyy-MM-dd'">
+// <input type="date" name="startDate" id="startDate"  [(ngModel)]="field.value | date:'yyyy-MM-dd'">  [max]="maxDate"
 export class CalanderComponent implements OnInit {
     public minDate = new Date(1800, 0, 1);
     public  maxDate = new Date();

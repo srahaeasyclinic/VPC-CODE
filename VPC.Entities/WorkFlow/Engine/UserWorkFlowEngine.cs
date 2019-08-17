@@ -18,7 +18,7 @@ namespace VPC.Entities.WorkFlow.Engine
         public const string _userName = "Key_User";
 
 
-        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_Registration", Status="Key_Registration" ,Description = "Registration")]
+        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_Registration", Status="Key_Registration" ,Description = "Registration",TransitionResourceValue="Registration",StatusResourceValue ="Registered")]
         public static Guid Registration
         {
             get
@@ -27,7 +27,7 @@ namespace VPC.Entities.WorkFlow.Engine
             }
         }
         
-        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_SendToDoctor", Status="Key_SendToDoctor", Description = "Send to doctor")]
+        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_SendToDoctor", Status="Key_SendToDoctor", Description = "Send to doctor",TransitionResourceValue="Send to doctor",StatusResourceValue ="Sent to doctor")]
         public static Guid SendToDoctor
         {
             get
@@ -36,7 +36,7 @@ namespace VPC.Entities.WorkFlow.Engine
             }
         }
 
-        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_DoctorAttending", Status="Key_DoctorAttending", Description = "Doctor attending")]
+        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_DoctorAttending", Status="Key_DoctorAttending", Description = "Doctor attending",TransitionResourceValue="Doctor Attending",StatusResourceValue ="Doctor attended")]
         public static Guid DoctorAttending
         {
             get
@@ -45,7 +45,7 @@ namespace VPC.Entities.WorkFlow.Engine
             }
         }
 
-        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_SendToPharmacy", Status="Key_SendToPharmacy", Description = "Send to pharmacy")]
+        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_SendToPharmacy", Status="Key_SendToPharmacy", Description = "Send to pharmacy",TransitionResourceValue="Send To Pharmacy",StatusResourceValue ="Sent to pharmacy")]
         public static Guid SendToPharmacy
         {
             get
@@ -54,7 +54,7 @@ namespace VPC.Entities.WorkFlow.Engine
             }
         }
 
-        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_PharmacyAttending", Status="Key_PharmacyAttending", Description = "Pharmacy attending")]
+        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_PharmacyAttending", Status="Key_PharmacyAttending", Description = "Pharmacy attending",TransitionResourceValue="Pharmacy Attending",StatusResourceValue ="Pharmacy attended")]
         public static Guid PharmacyAttending
         {
             get
@@ -63,7 +63,7 @@ namespace VPC.Entities.WorkFlow.Engine
             }
         }
 
-        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_Close", Status="Key_Close", Description = "Close")]
+        [WorkFlowModel(Name = _userName, Context = _user, Key = "Key_Close", Status="Key_Close", Description = "Close",TransitionResourceValue="Close",StatusResourceValue ="Closed")]
         public static Guid Close
         {
             get

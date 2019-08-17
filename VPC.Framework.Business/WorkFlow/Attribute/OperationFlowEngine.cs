@@ -14,7 +14,7 @@ namespace VPC.Framework.Business.WorkFlow.Attribute
 {
     public class OperationFlowEngine : IOperationFlowEngine
     {
-        IManagerWorkFlowTransition transactionHistory=new ManagerWorkFlowTransition();
+        IManagerWorkFlowTransition transactionHistory = new ManagerWorkFlowTransition();
         private readonly IManagerWorkFlowInnerStep _managerWorkFlowInnerStep = new ManagerWorkFlowInnerStep();
         private readonly IManagerWorkFlowProcess _managerWorkFlowProcess = new ManagerWorkFlowProcess();
         private readonly IManagerWorkFlowProcessTask _managerWorkFlowProcessTask = new ManagerWorkFlowProcessTask();
@@ -22,41 +22,41 @@ namespace VPC.Framework.Business.WorkFlow.Attribute
         private readonly IManagerWorkFlowOperation _managerWorkFlowOperation = new ManagerWorkFlowOperation();
         private IMetadataManager iMetadataManager = new VPC.Framework.Business.MetadataManager.Contracts.MetadataManager();
         private IManagerWorkFlowTransition _managerTrasition = new ManagerWorkFlowTransition();
-        private IManagerWorkFlow _managerWorkFlow=new ManagerWorkFlow();
+        private IManagerWorkFlow _managerWorkFlow = new ManagerWorkFlow();
         private IWorkFlowProcess _processWorkFlow = new WorkFlowProcess();
         WorkFlowResultMessage<WorkFlowProcessMessage> IOperationFlowEngine.PreProcess(Guid tenantId, OperationWapper operation, WorkFlowProcessProperties properties)
         {
-            var arrayList = new ArrayList { properties, operation.Data,tenantId };
+            var arrayList = new ArrayList { properties, operation.Data, tenantId };
             var resM = new WorkFlowResultMessage<WorkFlowProcessMessage>();
 
-         
-           var itsOperationProcess= WorkFlowCommon(tenantId,properties.EntityName, properties.SubTypeCode,operation.OperationType);
-           if(itsOperationProcess.Count>0)
-           {
-            //get its all process task
-            var allTasks = _managerWorkFlowProcessTask.GetWorkFlowProcessTask(tenantId, itsOperationProcess[0].WorkFlowId);
-            var itsPreProcessTasks = new List<WorkFlowProcessTaskInfo>();          
-            foreach (var itsOperationProc in itsOperationProcess)
-            {
-                if (itsOperationProc.ProcessType == (int)WorkFlowProcessType.PreProcess)
-                    itsPreProcessTasks = (from allProcessTask in allTasks
-                                          where itsOperationProc.WorkFlowProcessId == allProcessTask.WorkFlowProcessId
-                                          orderby allProcessTask.SequenceCode
-                                          select allProcessTask).ToList();
-                
-            }
 
-            foreach (var itsPreProcessTask in itsPreProcessTasks)
+            var itsOperationProcess = WorkFlowCommon(tenantId, properties.EntityName, properties.SubTypeCode, operation.OperationType);
+            if (itsOperationProcess.Count > 0)
             {
-                WorkFlowProcessMessage processResult = _processWorkFlow.OperationProcess(itsPreProcessTask.ProcessCode, arrayList);
-                if (!processResult.Success)
+                //get its all process task
+                var allTasks = _managerWorkFlowProcessTask.GetWorkFlowProcessTask(tenantId, itsOperationProcess[0].WorkFlowId);
+                var itsPreProcessTasks = new List<WorkFlowProcessTaskInfo>();
+                foreach (var itsOperationProc in itsOperationProcess)
                 {
-                    throw new CustomWorkflowException<WorkFlowMessage>(processResult.ErrorMessage.Code);
+                    if (itsOperationProc.ProcessType == (int)WorkFlowProcessType.PreProcess)
+                        itsPreProcessTasks = (from allProcessTask in allTasks
+                                              where itsOperationProc.WorkFlowProcessId == allProcessTask.WorkFlowProcessId
+                                              orderby allProcessTask.SequenceCode
+                                              select allProcessTask).ToList();
+
                 }
-                resM.Result = processResult;
+
+                foreach (var itsPreProcessTask in itsPreProcessTasks)
+                {
+                    WorkFlowProcessMessage processResult = _processWorkFlow.OperationProcess(itsPreProcessTask.ProcessCode, arrayList);
+                    if (!processResult.Success)
+                    {
+                        throw new CustomWorkflowException<WorkFlowMessage>(processResult.ErrorMessage.Code);
+                    }
+                    resM.Result = processResult;
+                }
+
             }
-           
-           }            
 
             var resultArrayList = new ArrayList { properties };
             if (resM.Result != null && resM.Result.Data != null)
@@ -69,81 +69,37 @@ namespace VPC.Framework.Business.WorkFlow.Attribute
 
         WorkFlowResultMessage<WorkFlowProcessMessage> IOperationFlowEngine.PostProcess(Guid tenantId, OperationWapper operation, WorkFlowProcessProperties properties)
         {
-           var arrayList = new ArrayList { properties, operation.Data,tenantId };
+            var arrayList = new ArrayList { properties, operation.Data, tenantId };
             var resM = new WorkFlowResultMessage<WorkFlowProcessMessage>();
 
-         
-           var itsOperationProcess= WorkFlowCommon(tenantId,properties.EntityName, properties.SubTypeCode,operation.OperationType);
-           if(itsOperationProcess.Count>0)
-           {
-            //get its all process task
-            var allTasks = _managerWorkFlowProcessTask.GetWorkFlowProcessTask(tenantId, itsOperationProcess[0].WorkFlowId);           
-            var itsPostProcessTasks = new List<WorkFlowProcessTaskInfo>();
-            foreach (var itsOperationProc in itsOperationProcess)
-            {                
 
-                if (itsOperationProc.ProcessType == (int)WorkFlowProcessType.PostProcess)
-                    itsPostProcessTasks = (from allProcessTask in allTasks
-                                           where itsOperationProc.WorkFlowProcessId == allProcessTask.WorkFlowProcessId
-                                           orderby allProcessTask.SequenceCode
-                                           select allProcessTask).ToList();
-            }
-
-            foreach (var itsPostProcessTask in itsPostProcessTasks)
+            var itsOperationProcess = WorkFlowCommon(tenantId, properties.EntityName, properties.SubTypeCode, operation.OperationType);
+            if (itsOperationProcess.Count > 0)
             {
-                WorkFlowProcessMessage processResult = _processWorkFlow.OperationProcess(itsPostProcessTask.ProcessCode, arrayList);
-                if (!processResult.Success)
+                //get its all process task
+                var allTasks = _managerWorkFlowProcessTask.GetWorkFlowProcessTask(tenantId, itsOperationProcess[0].WorkFlowId);
+                var itsPostProcessTasks = new List<WorkFlowProcessTaskInfo>();
+                foreach (var itsOperationProc in itsOperationProcess)
                 {
-                    throw new CustomWorkflowException<WorkFlowMessage>(processResult.ErrorMessage.Code);
+
+                    if (itsOperationProc.ProcessType == (int)WorkFlowProcessType.PostProcess)
+                        itsPostProcessTasks = (from allProcessTask in allTasks
+                                               where itsOperationProc.WorkFlowProcessId == allProcessTask.WorkFlowProcessId
+                                               orderby allProcessTask.SequenceCode
+                                               select allProcessTask).ToList();
                 }
-                resM.Result = processResult;
-            }
-           }
-            
 
-            var resultArrayList = new ArrayList { properties };
-            if (resM.Result != null && resM.Result.Data != null)
-            {
-                resultArrayList.Add(resM.Result.Data);
-            }
-
-            return resM;  
-        }
-
-        WorkFlowResultMessage<WorkFlowProcessMessage> IOperationFlowEngine.Process(Guid tenantId, OperationWapper operation, WorkFlowProcessProperties properties)
-        {          
-             var arrayList = new ArrayList { properties, operation.Data,tenantId };
-            var resM = new WorkFlowResultMessage<WorkFlowProcessMessage>();
-
-         
-           var itsOperationProcess= WorkFlowCommon(tenantId,properties.EntityName, properties.SubTypeCode,operation.OperationType);
-           if(itsOperationProcess.Count>0)
-           {
-            //get its all process task
-            var allTasks = _managerWorkFlowProcessTask.GetWorkFlowProcessTask(tenantId, itsOperationProcess[0].WorkFlowId);            
-            var itsProcessTasks = new List<WorkFlowProcessTaskInfo>();            
-            foreach (var itsOperationProc in itsOperationProcess)
-            {               
-
-                if (itsOperationProc.ProcessType == (int)WorkFlowProcessType.Process)
-                    itsProcessTasks = (from allProcessTask in allTasks
-                                       where itsOperationProc.WorkFlowProcessId == allProcessTask.WorkFlowProcessId
-                                       orderby allProcessTask.SequenceCode
-                                       select allProcessTask).ToList();
-
-              
-            }           
-
-            foreach (var itsProcessTask in itsProcessTasks)
-            {
-                WorkFlowProcessMessage processResult = _processWorkFlow.OperationProcess(itsProcessTask.ProcessCode, arrayList);
-                if (!processResult.Success)
+                foreach (var itsPostProcessTask in itsPostProcessTasks)
                 {
-                    throw new CustomWorkflowException<WorkFlowMessage>(processResult.ErrorMessage.Code);
+                    WorkFlowProcessMessage processResult = _processWorkFlow.OperationProcess(itsPostProcessTask.ProcessCode, arrayList);
+                    if (!processResult.Success)
+                    {
+                        throw new CustomWorkflowException<WorkFlowMessage>(processResult.ErrorMessage.Code);
+                    }
+                    resM.Result = processResult;
                 }
-                resM.Result = processResult;
             }
-           }            
+
 
             var resultArrayList = new ArrayList { properties };
             if (resM.Result != null && resM.Result.Data != null)
@@ -154,42 +110,87 @@ namespace VPC.Framework.Business.WorkFlow.Attribute
             return resM;
         }
 
-       void IOperationFlowEngine.FirstOperation(Guid tenantId,WorkFlowProcessProperties properties)
-       {
-           
-           var entityId = iMetadataManager.GetEntityContextByEntityName(properties.EntityName);           
-           var workFlow = _managerWorkFlow.GetWorkFlow(tenantId, entityId,properties.SubTypeCode);
-           if(workFlow!=null)
-           {
-            var steps = _managerWorkFlowStep.GetWorkFlowSteps(tenantId, workFlow.WorkFlowId).ToList();
-                if(steps.Count>0)
+        WorkFlowResultMessage<WorkFlowProcessMessage> IOperationFlowEngine.Process(Guid tenantId, OperationWapper operation, WorkFlowProcessProperties properties)
+        {
+            var arrayList = new ArrayList { properties, operation.Data, tenantId };
+            var resM = new WorkFlowResultMessage<WorkFlowProcessMessage>();
+
+
+            var itsOperationProcess = WorkFlowCommon(tenantId, properties.EntityName, properties.SubTypeCode, operation.OperationType);
+            if (itsOperationProcess.Count > 0)
+            {
+                //get its all process task
+                var allTasks = _managerWorkFlowProcessTask.GetWorkFlowProcessTask(tenantId, itsOperationProcess[0].WorkFlowId);
+                var itsProcessTasks = new List<WorkFlowProcessTaskInfo>();
+                foreach (var itsOperationProc in itsOperationProcess)
                 {
-                            transactionHistory.CreateTransitionHistory(tenantId,new WorkFlowTransition{
-                            TransitionHistoryId =Guid.NewGuid(),
-                            RefId =properties.resultId,
-                            EntityId=entityId,
-                            WorkFlowStepId=steps[0].WorkFlowStepId,  
-                            StartTime=DateTime.UtcNow,
-                            EndTime=DateTime.UtcNow,
-                            AssignedUserId=Guid.Empty,
-                            AuditInfo=new Entities.Common.AuditDetail{CreatedBy=properties.UserId} 
+
+                    if (itsOperationProc.ProcessType == (int)WorkFlowProcessType.Process)
+                        itsProcessTasks = (from allProcessTask in allTasks
+                                           where itsOperationProc.WorkFlowProcessId == allProcessTask.WorkFlowProcessId
+                                           orderby allProcessTask.SequenceCode
+                                           select allProcessTask).ToList();
+
+
+                }
+
+                foreach (var itsProcessTask in itsProcessTasks)
+                {
+                    WorkFlowProcessMessage processResult = _processWorkFlow.OperationProcess(itsProcessTask.ProcessCode, arrayList);
+                    if (!processResult.Success)
+                    {
+                        throw new CustomWorkflowException<WorkFlowMessage>(processResult.ErrorMessage.Code);
+                    }
+                    resM.Result = processResult;
+                }
+            }
+
+            var resultArrayList = new ArrayList { properties };
+            if (resM.Result != null && resM.Result.Data != null)
+            {
+                resultArrayList.Add(resM.Result.Data);
+            }
+
+            return resM;
+        }
+
+        void IOperationFlowEngine.FirstOperation(Guid tenantId, WorkFlowProcessProperties properties)
+        {
+
+            var entityId = iMetadataManager.GetEntityContextByEntityName(properties.EntityName);
+            var workFlow = _managerWorkFlow.GetWorkFlow(tenantId, entityId, properties.SubTypeCode);
+            if (workFlow != null)
+            {
+                var steps = _managerWorkFlowStep.GetWorkFlowSteps(tenantId, workFlow.WorkFlowId).ToList();
+                if (steps.Count > 0)
+                {
+                    transactionHistory.CreateTransitionHistory(tenantId, new WorkFlowTransition
+                    {
+                        TransitionHistoryId = Guid.NewGuid(),
+                        RefId = properties.resultId,
+                        EntityId = entityId,
+                        WorkFlowStepId = steps[0].WorkFlowStepId,
+                        StartTime = DateTime.UtcNow,
+                        EndTime = DateTime.UtcNow,
+                        AssignedUserId = Guid.Empty,
+                        AuditInfo = new Entities.Common.AuditDetail { CreatedBy = properties.UserId }
                     });
 
-                    dynamic jsonObject = new JObject ();
+                    dynamic jsonObject = new JObject();
                     jsonObject.CurrentWorkFlowStep = steps[0].TransitionType.Id;
 
-                    IEntityResourceManager _iEntityResourceManager = new VPC.Framework.Business.EntityResourceManager.Contracts.EntityResourceManager ();
+                    IEntityResourceManager _iEntityResourceManager = new VPC.Framework.Business.EntityResourceManager.Contracts.EntityResourceManager();
                     _iEntityResourceManager.UpdateSpecificField(tenantId, properties.EntityName, properties.resultId, "CurrentWorkFlowStep", steps[0].TransitionType.Id.ToString());
-                   // var resultId = _iEntityResourceManager.UpdateResult (tenantId, properties.UserId,properties.resultId,properties.EntityName, jsonObject, properties.SubTypeCode);
+                    // var resultId = _iEntityResourceManager.UpdateResult (tenantId, properties.UserId,properties.resultId,properties.EntityName, jsonObject, properties.SubTypeCode);
                 }
-           }
-       }
+            }
+        }
 
-        
-        private List<WorkFlowProcessInfo> WorkFlowCommon(Guid tenantId,string entityName, string subTypeCode,WorkFlowOperationType operationType)
+
+        private List<WorkFlowProcessInfo> WorkFlowCommon(Guid tenantId, string entityName, string subTypeCode, WorkFlowOperationType operationType)
         {
-            var entityId = iMetadataManager.GetEntityContextByEntityName(entityName);           
-            var workFlow = _managerWorkFlow.GetWorkFlow(tenantId, entityId,subTypeCode);
+            var entityId = iMetadataManager.GetEntityContextByEntityName(entityName);
+            var workFlow = _managerWorkFlow.GetWorkFlow(tenantId, entityId, subTypeCode);
             if (workFlow == null)
             {
                 return new List<WorkFlowProcessInfo>();
@@ -208,6 +209,6 @@ namespace VPC.Framework.Business.WorkFlow.Attribute
             return itsOperationProcess;
         }
 
-        
+
     }
 }

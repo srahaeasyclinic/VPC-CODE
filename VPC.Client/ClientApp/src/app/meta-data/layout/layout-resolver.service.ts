@@ -4,12 +4,14 @@ import { Resolve, ActivatedRoute, Params, ActivatedRouteSnapshot, RouterStateSna
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { MenuService } from '../../services/menu.service';
 @Injectable()
 export class LayoutResolver implements Resolve<any> {
 
   constructor(
     private http: HttpClient,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private menuService: MenuService
   ) { }
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
@@ -19,7 +21,9 @@ export class LayoutResolver implements Resolve<any> {
 
     let layout: string = '/api/meta-data';
     id = route.params['id'];
-    name = route.params['name'];
+    // name = route.params['name'];
+    let result=this.menuService.getMenuconext();
+      name = result.param_name;
 
     let query: string = '?&pagingParameter.pageNumber=1' + '&pagingParameter.pageSize=10';
     var url = `${environment.apiUrl}` + layout + '/' + name + '/layouts/' + id;

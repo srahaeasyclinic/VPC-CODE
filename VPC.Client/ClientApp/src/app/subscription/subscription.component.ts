@@ -7,7 +7,7 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { MenuService } from '../services/menu.service';
 import{GlobalResourceService} from '../global-resource/global-resource.service';
 import { Resource } from '../model/resource';
-
+import {CommonService } from 'src/app/services/common.service';
 
 @Component({
   selector: 'app-subscription',
@@ -21,13 +21,14 @@ export class SubscriptionComponent implements OnInit {
   public subscriptionInfo = { name: '', group: { id: '', name: '' } };
   groupTypes = [];
   subsGroups = [];
-
-  constructor(private activatedRoute: ActivatedRoute, private router: Router,
+  public pageSize: number = this.commonService.defaultPageSize();
+  
+  constructor(private activatedRoute: ActivatedRoute, private router: Router, private commonService: CommonService,
       private modalService: NgbModal, private subscriptionService: SubscriptionService, private toster: TosterService, private globalResourceService: GlobalResourceService, public menuService: MenuService
   ) { }
 
   ngOnInit() {
-    this.resource=this.globalResourceService.getGlobalResources();
+    //this.resource=this.globalResourceService.getGlobalResources();
     this.getSubscriptions();
     this.getGroupTypes();
 
@@ -53,15 +54,15 @@ export class SubscriptionComponent implements OnInit {
 
 
     if (this.subscriptionInfo.name === "") {
-      errorMessage += this.getResourceValue("Nameisrequired")+"<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("subscription_field_name")+"<br/>";
     }
     else if (this.subscriptionInfo.group == null) {
       if (this.subscriptionInfo.group.id == "")
-        errorMessage +=this.getResourceValue("GroupIsRequired")+"<br/>";
+        errorMessage += this.globalResourceService.requiredValidator("subscription_field_category")+"<br/>";
     }
 
     if (this.subscriptionInfo.group.name === "") {
-      errorMessage +=this.getResourceValue("GroupIsRequired")+"<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("subscription_field_category")+"<br/>";
     }
 
 
@@ -79,7 +80,7 @@ export class SubscriptionComponent implements OnInit {
           if (data) {
             this.getSubscriptions();
             this.modalService.dismissAll();
-            this.toster.showSuccess(this.getResourceValue('SubscriptionAddedSuccessfully.'));
+            this.toster.showSuccess(this.globalResourceService.updateSuccessMessage('subscription_displayname'));
           }
         },
         error => {
@@ -93,15 +94,15 @@ export class SubscriptionComponent implements OnInit {
 
 
     if (this.subscriptionInfo.name === "") {
-      errorMessage += this.getResourceValue("Nameisrequired")+"<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("subscription_field_name")+"<br/>";
     }
     else if (this.subscriptionInfo.group == null) {
       if (this.subscriptionInfo.group.id == "")
-        errorMessage += this.getResourceValue("GroupIsRequired")+"<br/>";
+        errorMessage += this.globalResourceService.requiredValidator("subscription_field_category")+"<br/>";
     }
 
     if (this.subscriptionInfo.group.name === "") {
-      errorMessage += this.getResourceValue("GroupIsRequired")+"<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("subscription_field_category")+"<br/>";
     }
 
 
@@ -129,7 +130,7 @@ export class SubscriptionComponent implements OnInit {
           if (data) {
             this.getSubscriptions();
             this.subscriptionInfo = { name: '', group: { id: '', name: '' } };
-            this.toster.showSuccess(this.getResourceValue('SubscriptionAddedSuccessfully'));
+            this.toster.showSuccess(this.globalResourceService.updateSuccessMessage('subscription_displayname'));
           }
         },
         error => {

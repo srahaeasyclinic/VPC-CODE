@@ -1,4 +1,5 @@
 using VPC.Metadata.Business.DataAnnotations;
+using VPC.Metadata.Business.Entity.Configuration;
 
 namespace VPC.Entities.EntityCore.Model.Query
 {
@@ -42,6 +43,9 @@ namespace VPC.Entities.EntityCore.Model.Query
         public string TypeOf {get; set;}
         public bool VirtualField{get;set;}
         public string VirtualName{get;set;}
+        public bool ActiveVersionField { get; set; }
+        public bool DraftVersionField { get; set; }
+        public IncrementType AutoIncrement { get; set; }
         //-----------------------
     }
 }

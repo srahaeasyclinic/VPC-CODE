@@ -23,6 +23,7 @@ export class ListToolbarComponent implements OnInit {
   private toolbarGroup: string;
   public layoutInfo: LayoutModel = new LayoutModel();
   public resource: Resource;
+  public searchText: string = '';
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -233,6 +234,14 @@ generateResourceName(word)
       item.sequence = a;
       a++;
     });
+  }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
   }
 
 

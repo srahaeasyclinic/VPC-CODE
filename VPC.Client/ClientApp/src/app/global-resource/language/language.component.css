@@ -4,7 +4,6 @@
     width: 46px;
     height: 46px;
     float: right;
-    right: 30px;
 }
 
 .top-dropdown:hover {
@@ -76,7 +75,7 @@
 } */
 
 .profile li a{
-    color:#484848;
+    
     line-height: 32px;
 }
 .profile li a i{
@@ -85,8 +84,17 @@
     margin-right: 10px;
 }
 .profile li{
+    color:#484848;
     padding:5px 12px;
     border-left: 3px solid #f9f9f9;
+}
+.selected{
+    background-color: #1268cb;
+    color:#fff !important;
+}
+.selected:hover{
+    background-color: #1268cb !important;
+    border-left: 3px solid #1268cb !important;
 }
 
 

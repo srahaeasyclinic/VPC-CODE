@@ -9,7 +9,7 @@
     <utility-top-bar [tree]="tree" [defaultLayoutData]="layoutInfo"></utility-top-bar>
 </div>
 <div class="page-content">
-  <my-tree [rootNode]="tree" [mode]="1"   [resource]="resource" *ngIf="isTreeReady" class="create-view">
+  <my-tree [rootNode]="tree" [mode]="1"   [resource]="resource" [entityName]="entityName" *ngIf="isTreeReady" class="create-view">
   </my-tree>
 </div>
 

@@ -33,17 +33,16 @@ namespace VPC.WebApi.Controllers.EntityController {
         private readonly IMetadataManager _iMetadataManager;
         private readonly IJsonMessage _iJsonMessage;
         private readonly IInitilizeManager _initilizeManager;
-        private readonly IMatcher _iMatcher;
 
         private readonly IInsertHelper _iEntityQueryManagerV1;
 
-        public EntityController (IEntityResourceManager iEntityResourceManager, ILayoutManager iILayoutManager, IMetadataManager iMetadataManager, IJsonMessage iJsonMessage, IInitilizeManager initilizeManager, IMatcher iMatcher, IInsertHelper iEntityQueryManagerV1) {
+        public EntityController (IEntityResourceManager iEntityResourceManager, ILayoutManager iILayoutManager, IMetadataManager iMetadataManager, IJsonMessage iJsonMessage, IInitilizeManager initilizeManager, IInsertHelper iEntityQueryManagerV1) {
             _iEntityResourceManager = iEntityResourceManager;
             _iILayoutManager = iILayoutManager;
             _iMetadataManager = iMetadataManager;
             _iJsonMessage = iJsonMessage;
             _initilizeManager = initilizeManager;
-            _iMatcher = iMatcher;
+
             _iEntityQueryManagerV1 = iEntityQueryManagerV1;
         }
 
@@ -120,11 +119,13 @@ namespace VPC.WebApi.Controllers.EntityController {
                 }
 
                 var result = _iEntityResourceManager.GetResultDetailsFromDefaultLayout (tenantId, entityName, id, LayoutType.Form, subType, LayoutContext.Edit);
+                //need to add in manager layer..
                 GetDetailEntity (entityName, id, subType, tenantId, result);
 
                 if (result == null || result.Rows.Count <= 0)
                     return NotFound ("Data not found");
 
+                //------------- need to move in mapper
                 if (result.Columns.Contains ("Context")) {
                     result = SetEntityNamebyCode (entityName, result); //Added to get Entityname by Entity code for Email/SMSTemplate
                 }
@@ -132,36 +133,32 @@ namespace VPC.WebApi.Controllers.EntityController {
                 ApiHelper.MapDynamicColumn (result.Columns);
                 stopwatch.StopAndLog ("GetEntityDetails method of EntityController.");
 
-                var computedField = _iILayoutManager.GetComputedFields (tenantId, entityName, LayoutType.Form, subType, (int) LayoutContext.Edit);
-
+                //version control.................
+                var versionControlName = _iMetadataManager.GetVersionControlName(entityName);
                 var resultModel = new ExpandoObject () as IDictionary<string, Object>;
-                var receiversWithValue = new List<ComputedField> ();
+                var versionId = string.Empty;
                 foreach (DataColumn item in result.Columns) {
-                    resultModel.Add (item.ColumnName, result.Rows[0][item.ColumnName]);
-                    if (computedField.Any ()) {
-                        // var broadcuster = computedField.FirstOrDefault(t => !string.IsNullOrEmpty(t.BroadcastingTypes) && t.Name.ToLower().Equals(item.ColumnName.ToLower()));
-                        // if (broadcuster != null)
-                        // {
-                        //     var receiver = computedField.FirstOrDefault(
-                        //         t => !string.IsNullOrEmpty(t.ReceivingTypes) &&
-                        //         t.ReceivingTypes.ToLower().Equals(broadcuster.BroadcastingType.ToLower())
-                        //         );
-                        //     if (receiver != null)
-                        //     {
-                        //         receiver.Value = result.Rows[0][item.ColumnName];
-                        //         var computed = new ComputedField();
-                        //         computed.FieldName = receiver.Name;
-                        //         computed.Value = receiver.Value;
-                        //         computed.MethodName = broadcuster.BroadcastingType;
-                        //         receiversWithValue.Add(computed);
-                        //     }
-                        // }
+                    if(!string.IsNullOrEmpty(versionControlName) && item.ColumnName.ToLower().Equals("activeversion")){
+                        versionId = result.Rows[0][item.ColumnName].ToString();
                     }
+                    resultModel.Add (item.ColumnName, result.Rows[0][item.ColumnName]);
                 }
-                if (receiversWithValue.Any ()) {
-                    //computed manager call
+              
+                var myObj = new ExpandoObject ();
+                ((IDictionary<string, object>) myObj).Add (entityName.ToString (), resultModel);
+
+                //--------------------
+                if(!string.IsNullOrEmpty(versionControlName)){
+                    Guid versionGuid = Guid.Parse(versionId.ToString());
+                    var versionDetails = _iEntityResourceManager.GetResultDetailsByVersionId (tenantId, entityName, id, versionControlName, versionGuid, LayoutType.Form, subType, LayoutContext.Edit);
+                    GetDetailEntity (versionControlName, versionGuid, subType, tenantId, versionDetails);
+                    IDictionary<string, object> versionModel = MapData (versionControlName, id, subType, tenantId, versionDetails);
+                    ((IDictionary<string, object>) myObj).Add (versionControlName.ToString (), versionModel);
                 }
-                return Ok (resultModel);
+                //--------------------
+
+                
+                return Ok (myObj);
             } catch (Exception ex) {
                 _log.Error (ExceptionFormatter.SerializeToString (ex));
                 return StatusCode ((int) HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
@@ -214,7 +211,7 @@ namespace VPC.WebApi.Controllers.EntityController {
         [ProducesResponseType (200)]
         [ProducesResponseType (500)]
         [ProducesResponseType (404)]
-        //   [ValidateJObjectdata]
+        // [ValidateJObjectdata]
         public IActionResult SaveResult ([FromRoute] string entityName, [FromQuery] string subType, [FromBody] JObject value) {
             try {
                 var stopwatch = StopwatchLogger.Start (_log);
@@ -224,12 +221,6 @@ namespace VPC.WebApi.Controllers.EntityController {
                 var result = _iEntityResourceManager.SaveResult (TenantCode, UserId, entityName, value, subType);
                 stopwatch.StopAndLog ("SaveResult of EntityController");
                 return Ok (new { result });
-                // var result1 = _iEntityResourceManager.SaveResult(TenantCode, UserId, entityName, value, subType);
-                //var id = Guid.NewGuid ();
-                //var query = _iEntityQueryManagerV1.BuildInsertQuery (id, TenantCode, entityName, value, subType, UserId);
-                // var col = _iEntityQueryManagerV1.MatchTest(TenantCode, entityName, value, subType, UserId);
-                //return Ok (new { query });
-                //  return Ok(new {col, query });
             } catch (FieldAccessException ex) {
                 //return BadRequest(ex.Message);
                 _log.Error (ExceptionFormatter.SerializeToString (ex));
@@ -245,13 +236,18 @@ namespace VPC.WebApi.Controllers.EntityController {
         [ProducesResponseType (200)]
         [ProducesResponseType (500)]
         [ProducesResponseType (404)]
-        [ValidateJObjectdata]
+        // [ValidateJObjectdata]
         public IActionResult UpdateResult ([FromRoute] string entityName, Guid id, [FromQuery] string subType, [FromBody] JObject value) {
             try {
                 var stopwatch = StopwatchLogger.Start (_log);
                 _log.Info ("Called EntityController UpdateResult");
                 if (value == null) return BadRequest ("Value required");
                 if (string.IsNullOrEmpty (subType)) return BadRequest ("sub type required");
+
+                // var mainObj = value.Children ().FirstOrDefault (t => t.Path.ToLower ().Equals (entityName.ToLower()));
+                // var targetObj = mainObj.First ().ToObject<JObject> ();
+                // var result = _iEntityResourceManager.UpdateResult (TenantCode, UserId, id, entityName, targetObj, subType);
+
                 var result = _iEntityResourceManager.UpdateResult (TenantCode, UserId, id, entityName, value, subType);
                 stopwatch.StopAndLog ("UpdateResult of EntityController");
                 return Ok (result);
@@ -376,9 +372,11 @@ namespace VPC.WebApi.Controllers.EntityController {
                 var tenantId = TenantCode;
                 var relatedColumn = _iMetadataManager.GetRelatedColumnNameOfDetailEntity (entityName, detailEntityName);
                 if (relatedColumn != null) {
-                    value.Add (relatedColumn.FieldName, id);
+                    JObject channel = (JObject) value[detailEntityName.ToLower ()];
+                    var prop = new JProperty (relatedColumn.FieldName, id);
+                    channel.Add (prop);
                 }
-                var result = _iEntityResourceManager.SaveResult (tenantId, UserId, detailEntityName, value, string.Empty);
+                var result = _iEntityResourceManager.SaveResult (tenantId, UserId, detailEntityName, value, subType);
 
                 stopwatch.StopAndLog ("DetailEntity_SaveResult of EntityController");
 
@@ -431,6 +429,164 @@ namespace VPC.WebApi.Controllers.EntityController {
                 }
             }
             return resultdt;
+        }
+
+        [HttpGet ("{entityName}/{id:guid}/fields/{fieldName}")]
+        [ProducesResponseType (200)]
+        [ProducesResponseType (500)]
+        [ProducesResponseType (404)]
+        public IActionResult GetFieldValue (string entityName, Guid id, string fieldName) {
+            try {
+                var result = true;
+                return Ok (result);
+            } catch (FieldAccessException fx) {
+                _log.Error (ExceptionFormatter.SerializeToString (fx));
+                return StatusCode ((int) HttpStatusCode.BadRequest, fx.Message);
+            } catch (Exception ex) {
+                //return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+                _log.Error (ExceptionFormatter.SerializeToString (ex));
+                return StatusCode ((int) HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route ("{entityName}/{id:guid}/versions")]
+        [ProducesResponseType (200)]
+        [ProducesResponseType (500)]
+        [ProducesResponseType (404)]
+        public IActionResult GetEntityVersions ([FromRoute] string entityName, Guid id, int versionNo, [FromQuery] string subType) {
+            var tenantId = TenantCode;
+            try {
+                return Ok ("not implemented");
+            } catch (Exception ex) {
+                _log.Error (ExceptionFormatter.SerializeToString (ex));
+                return StatusCode ((int) HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            }
+        }
+
+        [HttpGet]
+        [Route ("{entityName}/{id:guid}/versions/{versionId:guid}")]
+        [ProducesResponseType (200)]
+        [ProducesResponseType (500)]
+        [ProducesResponseType (404)]
+        public IActionResult GetEntityVersionDetails ([FromRoute] string entityName, Guid id, Guid versionId, [FromQuery] string subType) {
+            // var tenantId = TenantCode;
+
+            // try {
+            //     var stopwatch = StopwatchLogger.Start (_log);
+            //     _log.Info ("Called EntityController GetEntityDetails with entityName {0}=", entityName);
+            //     _log.Info ("Called EntityController GetEntityDetails with subType {0}=", subType);
+
+            //     if (string.IsNullOrEmpty (entityName)) {
+            //         return BadRequest ("Entity name required!");
+            //     }
+            //     if (id == Guid.Empty) {
+            //         return BadRequest ("Id required!");
+            //     }
+            //     if (string.IsNullOrEmpty (subType)) {
+            //         return BadRequest ("Sub type required!");
+            //     }
+            //     var versionEntityName = _iMetadataManager.GetVersionControlName (entityName);
+            //     var result = _iEntityResourceManager.GetResultDetailsByVersionId (tenantId, entityName, id, versionEntityName, versionId, LayoutType.Form, subType, LayoutContext.Edit);
+            //   //  var result = _iEntityResourceManager.GetResultDetailsFromVersion (tenantId, entityName, id, LayoutType.Form, subType, LayoutContext.Edit, versionId);
+            //     if (result == null || result.Rows.Count <= 0)
+            //         return NotFound ("Data not found");
+
+            //     IDictionary<string, object> resultModel = MapData (entityName, id, subType, tenantId, result);
+
+            //     var myObj = new ExpandoObject ();
+            //     ((IDictionary<string, object>) myObj).Add (entityName.ToString (), resultModel);
+
+            //     // var version = _iEntityResourceManager.GetResultDetailsFromVersion (tenantId, entityName, id, LayoutType.Form, subType, LayoutContext.Edit, versionId);
+            //     // if (version == null || version.Rows.Count <= 0)
+            //     //     return NotFound ("Data not found");
+
+            //     // if (version != null && version.Rows.Count > 0) {
+            //     //     var versionEntityName = _iMetadataManager.GetVersionControlName (entityName);
+            //     //     IDictionary<string, object> versionModel = MapData (versionEntityName, id, subType, tenantId, version);
+            //     //     ((IDictionary<string, object>) myObj).Add (versionEntityName.ToString (), versionModel);
+            //     // }
+            //     return Ok (myObj);
+            // } catch (Exception ex) {
+            //     _log.Error (ExceptionFormatter.SerializeToString (ex));
+            //     return StatusCode ((int) HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            // }
+
+
+            var tenantId = TenantCode;
+            try {
+                var stopwatch = StopwatchLogger.Start (_log);
+          
+                if (string.IsNullOrEmpty (entityName)) {
+                    return BadRequest ("Entity name required!");
+                }
+                if (id == Guid.Empty) {
+                    return BadRequest ("Id required!");
+                }
+                if (string.IsNullOrEmpty (subType)) {
+                    return BadRequest ("Sub type required!");
+                }
+
+                var result = _iEntityResourceManager.GetResultDetailsFromDefaultLayout (tenantId, entityName, id, LayoutType.Form, subType, LayoutContext.Edit);
+                //need to add in manager layer..
+                GetDetailEntity (entityName, id, subType, tenantId, result);
+
+                if (result == null || result.Rows.Count <= 0)
+                    return NotFound ("Data not found");
+
+                if (result.Columns.Contains ("Context")) {
+                    result = SetEntityNamebyCode (entityName, result); //Added to get Entityname by Entity code for Email/SMSTemplate
+                }
+
+                ApiHelper.MapDynamicColumn (result.Columns);
+                stopwatch.StopAndLog ("GetEntityDetails method of EntityController.");
+                var versionControlName = _iMetadataManager.GetVersionControlName(entityName);
+
+                //var computedField = _iILayoutManager.GetComputedFields (tenantId, entityName, LayoutType.Form, subType, (int) LayoutContext.Edit);
+
+                var resultModel = new ExpandoObject () as IDictionary<string, Object>;
+               // var versionId = string.Empty;
+                //var receiversWithValue = new List<ComputedField> ();
+                foreach (DataColumn item in result.Columns) {
+                    // if(!string.IsNullOrEmpty(versionControlName) && item.ColumnName.ToLower().Equals("activeversion")){
+                    //     versionId = result.Rows[0][item.ColumnName].ToString();
+                    // }
+                    resultModel.Add (item.ColumnName, result.Rows[0][item.ColumnName]);
+                }
+              
+
+                var myObj = new ExpandoObject ();
+                ((IDictionary<string, object>) myObj).Add (entityName.ToString (), resultModel);
+
+                //--------------------
+                if(!string.IsNullOrEmpty(versionControlName)){
+                   
+                    var versionDetails = _iEntityResourceManager.GetResultDetailsByVersionId (tenantId, entityName, id, versionControlName, versionId, LayoutType.Form, subType, LayoutContext.Edit);
+                    IDictionary<string, object> versionModel = MapData (versionControlName, versionId, subType, tenantId, versionDetails);
+                    ((IDictionary<string, object>) myObj).Add (versionControlName.ToString (), versionModel);
+                }
+                //--------------------
+
+                
+                return Ok (myObj);
+            } catch (Exception ex) {
+                _log.Error (ExceptionFormatter.SerializeToString (ex));
+                return StatusCode ((int) HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            }
+        }
+
+        private IDictionary<string, object> MapData (string entityName, Guid id, string subType, Guid tenantId, DataTable result) {
+            GetDetailEntity (entityName, id, subType, tenantId, result);
+            if (result.Columns.Contains ("Context")) {
+                result = SetEntityNamebyCode (entityName, result); //Added to get Entityname by Entity code for Email/SMSTemplate
+            }
+
+            ApiHelper.MapDynamicColumn (result.Columns);
+            var resultModel = new ExpandoObject () as IDictionary<string, Object>;
+            foreach (DataColumn item in result.Columns) {
+                resultModel.Add (item.ColumnName, result.Rows[0][item.ColumnName]);
+            }
+            return resultModel;
         }
     }
 }

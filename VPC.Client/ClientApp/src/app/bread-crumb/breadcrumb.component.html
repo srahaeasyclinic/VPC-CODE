@@ -1,5 +1,6 @@
-﻿<ul class="breadcrumb">
-    <li *ngFor="let bcItem of segmenttree; let $index = index; let $last = last" title="{{getResourceByKey(bcItem.labelName)}}">
+﻿<!-- {{segmenttree|json}} -->
+<ul class="breadcrumb">
+    <!-- <li *ngFor="let bcItem of segmenttree; let $index = index; let $last = last" title="{{getResourceByKey(bcItem.labelName)}}">
         <a *ngIf="($index==0)" [ngClass]="{'active': true}"
                     (click)="openPageWithBreadcrumb(bcItem)">{{getResourceByKey(bcItem.labelName)}}</a>
         <span *ngIf="!$last && ($index==1)" [ngClass]="{'inactive': !$last}"
@@ -8,6 +9,11 @@
             (click)="openPageWithBreadcrumb(bcItem)">{{getResourceByKey(bcItem.labelName)}}</a>
         <span *ngIf="$last && !bcItem.isActive">{{getResourceByKey(bcItem.labelName)}}</span>
         <a *ngIf="$last && bcItem.isActive" [ngClass]="{'active': bcItem.isActive}" (click)="openPageWithBreadcrumb(bcItem)">{{getResourceByKey(bcItem.labelName)}}</a>
-    </li>
+    </li> -->
     <!-- <div class="active" [(ngModel)]="commonService.displayName4Breadcrumb">{{commonService.displayName4Breadcrumb}}</div> -->
+
+     <li *ngFor="let bcItem of segmenttree" title="{{bcItem.elementName}}">
+        <a class="default" *ngIf="(bcItem.elementURL=='' || bcItem.elementURL==null)" >{{bcItem.elementName}}</a>
+       <a class="clickable" *ngIf="(bcItem.elementURL!='' && bcItem.elementURL!=null)" (click)="openPageWithBreadcrumb(bcItem)">{{bcItem.elementName}}</a>
+    </li>
 </ul>

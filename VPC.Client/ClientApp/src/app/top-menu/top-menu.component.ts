@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
+import { Component, OnInit, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { MenuService } from '../services/menu.service';
 import { MenuGroup } from '../model/menuGroup';
 import { LoginService } from '../login/login.service';
@@ -14,7 +14,9 @@ import * as _ from 'lodash';
 import { UserInfoService } from '../services/userInfo.service';
 import { GlobalResourceService } from '../global-resource/global-resource.service'
 import { Resource } from '../model/resource';
+import { RoutelocalizationService } from '../services/routelocalization.service';
 //import { Observable } from 'rxjs';
+//import { MenuFilterPipe} from '../utility/menuFilter'
 
 @Component({
   selector: 'app-top-menu',
@@ -22,14 +24,16 @@ import { Resource } from '../model/resource';
   styleUrls: ['./top-menu.component.css'],
   // outputs: [" topMenuClickEvent:generateSideMenu ", " topMenuNewClickEvent:generateSideMenuNew "],
 })
-export class TopMenuComponent implements OnInit {
+export class TopMenuComponent implements OnInit,OnChanges {
 
   @Input() menus: NewMenuItem[];
   @Input() onlyLogin: boolean;
   @Output() groupClickEvent: EventEmitter<any> = new EventEmitter();
-  public groups: Array<MenuGroup> = [];
-
-
+  @Output() menuClickEvent:EventEmitter<any> = new EventEmitter();
+  public groups: NewMenuItem[] = [];
+  public groupMenu: NewMenuItem[] = [];
+  public subgroups: any = [];
+  public firstElement: NewMenuItem;
 
 
   public topMenuClickEvent: EventEmitter<any>;
@@ -40,32 +44,33 @@ export class TopMenuComponent implements OnInit {
   //isLog:boolean;
   private layoutType: number = 3;
   public defaultLayout: LayoutModel = new LayoutModel();
-  private orderBy: string = '';
+  // private orderBy: string = '';
   public sort: SortDescriptor[];
   public selectedFields: string = '';
   public results: any;
   public totalRecords: number = 0;
   public pageindex: number = 1;
-  private pageSize: number = 10;
+  // private pageSize: number = 10;
   private canUserChangePassword = true;
   username: any;
   public resource: Resource;
 
-  constructor(public menuService: MenuService, public authService: LoginService, private picklistService: PicklistUiService,
+  constructor(public localization:RoutelocalizationService,public menuService: MenuService, public authService: LoginService, private picklistService: PicklistUiService,
     private toster: TosterService, private userinfoService: UserInfoService,private globalResourceService: GlobalResourceService,private route:Router) {
     this.topMenuClickEvent = new EventEmitter();
     this.topMenuNewClickEvent = new EventEmitter();
   }
 
   ngOnInit() {
-    // this.topMenu = this.menuService.getTopMenu();
-    // this.groups = _.uniqBy(this.menus, 'groupName');
-    // this.topMenu = this.menuService.getTopMenu();
-    // this.isLog = this.authService.isLoggedIn;
-    //this.getDefaultLayout('MenuGroup'); 
+    
+   // console.log('this.groups ',JSON.stringify(this.groups));
     this.resource = this.globalResourceService.getGlobalResources();
-    this.groups = _.uniqBy(this.menus, 'groupName');
-    this.setData();
+    
+    //console.log('this.groups ', JSON.stringify(this.groups));
+    //this.setSubgroup();
+    
+    //this.initTopmenu();
+    //  console.log('this.subgroups ', JSON.stringify(this.subgroups));
     // this.menuService.getAllMenu().subscribe(result => {
     //   if (result) {
 
@@ -74,6 +79,13 @@ export class TopMenuComponent implements OnInit {
     //   }
     // });
 
+  }
+  ngOnChanges(changes: SimpleChanges) { 
+    this.groups = _.uniqBy(this.menus, 'groupId');
+    this.setData();
+    this.LoadTopmenu();
+    this.groupMenu = _.sortBy(this.groupMenu, 'groupIdSort');
+    //console.log('new menus',this.groupMenu);
   }
   setData() {
     
@@ -84,7 +96,7 @@ export class TopMenuComponent implements OnInit {
         
         this.userinfoService.checkPasswordChangeAccess = x
         this.canUserChangePassword = this.userinfoService.checkPasswordChangeAccess
-      }, error => console.log("testerror", error))
+      }, error => console.log("TopMenuerror", error))
     }
 
 
@@ -95,19 +107,97 @@ export class TopMenuComponent implements OnInit {
         
         this.userinfoService.username = x.username
         this.username = this.userinfoService.username
-      }, error => console.log("testerror", error))
+      }, error => console.log("Topmenuerror", error))
     }
 
   }
   topMenuClick(group): void {
-    this.groupClickEvent.emit(group);
+    this.getFirstelementfromGroup(group);
+    this.groupClickEvent.emit(this.firstElement);
   }
-
+  topSubMenuClick(subgroups):void {
+    this.menuClickEvent.emit(subgroups);
+}
   // topMenuNewClick(name): void {
 
   //   this.topMenuNewClickEvent.emit({ groupName: name });
 
   // }
+// setSubgroup(groupname:string)
+//   {
+//     let suggroup = this.menus.filter(d => d.groupName == groupname && d.parentId == '00000000-0000-0000-0000-000000000000');
+
+//     return _.sortBy(suggroup,'sortItem')
+//   }
+  setSubgroup(groupid:string)
+  {
+    //debugger;
+    if (this.groups == undefined && this.groups == null) return null;
+    let responseObj: NewMenuItem[]=[];
+
+    let maingroup = this.menus.filter(d => d.groupId == groupid && d.isMenuGroup==true && d.parentId == '00000000-0000-0000-0000-000000000000');
+    
+    maingroup.forEach(subel => {
+
+      let subgroup=this.menus.find(e => e.parentId == subel.id && e.isMenuGroup == true);
+      if (subgroup!=null && subgroup!=undefined && this.menus.find(e=>e.parentId==subgroup.id && e.isMenuGroup!=true))
+      {
+        responseObj.push(subel);
+      }
+
+    });    
+
+    //console.log('sss ',responseObj);
+  
+    return _.sortBy(responseObj, 'sortItem')
+    
+  }
+
+  //////////////////////////// this is not using due to irregular behavior/////////////////////////////////////////////////
+  LoadTopmenu()
+  {
+    this.groupMenu = [];
+    if (this.groups == undefined && this.groups == null) return null;
+
+    this.groups.forEach(element => {
+
+      let menus = new NewMenuItem();
+     
+      menus.id = element.id;
+      menus.name = element.name;
+      menus.layoutId = element.layoutId;
+      menus.menuIcon = element.menuIcon;
+      menus.menuTypeId = element.menuTypeId;
+      menus.menuTypeName = element.menuTypeName;
+      menus.menucode = element.menucode;
+      menus.parentId = element.parentId;
+      menus.referenceEntityId = element.referenceEntityId;
+      menus.sortItem = element.sortItem;
+    
+      menus.groupId = element.groupId;
+      menus.groupName = element.groupName;
+      menus.groupIdSort = element.groupIdSort;
+
+      menus.actionTypeId = element.actionTypeId;
+      menus.actionTypeName = element.actionTypeName;
+      menus.wellKnownLink = element.wellKnownLink;
+
+      menus.subGroup = this.setSubgroup(element.groupId)
+
+      // let subgroup = this.menus.filter(d => d.groupName == element.groupName && d.parentId == '00000000-0000-0000-0000-000000000000');
+
+      //  subgroup.forEach(subelement => {
+      //     if (this.menus.find(d => d.groupName == element.groupName && d.parentId==subelement.id))
+      //     {
+      //       menus.subGroup.push(subelement);
+      //     }
+      //  });
+      
+      this.groupMenu.push(menus);
+    });
+    
+    //console.log('new menus',this.groupMenu);
+  }
 
   onLogout() {
     this.authService.logout();
@@ -244,7 +334,21 @@ export class TopMenuComponent implements OnInit {
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
   }
+
   logoClick(){
-    this.route.navigate(['home']);
+    this.route.navigate([this.localization.getDefaultUrl()]);
+
+  }
+  getFirstelementfromGroup(group:any)
+  {
+    if (this.groups == undefined && this.groups == null) return null;
+    
+    let subgroup = this.menus.filter(d => d.parentId == group.id && d.isMenuGroup==true);
+    let firystelemnt=_.sortBy(subgroup, 'sortItem');
+    if (firystelemnt!=undefined && firystelemnt!=null) {
+      this.firstElement=firystelemnt[0];
+    } else {
+      return this.firstElement=group;
+    }
   }
 }

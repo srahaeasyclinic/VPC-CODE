@@ -9,7 +9,7 @@ namespace VPC.Metadata.Business.Tasks
     public class ChangePasswordTaskAttribute : TaskAttribute
     {
         
-        public ChangePasswordTaskAttribute(string name,string task,string verb="" ,string taskDisplay="") : base(name,task,verb,taskDisplay)
+        public ChangePasswordTaskAttribute(string name,string task,string verb="" ,string taskDisplay="Change password") : base(name,task,verb,taskDisplay)
         {
         }
     }   

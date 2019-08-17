@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef, ChangeDetectionStrategy, ViewChildren, QueryList } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 //import { TreeNode } from "../../../dynamic-form-builder/tree.module";
 import { ITreeNode, getTreenodeinstanceWithObject, generateRandomNo } from '../../../model/treeNode';
@@ -33,13 +33,17 @@ import { Operation } from '../../../model/operation';
 import { DebugRenderer2 } from '@angular/core/src/view/services';
 import { GlobalResourceService } from 'src/app/global-resource/global-resource.service';
 import { FieldModel } from '../../../model/fieldmodel';
+import { SharedTreeService } from 'src/app/dynamic-form-builder/service/sharedtree.service';
+import { TreeNodeComponent } from 'src/app/dynamic-form-builder/tree-node.component';
+import { MenuService } from '../../../services/menu.service';
 
 
 @Component({
 	selector: 'app-layout-detail-form',
 	templateUrl: './layout-detail-form.component.html',
 	styleUrls: ['./layout-detail-form.component.css'],
-	//changeDetection: ChangeDetectionStrategy.OnPush
+	providers: [SharedTreeService],
+	changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 
@@ -82,6 +86,26 @@ export class LayoutDetailFormComponent implements OnInit {
 	private isFirefox = typeof this.InstallTrigger !== 'undefined';
 	private isChrome = !!window['chrome'] && (!!window['chrome']['webstore'] || !!window['chrome']['runtime']);
 	public showLoader = false;
+	selectedRelatedEntityIndex = 0;
+	@ViewChildren(TreeNodeComponent) treeNodeComponent: QueryList<TreeNodeComponent>;
+	public entityInfo: any[];
+	selectedLayout: any = {}
+	pageInfo:
+    {
+      config:
+      {
+        allowConfiguration: boolean, displaySortColumn: boolean, direction: boolean, maxResult: boolean,
+        groupBy: boolean, clickableColumn: boolean
+      }
+      , selectedLayout: {},
+      addedItemToMainList: [],
+      fieldSource: [],
+      type: string
+
+    }
+
+	fieldSource: any = [];
+	config: { allowConfiguration: boolean; displaySortColumn: boolean; direction: boolean; maxResult: boolean; groupBy: boolean; clickableColumn: boolean; };
 	//
 	// public layoutContext: string = "";
 	// public subTypeName: string = "";
@@ -94,10 +118,12 @@ export class LayoutDetailFormComponent implements OnInit {
 		private commonService: CommonService,
 		private metadataService: MetadataService,
 		private zone: NgZone,
-		private cdr: ChangeDetectorRef,
+		private changeRef: ChangeDetectorRef,
 		private modalService: NgbModal,
 		private toster: TosterService,
-		public globalResourceService: GlobalResourceService
+		public globalResourceService: GlobalResourceService,
+		private sharedTreeService: SharedTreeService,
+		private menuService: MenuService
 	) {
 
 		this.getScreenSize();
@@ -137,6 +163,7 @@ export class LayoutDetailFormComponent implements OnInit {
 				this.isRendered = true;
 			}
 		}
+		this.changeRef.detectChanges();
 	}
 
 	entityname: string;
@@ -145,7 +172,7 @@ export class LayoutDetailFormComponent implements OnInit {
 		this.selectedTreeNode = null;
 		this.addedItemToMainList = [];
 		this.toolbarSource = [];
-		
+
 		this.getResource();
 
 	}
@@ -153,7 +180,6 @@ export class LayoutDetailFormComponent implements OnInit {
 
 	private init() {
 		this.layoutInfo = this.activatedRoute.snapshot.data['layoutDetails'];
-
 		this.activatedRoute.params.subscribe((params: Params) => {
 			this.layoutId = params['id'];
 		});
@@ -162,13 +188,15 @@ export class LayoutDetailFormComponent implements OnInit {
 			this.entityname = params['entityName'];
 		});
 
-
+		// let result=this.menuService.getMenuconext();
+		// this.entityname = result.param_name;
+		
 		this.getMetadataFieldsByName(this.entityname);
 
 	}
 
 	private addMandatoryFieldsAndActivityEntity(item, entityName) {
-		var myObj =getTreenodeinstanceWithObject({
+		var myObj = getTreenodeinstanceWithObject({
 			name: item.name,
 			value: "",
 			required: item.required, //need to change
@@ -186,7 +214,7 @@ export class LayoutDetailFormComponent implements OnInit {
 			receivingTypes: item.receivingTypes,
 			receiverDataTypes: item.receiverDataTypes,
 			broadcastingTypes: item.broadcastingTypes,
-			refId:'',
+			refId: '',
 			readOnly: item.readOnly,
 			accessibleLayoutTypes: item.accessibleLayoutTypes,
 			toolbar: item.toolbar,
@@ -202,7 +230,7 @@ export class LayoutDetailFormComponent implements OnInit {
 			this.tree = this.layoutInfo.formLayoutDetails;
 			// this.layoutContext = this.layoutInfo.contextName;
 			// this.subTypeName = this.layoutInfo.subtypeeName;
-		} else { 
+		} else {
 			//console.log('add access ');
 			//FormLayoutDetails
 			this.tree = getTreenodeinstanceWithObject({
@@ -216,7 +244,14 @@ export class LayoutDetailFormComponent implements OnInit {
 
 				if (this.metadatafield.fields != undefined) {
 					this.metadatafield.fields.forEach(item => {
-						if (item.controlType.toLocaleLowerCase() !== 'label' && item.required == true && (item.accessibleLayoutTypes === undefined || item.accessibleLayoutTypes.find(x => x === 2))) {
+						//if (item.controlType.toLocaleLowerCase() !== 'label' && item.required == true && (item.accessibleLayoutTypes === undefined || item.accessibleLayoutTypes.find(x => x === 2))) {
+						if (item.controlType.toLocaleLowerCase() !== 'label' && item.required == true && (item.accessibleLayoutTypes === undefined || (item.accessibleLayoutTypes && item.accessibleLayoutTypes.find(e =>
+							(e.toString().split('').length == 1 && e.toString().split('')[0] === this.layoutInfo.layoutType.toString())
+							||
+							(
+								e.toString().split('').length > 1 && e.toString().split('')[0] === this.layoutInfo.layoutType.toString() && e.toString().split('')[1] === this.layoutInfo.context.toString()
+							)
+						)))) {
 							this.addMandatoryFieldsAndActivityEntity(item, this.metadatafield.name)
 						}
 					});
@@ -229,8 +264,17 @@ export class LayoutDetailFormComponent implements OnInit {
 						}
 					});
 				}
+
+				if (this.metadatafield.versionControl != undefined) {
+					this.metadatafield.versionControl.fields.forEach(item => {
+						if (item.controlType.toLocaleLowerCase() !== 'label' && item.required == true && (item.accessibleLayoutTypes === undefined || item.accessibleLayoutTypes.find(x => x === 2))) {
+							this.addMandatoryFieldsAndActivityEntity(item, this.metadatafield.versionControl.name)
+						}
+					});
+				}
 			}
 
+			this.updateLayout();
 		}
 		this.setactivityOnMetadataFields();
 		//console.log('beforeSetId '+JSON.stringify(this.tree));
@@ -266,8 +310,8 @@ export class LayoutDetailFormComponent implements OnInit {
 	}
 	getResourceValue(key) {
 		return this.globalResourceService.getResourceValueByKey(key);
-	  }
-	
+	}
+
 
 	public updateLayout() {
 
@@ -282,7 +326,7 @@ export class LayoutDetailFormComponent implements OnInit {
 
 		this.layoutService.updateFormLayout(this.entityname, this.layoutId, this.layoutInfo).subscribe(result => {
 			//console.log(result);
-			this.toster.showSuccess(this.getResourceValue("LayoutSavedSuccessfully"));
+			this.toster.showSuccess(this.getResourceValue("metadata_operation_save_success_message"));
 		});
 		//console.log(' this.tree ', this.tree);
 	}
@@ -402,8 +446,10 @@ export class LayoutDetailFormComponent implements OnInit {
 			.pipe(first())
 			.subscribe(
 				data => {
+					
 					this.metadatafield = data;
 					this.initAfterDataFieldByName();
+					this.setData(data)
 					//console.log('getMetadataFieldsByName metadatafield '+ JSON.stringify(this.metadatafield));
 				},
 				error => {
@@ -411,7 +457,48 @@ export class LayoutDetailFormComponent implements OnInit {
 				});
 		//console.log('treenode'+JSON.stringify(this.tree.fields));
 	}
+	setData(data) {
+		this.selectedLayout = this.layoutInfo.formLayoutDetails;
+		this.addedItemToMainList = this.selectedLayout.toolbar ? this.selectedLayout.toolbar : [];
+		this.manipulateToolBar(data)
+		this.config = { allowConfiguration: true, displaySortColumn: false, direction: false, maxResult: false, groupBy: false, clickableColumn: false }
+		this.setFieldSourceProperties()
+		this.setPageInfo()
 
+	}
+	setPageInfo() {
+		this.pageInfo = {
+			config: this.config,
+			selectedLayout: this.selectedLayout,
+			addedItemToMainList: this.addedItemToMainList,
+			fieldSource: this.fieldSource,
+			type: 'toolbar'
+		}
+	}
+	manipulateToolBar(data) {
+
+		if (data.operations) {
+			for (var k = 0; k < data.operations.length; k++) {
+				this.fieldSource.push(data.operations[k]);
+			}
+		}
+		if (data.tasks) {
+			for (var k = 0; k < data.tasks.length; k++) {
+				this.fieldSource.push(data.tasks[k]);
+			}
+		}
+
+	}
+	setFieldSourceProperties() {
+		for (var i = 0; i < this.addedItemToMainList.length; i++) {
+			for (var j = 0; j < this.fieldSource.length; j++) {
+				if (this.addedItemToMainList[i].name === this.fieldSource[j].name) {
+					this.fieldSource[j].isRowSelected = true;
+					this.fieldSource[j].isAdded = true;
+				}
+			}
+		}
+	}
 	private setactivityOnMetadataFields() {
 
 		if (this.metadatafield != null || this.metadatafield != undefined) {
@@ -443,10 +530,22 @@ export class LayoutDetailFormComponent implements OnInit {
 			}
 
 			this.entityDeatils = this.metadatafield;
-			this.entityDeatils.fields = this.metadatafield.fields.filter(f => (f.accessibleLayoutTypes && f.accessibleLayoutTypes.find(e => e === 2)));
+
+			//fields mapper...
+			this.entityDeatils.fields = this.mapAccessibilityRule(this.metadatafield.fields);
+			//----- logic for qucik add
+			this.mapQuickAddMapper(this.entityDeatils.fields);
+			//----------
+
+			if (this.entityDeatils.versionControl && this.entityDeatils.versionControl.fields) {
+				this.entityDeatils.versionControl.fields = this.mapAccessibilityRule(this.metadatafield.versionControl.fields);
+				this.mapQuickAddMapper(this.entityDeatils.versionControl.fields);
+			}
+
 
 			if (this.metadatafield.activityEntity && this.metadatafield.activityEntity.fields) {
-				this.entityDeatils.activityEntity.fields = this.metadatafield.activityEntity.fields.filter(f => (f.accessibleLayoutTypes && f.accessibleLayoutTypes.find(e => e === 2)));
+				this.entityDeatils.activityEntity.fields = this.mapAccessibilityRule(this.entityDeatils.activityEntity.fields);
+				//this.entityDeatils.activityEntity.fields = this.metadatafield.activityEntity.fields.filter(f => (f.accessibleLayoutTypes && f.accessibleLayoutTypes.find(e => e === 2)));
 			}
 
 			this.tree.fields.forEach(item => {
@@ -457,8 +556,37 @@ export class LayoutDetailFormComponent implements OnInit {
 		}
 
 	}
+	mapQuickAddMapper(fields: FieldModel[]) {
+		fields.forEach(element => {
+			if (element.supportedQuickAddModes) {
+				element.supportedQuickAddModes.forEach(layoutType => {
+					var types = layoutType.toString().split('');
+					if (types.length > 1) {
+						element.isQuickAddSupported = false;
+						if (types[0] == this.layoutInfo.layoutType.toString()) {
+							if (types[1] == this.layoutInfo.context.toString()) {
+								element.isQuickAddSupported = true;
+								return;
+							}
+						}
+					}
+				});
+			}
+		});
+	}
 
-	public fieldDragStartEvent(field: any, entityName: string) {
+
+	mapAccessibilityRule(fields: any): FieldModel[] {
+		return fields.filter(f => (f.accessibleLayoutTypes && f.accessibleLayoutTypes.find(e =>
+			(e.toString().split('').length == 1 && e.toString().split('')[0] === this.layoutInfo.layoutType.toString())
+			||
+			(
+				e.toString().split('').length > 1 && e.toString().split('')[0] === this.layoutInfo.layoutType.toString() && e.toString().split('')[1] === this.layoutInfo.context.toString()
+			)
+		)));
+	}
+
+	public fieldDragStartEvent(field: any,entity) {
 		//console.log('Drag '+JSON.stringify(field));
 
 		//var count = this.layoutService.getnoOfcontroltype(this.tree,field.controlType);
@@ -472,17 +600,22 @@ export class LayoutDetailFormComponent implements OnInit {
 		// });
 
 		//event.preventDefault();
-		event.stopPropagation();
+
+		(<any>event).stopPropagation();
 		//console.log("field", field);
+		field.entityName = entity
 		if (field.type === "DetailEntity") {
 			field.dataType = "custom";
 			field.controlType = "custom";
+			//field.entityName = field.name
 		}
 		if (field.type && field.type.toLowerCase() === "intersectentity") {
 			field.dataType = field.relatedEntity;
+			//field.entityName = field.name
 			field.controlType = "multiselectdropdown";
 		}
-
+	
+		//console.log("setting checking:::", field);
 		this.selectedField = field;
 
 		var myObj = getTreenodeinstanceWithObject({
@@ -497,19 +630,20 @@ export class LayoutDetailFormComponent implements OnInit {
 			defaultValue: field.defaultValue,
 			properties: "",
 			tabs: [],
-			setting: { columnWidth: 12, showHeader: true },
+			setting: null,
 			validators: field.validators,
 			selectedView: "",
 			typeOf: field.typeOf,
 			receivingTypes: field.receivingTypes,
 			receiverDataTypes: field.receiverDataTypes,
 			broadcastingTypes: field.broadcastingTypes,
-			refId:'',
+			refId: '',
 			accessibleLayoutTypes: field.accessibleLayoutTypes,
 			toolbar: [],
-			entityName: entityName
+			entityName:entity,
+			supportedQuickAddModes: field.supportedQuickAddModes,
+			isQuickAddSupported: field.isQuickAddSupported
 		});
-
 		if (field.controlType == "Tabs") {
 
 			var tab = getTreenodeinstanceWithObject({
@@ -519,16 +653,16 @@ export class LayoutDetailFormComponent implements OnInit {
 				dataType: "tab",
 				controlType: "tab",
 				readOnly: false,
-				setting: { columnWidth: 12, showHeader: true },
-				entityName: entityName
+				setting: null,
+				// entityName: field.entityName
 			});
 			var tabSection = getTreenodeinstanceWithObject({
 				required: true,
 				controlType: "section",
 				readOnly: false,
 				tabs: [],
-				setting: { columnWidth: 12, showHeader: true },
-				entityName: entityName
+				setting: null,
+				// entityName: field.entityName
 			});
 
 			tab.fields.push(tabSection);
@@ -581,89 +715,27 @@ export class LayoutDetailFormComponent implements OnInit {
 
 		this.dragStart = true;
 		this.selectedTreeNode = myObj;
+		// field['dragstart'] = true;
+		// field['dropstart'] = false;
+		//console.log('this.selectedField ', this.selectedField);
+		//(<any>event).stopPropagation();
+		(<any>event).dataTransfer.setData('text/plain', '');
 	}
 
-	// private swapfield(data: ITreeNode[], sourceData: ITreeNode, targetdata: ITreeNode) {
 
-	// 	var sourceindex = data.findIndex(t => t.refId == sourceData.refId);
-	// 	var tragetindex = data.findIndex(t => t.refId == targetdata.refId);
+	allowDrop(ev) {
+		//console.log('ev ', ev);
+		//ev['dragstart'] = false ;
+		//ev['dropstart'] = false;
+		// if(this.selectedField)
+		// {
+		// 	this.selectedField['dragstart'] = false;
+		// 	this.selectedField['dropstart'] = false;
+		// }		
+		(<any>event).stopPropagation();
+		(<any>event).preventDefault();
+	}
 
-	// 	//console.log('\n\n\n\n sourceindex ', sourceindex);
-	// 	//console.log('tragetindex ', tragetindex);
-
-	// 	if (!this.swapComplete) {
-
-	// 		if (sourceindex >= 0 && tragetindex >= 0) {
-
-	// 			let sourcedata = data.find(t => t.refId == sourceData.refId);
-	// 			let targetData = data.find(t => t.refId == targetdata.refId);
-
-	// 			data[sourceindex] = Object.assign({}, targetData);
-	// 			data[tragetindex] = Object.assign({}, sourcedata);
-
-	// 			//console.log('data[sourceindex] ', data[sourceindex]);
-	// 			//console.log('data[tragetindex] ', data[tragetindex]);
-
-
-	// 			//console.log('treenodeswap'+JSON.stringify(data));
-	// 			this.swapComplete = true;
-	// 			return;
-	// 		} else {
-
-	// 			data.forEach(element => {
-
-	// 				if (sourceData.controlType === "custom") {
-	// 					element.tabs.forEach(tab => {
-	// 						tab.fields.forEach(innerelement => {
-	// 							innerelement.fields.forEach(customelement => {
-	// 								if (customelement.name === sourceData.name) {
-	// 									this.swapfield(innerelement.fields, sourceData, targetdata);
-	// 								}
-	// 							});
-	// 						});
-	// 					});
-	// 				}
-	// 				if (element.controlType.toLowerCase() === "tabs" || element.controlType.toLowerCase() === "tab") {
-
-	// 					element.tabs.forEach(tab => {
-	// 						tab.fields.forEach(innerelement => {
-	// 							innerelement.fields.forEach(customelement => {
-	// 								// if (customelement.name === sourceData.name) {
-	// 								// 	this.swapfield(innerelement.fields, sourceData, targetdata);
-	// 								// }
-	// 								//console.log('customelement.controlType.toLowerCase() ', customelement.controlType.toLowerCase());
-	// 								//console.log('customelement.name ', customelement);
-	// 								//console.log('sourceData.name ', sourceData);
-	// 								//console.log('targetdata.name ', targetdata);
-
-	// 								// if(customelement.controlType.toLowerCase() === "section" || customelement.controlType.toLowerCase() === "tabs" || customelement.controlType.toLowerCase() === "tab")
-	// 								// {
-	// 								// 	//console.log('if');
-	// 								// 	this.swapfield(tab.fields, sourceData, targetdata);
-	// 								// }
-	// 								// else{
-	// 								//console.log('else');
-	// 								if (customelement.name == sourceData.name) {
-	// 									this.swapfield(innerelement.fields, sourceData, targetdata);
-	// 								}
-	// 								// }
-
-
-	// 							});
-	// 						});
-	// 					});
-	// 				}
-	// 				else {
-
-	// 					if (element.fields) {
-	// 						this.swapfield(element.fields, sourceData, targetdata);
-	// 					}
-	// 				}
-
-	// 			});
-	// 		}
-	// 	}
-	// }
 
 	private removeCommon(data: ITreeNode[], targetData: ITreeNode) {
 
@@ -728,7 +800,6 @@ export class LayoutDetailFormComponent implements OnInit {
 				});
 			}
 
-
 			data.splice(index, 1);
 			//this.selectedTreeNode = null;
 
@@ -776,164 +847,28 @@ export class LayoutDetailFormComponent implements OnInit {
 						this.removeData(element.fields, targetData);
 						//this.removeCommon(targetData);
 					}
-
 				}
 			});
-
-			//	this.removeCommon(targetData);
 		}
 	}
 
 	// I handle the events from the tree component.
 	public handleSelection(node: ITreeNode): void {
 		this.selectedTreeNode = node;
-
-		console.groupEnd();
+		//console.log("this.selectedTreeNode", this.selectedTreeNode);
+		(<any>event).dataTransfer.setData('text/plain', '');
+		//console.groupEnd();
 	}
 
 	public handleDropEvent(node: ITreeNode): void {
-
-		// this.showLoader = true;
-		// this.swapComplete = false;
-		// var errormessage = "";
-		// var isField = true;
-		// //event.preventDefault();
-		// event.stopPropagation();
-		// if (node != null && node.controlType && (node.controlType.toLocaleLowerCase() == "section" || node.controlType.toLocaleLowerCase() == "tabs")) {
-
-		// 	if (node.fields !== null && node.fields.length > 0) {
-
-		// 		node.fields.forEach(item => {
-		// 			if (item.controlType === "custom") {
-		// 				isField = false;
-		// 				return;
-		// 			}
-		// 		});
-
-		// 		if (isField && this.selectedTreeNode.controlType === "custom") {
-		// 			errormessage += this.getResourceValue("DetailEntitiesCannotbeAddedWithFields") +"<br/>";
-		// 		}
-		// 		else if (!isField && this.selectedTreeNode.controlType !== "custom") {
-		// 			errormessage += this.getResourceValue("FieldsCannotbeAddedWithDetailEntities")+"<br/>";
-		// 		}
-		// 		else if (!isField && this.selectedTreeNode.controlType === "custom") {
-		// 			errormessage += this.getResourceValue("OneDetailEntityisAllowedinOneTab") +"<br/>";
-		// 		}
-
-		// 		//validate whether field is already added
-		// 		node.fields.forEach(item => {
-		// 			//console.log('item ', item);
-		// 			if (item.name === this.selectedTreeNode.name && (item.entityName === this.selectedTreeNode.entityName) && this.selectedTreeNode.controlType !== "Section" && this.selectedTreeNode.controlType !== "Tabs" && this.selectedTreeNode.controlType !== "Tab") {
-		// 				errormessage += this.selectedTreeNode.name + this.getResourceValue("FieldIsAlreadyAdded") +"<br/>";
-		// 			}
-
-		// 		});
-		// 		this.entityDeatils.fields.forEach(obj => {
-		// 			// if (item.name === obj.name) {
-		// 			if (this.selectedTreeNode.name === obj.name && this.entityDeatils.name === this.selectedTreeNode.entityName) {
-		// 				obj.draggedItem = true;
-		// 			}
-		// 		});
-
-		// 		if (this.entityDeatils.activityEntity != null && this.entityDeatils.activityEntity != undefined) {
-		// 			this.entityDeatils.activityEntity.fields.forEach(obj => {
-		// 				if (this.selectedTreeNode.name === obj.name && this.entityDeatils.activityEntity.name === this.selectedTreeNode.entityName) {
-		// 					obj.draggedItem = true;
-		// 				}
-		// 			});
-		// 		}
-
-		// 	}
-
-		// 	if (errormessage !== "") {
-		// 		this.toster.showError(errormessage);
-		// 	} else {
-		// 		if (!this.dragStart) {
-		// 			this.removeData(this.tree.fields, this.selectedTreeNode);
-		// 		}
-
-		// 		//if control type is custom then set view 
-		// 		if (isField && this.selectedTreeNode.controlType === "custom") {
-		// 			this.getDefaultLayout(this.entityname, "View", "", "", node);
-		// 		} else {
-		// 			//console.log('this.tree.fields if ', this.tree.fields);
-		// 			//console.log('this.selectedTreeNode if ', this.selectedTreeNode);
-		// 			//console.log('node if ', node);
-		// 			node.fields.push(this.selectedTreeNode);
-		// 			this.showLoader = false;
-		// 			this.entityDeatils.fields.forEach(obj => {
-		// 				// if (item.name === obj.name) {							
-		// 				if (this.selectedTreeNode.name === obj.name && this.entityDeatils.name === this.selectedTreeNode.entityName) {
-		// 					obj.draggedItem = true;
-		// 				}
-		// 			});
-
-		// 			if (this.entityDeatils.activityEntity != null && this.entityDeatils.activityEntity != undefined) {
-		// 				this.entityDeatils.activityEntity.fields.forEach(obj => {
-		// 					if (this.selectedTreeNode.name === obj.name && this.entityDeatils.activityEntity.name === this.selectedTreeNode.entityName) {
-		// 						obj.draggedItem = true;
-		// 					}
-		// 				});
-		// 			}
-
-		// 		}
-		// 	}
+		// console.log('this.selectedField ', this.selectedField);
+		// if (this.selectedField) {
+		// 	this.selectedField['dropstart'] = false;
+		// 	this.selectedField['dragstart'] = false;
 		// }
-		// else if (node != null && node.controlType && node.controlType.toLocaleLowerCase() != "section" && node.controlType.toLocaleLowerCase() != "tabs") {
-		// 	//console.log('this.dragStart ', this.dragStart);
-
-		// 	if (!this.dragStart) {
-		// 		this.swapfield(this.tree.fields, this.selectedTreeNode, node);
-		// 	}
-		// 	else {
-		// 		//console.log('this.tree.fields else ', this.tree.fields);
-		// 		//console.log('this.selectedTreeNode else ', this.selectedTreeNode);
-		// 		//console.log('node else ', node);
-		// 		//this.tree.fields.push(this.selectedTreeNode);
-		// 		//console.log('this.tree.fields 2 ', this.tree.fields);
-		// 		if (node.controlType.toLocaleLowerCase() !== "section" && node.controlType.toLocaleLowerCase() !== "tabs") {
-		// 			var sourceindex = this.tree.fields.findIndex(t => t.refId == node.refId);
-		// 			//console.log('sourceindex if ', sourceindex);
-		// 			//this.swapfield(this.tree.fields, this.selectedTreeNode, node);				
-		// 			let fieldAndIndex: any;
-		// 			if (sourceindex >= 0) {
-		// 				this.tree.fields.splice(sourceindex, 0, this.selectedTreeNode);
-
-		// 				this.entityDeatils.fields.forEach(obj => {
-		// 					// if (item.name === obj.name) {								
-		// 					if (this.selectedTreeNode.name === obj.name && this.entityDeatils.name === this.selectedTreeNode.entityName) {
-		// 						obj.draggedItem = true;
-		// 					}
-		// 				});
-
-		// 				if (this.entityDeatils.activityEntity != null && this.entityDeatils.activityEntity != undefined) {
-		// 					this.entityDeatils.activityEntity.fields.forEach(obj => {
-		// 						if (this.selectedTreeNode.name === obj.name && this.entityDeatils.activityEntity.name === this.selectedTreeNode.entityName) {
-		// 							obj.draggedItem = true;
-		// 						}
-		// 					});
-		// 				}
-
-		// 			}
-		// 			else {
-		// 				this.setField(this.tree.fields, node);
-		// 				//node.fields.splice(sourceindex, 0, this.selectedTreeNode);
-		// 			}
-		// 			//console.log('this.tree.fields 2 ', this.tree.fields);
-		// 		}
-		// 		//console.log('this.tree.fields 2 ', this.tree.fields);
-		// 		// }
-		// 		// else
-		// 		// {
-		// 		// 	let sourceindex = node.fields.findIndex(t => t.refId == node.fields.refId);
-		// 		// 	console.log('sourceindex else ', sourceindex);
-		// 		// 	node.fields.splice(sourceindex, 0, this.selectedTreeNode);
-		// 		// }
-		// 	}
-		// }
-		// this.dragStart = false;
+		this.dragStart = false;
 		/////////////////////////////////////////////////////////////
-
+		node['dragover'] = false;
 		event.stopPropagation();
 
 		//console.log('\n\n\nthis.selectedTreeNode ', this.selectedTreeNode);
@@ -949,6 +884,27 @@ export class LayoutDetailFormComponent implements OnInit {
 
 		//if (!this.dragStart) {
 		this.putElement(this.selectedTreeNode, node);
+
+		var instance: any
+		instance = node
+		// if(instance.from)
+		// {
+		// 	instance.from.changeRef.detectChanges()
+		// }
+
+		let treeNodeArray: TreeNodeComponent[] = this.treeNodeComponent.toArray();
+		var data = treeNodeArray.find(x => x.selectedNode == node)
+		//console.log(data)
+		if (data) {
+			data.changeRef.detectChanges()
+		}
+
+		// if(instance.to)
+		// {
+		// 	instance.to.changeRef.detectChanges()
+		// }
+
+
 	}
 
 
@@ -1027,14 +983,14 @@ export class LayoutDetailFormComponent implements OnInit {
 				}
 			});
 		}
-
+		/* Source Object, Source Index, Source Container, Target Index, Target Container */
 		var s, si, sc, ti, tc;
-		if (buildSource) {
-			s = eval("this.tree" + buildSource);
-		}
-		else {
-			s = this.selectedTreeNode;
-		}
+		// if (buildSource) {
+		// 	s = eval("this.tree" + buildSource);
+		// }
+		// else {
+		s = this.selectedTreeNode;
+		// }
 
 		if (buildSourceIndex >= 0) {
 			si = buildSourceIndex;
@@ -1045,8 +1001,7 @@ export class LayoutDetailFormComponent implements OnInit {
 		if (buildSourceContainer) {
 			sc = eval("this.tree" + buildSourceContainer + '["fields"]');
 		}
-		else
-		{
+		else {
 			sc = eval("this.tree" + '["fields"]');
 		}
 
@@ -1056,16 +1011,15 @@ export class LayoutDetailFormComponent implements OnInit {
 
 		tc = eval("this.tree" + buildTargetContainer + '["fields"]');
 
-		// console.log('\n\n\ns ', s);
-		// console.log('si ', si);
-		// console.log('sc ', sc);
-		// console.log('\n\nti ', ti);
-		// console.log('tc ', tc);
+		//console.log('\n\n\ns ', s);
+		//console.log('si ', si);
+		//console.log('sc ', sc);
+		//console.log('\n\nti ', ti);
+		//console.log('tc ', tc);
 		// console.log('buildSourceContainer ', buildSourceContainer);
 		// console.log('buildTargetContainer ', buildTargetContainer);
-
-
 		if (si >= 0 && ti >= 0) {
+			//console.log('(si >= 0 && ti >= 0)');
 			if (buildSourceContainer === buildTargetContainer) {
 				if (ti < si) {
 					tc.splice(si, 1);
@@ -1084,28 +1038,61 @@ export class LayoutDetailFormComponent implements OnInit {
 			}
 		}
 		else if (si >= 0 && !ti) {
+			//console.log('(si >= 0 && !ti)');
 			sc.splice(si, 1);//removing dragged source element
 			tc.push(s);//adding dragged source element in the section of target
 		}
 		else if (!si && !ti) {
+			//console.log('!si && !ti');
 			tc.push(s);//adding dragged source element in the section of target
-			this.entityDeatils.fields.forEach(obj => {
+			// this.entityDeatils.fields.forEach(obj => {
+			// 	if (this.selectedTreeNode.name === obj.name && this.entityDeatils.name === this.selectedTreeNode.entityName) {
+			// 		obj.draggedItem = true;
+			// 		this.selectedField = null;
+			// 		//console.log('obj.draggedItem ', obj.draggedItem);
+			// 	}
+			// });
 
-				if (this.selectedTreeNode.name === obj.name && this.entityDeatils.name === this.selectedTreeNode.entityName) {
-					obj.draggedItem = true;
-				}
-			});
+			// if (this.entityDeatils.activityEntity != null && this.entityDeatils.activityEntity != undefined) {
+			// 	this.entityDeatils.activityEntity.fields.forEach(obj => {
+			// 		if (this.selectedTreeNode.name === obj.name && this.entityDeatils.activityEntity.name === this.selectedTreeNode.entityName) {
+			// 			obj.draggedItem = true;
+			// 			this.selectedField = null;
+			// 			//console.log('obj.draggedItem activityEntity ', obj.draggedItem);
+			// 		}
+			// 	});
+			// }
 
-			if (this.entityDeatils.activityEntity != null && this.entityDeatils.activityEntity != undefined) {
-				this.entityDeatils.activityEntity.fields.forEach(obj => {
-					if (this.selectedTreeNode.name === obj.name && this.entityDeatils.activityEntity.name === this.selectedTreeNode.entityName) {
-						obj.draggedItem = true;
-					}
-				});
-			}
+			this.selectedField.draggedItem = true;
+			this.selectedField = null;
 		}
 		else if (!si && ti >= 0) {
+			//console.log('!si && ti >= 0');
 			tc.splice(ti, 0, s);//placing dragged source element in the index of target
+
+			// this.entityDeatils.fields.forEach(obj => {
+			// 	// console.log('obj.name ', obj.name);
+			// 	// console.log('this.entityDeatils.name ', this.entityDeatils.name);
+			// 	// console.log('this.selectedTreeNode.entityName ', this.selectedTreeNode.entityName);
+			// 	if (this.selectedTreeNode.name === obj.name && this.entityDeatils.name === this.selectedTreeNode.entityName) {
+			// 		obj.draggedItem = true;
+			// 		this.selectedField = null;
+			// 		//console.log('obj.draggedItem ', obj.draggedItem);
+			// 	}
+			// });
+
+			// if (this.entityDeatils.activityEntity != null && this.entityDeatils.activityEntity != undefined) {
+			// 	this.entityDeatils.activityEntity.fields.forEach(obj => {
+			// 		if (this.selectedTreeNode.name === obj.name && this.entityDeatils.activityEntity.name === this.selectedTreeNode.entityName) {
+			// 			obj.draggedItem = true;
+			// 			this.selectedField = null;
+			// 			//console.log('obj.draggedItem activityEntity ', obj.draggedItem);
+			// 		}
+			// 	});
+			// }
+
+			this.selectedField.draggedItem = true;
+			this.selectedField = null;
 		}
 		this.setItemIndex();
 		//console.log('new tree ', this.tree);
@@ -1115,6 +1102,7 @@ export class LayoutDetailFormComponent implements OnInit {
 	private setItemIndex() {
 		let treeNode = this.tree;
 		treeNode["itemIndex"] = "s0";
+		treeNode["visibility"] = true;
 		if (treeNode.fields.length > 0) {
 			this.findAndSetIndex(treeNode.fields, treeNode["itemIndex"]);
 		}
@@ -1129,81 +1117,28 @@ export class LayoutDetailFormComponent implements OnInit {
 			//console.log('index ', index);
 			if (element.controlType.toLowerCase() === "section") {
 				element["itemIndex"] = parentIndex + ",s" + index;
+				element["visibility"] = true;
 				if (element.fields.length > 0) {
 					this.findAndSetIndex(element.fields, element["itemIndex"]);
 				}
 			}
 			else if (element.controlType.toLowerCase() === "tabs") {
 				element["itemIndex"] = parentIndex + ",tg" + index;
+				element["visibility"] = true;
 				this.findAndSetIndex(element.tabs, element["itemIndex"]);
 			}
 			else if (element.controlType.toLowerCase() === "tab") {
 				element["itemIndex"] = parentIndex + ",ti" + index;
+				element["visibility"] = true;
 				this.findAndSetIndex(element.fields, element["itemIndex"]);
 			}
 			else {
 				element["itemIndex"] = parentIndex + "," + index;
+				element["visibility"] = true;
 			}
 		});
 	}
 
-	private setField(tree, node) {
-		//
-		var sectionindex = tree.findIndex(t => t.name == 'Section');
-		var tabgrpindex = tree.findIndex(t => t.name == 'Tabs');
-		var nodeIndex = tree.findIndex(t => t.name == node.name);
-		//
-		//console.log('\n\n\nsetField :: sectionindex ', sectionindex);
-		//console.log('nodeIndex ', nodeIndex);		
-		//console.log('tree ', tree);
-
-		if (sectionindex >= 0) {
-			//console.log('this.tree.fields[sectionindex].fields ', this.tree.fields[sectionindex].fields);
-			//console.log('node ', node);
-			if (nodeIndex === -1) {
-				this.setField(tree[sectionindex].fields, node);
-			}
-			else {
-				tree.splice(nodeIndex, 0, this.selectedTreeNode);
-				this.showLoader = false;
-				return;
-			}
-		}
-		else if (tabgrpindex >= 0) {
-			//console.log('tabgrpindex ', tabgrpindex);
-			//console.log('tree[tabgrpindex] ', tree[tabgrpindex]);
-			if (nodeIndex === -1) {
-				//this.setField(tree[tabindex].fields, node);
-				tree[tabgrpindex].tabs.forEach(element => {
-					this.setField(element.fields[0].fields, node);
-				});
-			}
-			else {
-				tree.splice(nodeIndex, 0, this.selectedTreeNode);
-				return;
-			}
-		}
-		else {
-			tree.splice(nodeIndex, 0, this.selectedTreeNode);
-			return;
-		}
-
-
-		this.entityDeatils.fields.forEach(obj => {
-
-			if (this.selectedTreeNode.name === obj.name && this.entityDeatils.name === this.selectedTreeNode.entityName) {
-				obj.draggedItem = true;
-			}
-		});
-
-		if (this.entityDeatils.activityEntity != null && this.entityDeatils.activityEntity != undefined) {
-			this.entityDeatils.activityEntity.fields.forEach(obj => {
-				if (this.selectedTreeNode.name === obj.name && this.entityDeatils.activityEntity.name === this.selectedTreeNode.entityName) {
-					obj.draggedItem = true;
-				}
-			});
-		}
-	}
 
 	public handleCloseEvent(node: ITreeNode): void {
 		//console.log('handleCloseEvent called');
@@ -1221,27 +1156,43 @@ export class LayoutDetailFormComponent implements OnInit {
 
 
 	private deleteComponent(node: ITreeNode) {
-		swal({
-			title: this.getResourceValue("Areyousure"),
-            text: this.getResourceValue("Youwntbeabletorevertthis"),
-            type: this.getResourceValue('warning'),
-			showCancelButton: true,
-			confirmButtonColor: '#3085d6',
-			cancelButtonColor: '#d33',
-			confirmButtonText: this.getResourceValue('Yesdeleteit'),
-			showLoaderOnConfirm: true,
-		}).then((willDelete) => {
-			if (willDelete.value) {
-				this.removeData(this.tree.fields, node);
-				this.removeCommon(this.tree.fields, node)
-			} else {
-				//write the code for cancel click
-			}
-		});
+
+		this.globalResourceService.openDeleteModal.emit()
+	this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+
+		this.removeData(this.tree.fields, node);
+		this.removeCommon(this.tree.fields, node)
+		   
+		  })
+
+
+
+
+
+
+
+		// swal({
+		// 	title: this.getResourceValue("common_message_areyousure"),
+		// 	text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+		// 	type: 'warning',
+		// 	showCancelButton: true,
+		// 	confirmButtonColor: '#3085d6',
+		// 	cancelButtonColor: '#d33',
+		// 	confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+		// 	showLoaderOnConfirm: true,
+		// }).then((willDelete) => {
+		// 	if (willDelete.value) {
+		// 		this.removeData(this.tree.fields, node);
+		// 		this.removeCommon(this.tree.fields, node)
+		// 	} else {
+		// 		//write the code for cancel click
+		// 	}
+		// });
 	}
 
 	private configureSettings(node: ITreeNode) {
 		//console.log(' configureSettings  ', node);
+
 		let ngbModalOptions: NgbModalOptions = {
 			backdrop: 'static',
 			keyboard: false
@@ -1253,20 +1204,21 @@ export class LayoutDetailFormComponent implements OnInit {
 		if (modalRef.componentInstance !== undefined) {
 			modalRef.componentInstance.node = nodeObj;
 			modalRef.componentInstance.saveEvent.subscribe((receivedEntry) => {
-				//console.log("saveEvent.subscribe", receivedEntry)
+				console.log("saveEvent.subscribe", receivedEntry)
 				node.name = receivedEntry.name;
-				node.setting.showHeader = receivedEntry.setting.showHeader;
-				node.setting.columnWidth = receivedEntry.setting.columnWidth;
+				node.setting = receivedEntry.setting;
+				// node.setting.showHeader = receivedEntry.setting.showHeader;
+				// node.setting.columnWidth = receivedEntry.setting.columnWidth;
 				node.selectedView = receivedEntry.selectedView;
 				node.validators = receivedEntry.validators;
+				console.log("node.validators", node.validators);
 				node.tabs = receivedEntry.tabs;
-
 				modalRef.close();
 			});
 		}
 		else {
 			modalRef.close();
-			this.toster.showWarning(this.getResourceValue("SettingsUnavailable"));
+			this.toster.showWarning(this.getResourceValue("metadata_task_settingsunavailable_warning_message"));
 		}
 	}
 
@@ -1282,7 +1234,7 @@ export class LayoutDetailFormComponent implements OnInit {
 			// node.name = receivedEntry.name;
 			// node.settings.showHeader = receivedEntry.settings.showHeader;
 			// node.settings.columnWidth = receivedEntry.settings.columnWidth;
-			var section =getTreenodeinstanceWithObject({
+			var section = getTreenodeinstanceWithObject({
 				name: receivedEntry.name,
 				required: false,
 				controlType: "section",
@@ -1321,7 +1273,6 @@ export class LayoutDetailFormComponent implements OnInit {
 			});
 		}
 
-
 		if (node.tabs != null && node.tabs.length > 0) {
 			node.tabs.forEach(tab => {
 
@@ -1340,7 +1291,6 @@ export class LayoutDetailFormComponent implements OnInit {
 
 				}
 
-
 				tab.fields.forEach(innerelement => {
 					this.entityDeatils.fields.forEach(obj => {
 						if (innerelement.name === obj.name && innerelement.entityName === this.entityDeatils.name) {
@@ -1356,7 +1306,6 @@ export class LayoutDetailFormComponent implements OnInit {
 						});
 					}
 
-
 					innerelement.fields.forEach(nextf => {
 						this.entityDeatils.fields.forEach(obj => {
 							if (nextf.name === obj.name && nextf.entityName === this.entityDeatils.name) {
@@ -1370,7 +1319,6 @@ export class LayoutDetailFormComponent implements OnInit {
 									obj.draggedItem = true;
 								}
 							});
-
 						}
 
 						if (nextf.controlType === "Section") {
@@ -1380,12 +1328,10 @@ export class LayoutDetailFormComponent implements OnInit {
 						if (nextf.tabs.length > 0) {
 							this.setdeactivefields(nextf);
 						}
-
 					});
 
 					if (innerelement.tabs.length > 0) {
 						this.setdeactivefields(innerelement);
-
 					}
 				});
 				if (tab.tabs.length > 0) {
@@ -1407,7 +1353,6 @@ export class LayoutDetailFormComponent implements OnInit {
 							obj.draggedItem = true;
 						}
 					});
-
 				}
 
 				innerelement.fields.forEach(nextf => {
@@ -1424,7 +1369,6 @@ export class LayoutDetailFormComponent implements OnInit {
 							}
 						});
 					}
-
 					if (nextf.tabs.length > 0) {
 						this.setdeactivefields(nextf);
 					}
@@ -1438,9 +1382,6 @@ export class LayoutDetailFormComponent implements OnInit {
 				}
 			});
 		}
-
-
-
 	}
 
 	private getDefaultLayout(name: string, type: string, subtype: string, context: string, node: ITreeNode) {
@@ -1451,7 +1392,6 @@ export class LayoutDetailFormComponent implements OnInit {
 				data => {
 					if (data) {
 						this.defaultView = data;
-
 						if (this.defaultView) {
 							this.selectedTreeNode.selectedView = this.defaultView.id;
 							node.fields.push(this.selectedTreeNode);
@@ -1465,16 +1405,10 @@ export class LayoutDetailFormComponent implements OnInit {
 
 	private setidExistingfields(node: ITreeNode) {
 		node.refId = node.refId || generateRandomNo();
-
 		node.fields.forEach(item => {
-
-
 			this.setidExistingfields(item);
-
 			if (item.fields) {
 				item.fields.forEach(item3 => {
-
-
 					this.setidExistingfields(item3);
 
 				});
@@ -1482,19 +1416,12 @@ export class LayoutDetailFormComponent implements OnInit {
 		});
 		if (node.tabs) {
 			node.tabs.forEach(item2 => {
-
-
 				this.setidExistingfields(item2);
-
 				if (item2.fields) {
 					item2.fields.forEach(item3 => {
-
-
 						this.setidExistingfields(item3);
-
 					});
 				}
-
 			});
 		}
 	}
@@ -1643,5 +1570,8 @@ export class LayoutDetailFormComponent implements OnInit {
 				}
 			}
 		}
+	}
+	onclick(index) {
+		this.selectedRelatedEntityIndex = index
 	}
 }

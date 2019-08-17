@@ -21,13 +21,14 @@ namespace VPC.Entities.Email
     [PluralName("Emails")]
     [Import(false)]
     [Export(false)]
-    [SupportWorkflow(true)]
+    [SupportWorkflow(false)]
     public class Email : PrimaryEntity, IItem<Item>
     {
         //
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public InternalId TenantId { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -35,17 +36,21 @@ namespace VPC.Entities.Email
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [DefaultValue(InfoType.Email)]
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.Email);
-
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN10014-ST01", "Standard"}
@@ -61,6 +66,7 @@ namespace VPC.Entities.Email
         [ColumnName("[Date]")]
         [NotNull]
         [Tagable]
+        [DisplayName("Date")]
         public DateTime Date { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
@@ -68,28 +74,38 @@ namespace VPC.Entities.Email
         [NotNull]
         [Tagable]
         [FreeTextSearch]
+        [DisplayName("Recipient")]
         public MediumText Recipient { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[Sender]")]
         [NotNull]
         [Tagable]
+        [DisplayName("Sender")]
         public MediumText Sender { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[Subject]")]
         [Tagable]
+        [DisplayName("Subject")]
         public MediumText Subject { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[Body]")]
         [NotNull]
         [Tagable]
+        [DisplayName("Body")]
         public RichText Body { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [SimpleSearch]
-        [ColumnName("[CurrentWorkFlowStep]")]
-        public PickList<EmailWorkFlow> CurrentWorkFlowStep { get; set; }
+        [ColumnName("[Status]")]
+        [DisplayName("Status")]
+        public PickList<EmailStatus> Status { get; set; }
+
+
+        [ColumnName("[BatchItemId]")]
+        [DisplayName("Batch item Id")]
+        public InternalId BatchItemId { get; set; }
     }
 }

@@ -41,7 +41,7 @@ export class ModalOperationProcessComponent implements OnInit {
   public preProcessList=[];
   public processList=[];
   public postProcessList=[];
-
+  public title: string = "";
   subTypes:any[];
   subTypeSelected:string;
   public resource: Resource;

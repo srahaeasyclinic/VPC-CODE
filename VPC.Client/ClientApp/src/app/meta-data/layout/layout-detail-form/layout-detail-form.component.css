@@ -12,9 +12,9 @@
     padding:10px;
 }
 
-.page-content{
+/* .page-content{
     padding: 0px;
-}
+} */
 
 .fields-content{
     padding: 0px;
@@ -34,4 +34,13 @@
     left: 0;
     POSITION: ABSOLUTE;
     Z-INDEX: 1000;
+}
+
+
+.drag-start{
+    background-color: brown;
+}
+
+.drop-start{
+    background-color: chartreuse;
 }

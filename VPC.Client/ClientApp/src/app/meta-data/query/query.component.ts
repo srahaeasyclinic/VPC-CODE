@@ -62,17 +62,11 @@ export class QueryComponent implements OnInit {
 
     this.route.parent.url.subscribe((urlPath) => {
       this.entityName = urlPath[urlPath.length - 1].path;
-      this.getResource();
       this.getEntitiesByName(this.entityName);
       this.getOperators();
     });
 
 
-  }
-
-
-  private getResource() {
-    this.resource = this.globalResourceService.getGlobalResources();
   }
 
   private getOperators() {
@@ -166,11 +160,11 @@ export class QueryComponent implements OnInit {
   private validateUserInput() {
     var validationMsg = "";
     if (!this.selectedFields || this.selectedFields.length == 0) {
-      validationMsg = this.getResourceValue("FieldsAreRequirdtoGenerateQuery");
+      validationMsg = this.globalResourceService.requiredValidator("metadata_field_query_selectedfield");
     }
     this.filterArray.forEach(element => {
       if (!element.name || !element.operator || !element.value) {
-        validationMsg = this.getResourceValue("FiltersAreNotProperlyConfigured");
+        validationMsg = this.getResourceValue("metadata_improper_query_message");
         return;
       }
     });

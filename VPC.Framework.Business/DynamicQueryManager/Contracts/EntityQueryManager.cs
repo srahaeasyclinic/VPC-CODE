@@ -1,25 +1,21 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reflection;
 using Newtonsoft.Json.Linq;
 using VPC.Entities.EntityCore.Model.Query;
-using VPC.Entities.SampleEntity;
-using VPC.Framework.Business.Common;
+using VPC.Entities.WorkFlow;
 using VPC.Framework.Business.DynamicQueryManager.APIs;
 using VPC.Framework.Business.DynamicQueryManager.Core;
-using VPC.Framework.Business.DynamicQueryManager.Core.Clauses;
 using VPC.Framework.Business.DynamicQueryManager.Core.Enums;
 using VPC.Framework.Business.EntityResourceManager.Contracts;
-using VPC.Framework.Business.EntityResourceManager.Data;
 using VPC.Framework.Business.MetadataManager.Contracts;
 using VPC.Framework.Business.RelationManager.Contracts;
-using VPC.Metadata.Business.DataTypes;
-using VPC.Metadata.Business.Entity.Infrastructure;
-using VPC.Metadata.Business.Operator.DataAnnotations;
+using VPC.Framework.Business.WorkFlow.Attribute;
+using VPC.Metadata.Business.Entity.Configuration;
+using VPC.Metadata.Business.Entity.Trigger;
+using VPC.Metadata.Business.Entity.Trigger.Execution;
 using Comparison = VPC.Framework.Business.DynamicQueryManager.Core.Enums.Comparison;
 
 namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
@@ -27,13 +23,16 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
         string BuildQuery (Guid tenantId, string entityName, QueryContext query);
         DataTable GetResult (Guid tenantId, string entityName, QueryContext query);
         DataTable GetResultById (Guid tenantId, string entityName, Guid id, QueryContext query);
-        Guid SaveResult (Guid tenantId, string entityName, JObject payload, string subtype, Guid userId);
         bool UpdateResult (Guid tenantId, Guid userId, string entityName, Guid id, JObject payload, string subType);
-        bool DeleteResult (Guid tenantId, string entityName, Guid id);
+        Guid SaveResult (Guid tenantId, string entityName, JObject payload, string subtype, Guid userId);
+        bool DeleteResult (Guid tenantId, Guid userId, Guid itemId, string entityName);
         bool ExecuteUpdateQuery (string queryRes);
         dynamic GetSpecificIdByQuery (Guid tenantId, string entityName, dynamic primaryKeyValue, string whichPropery);
-
         bool UpdateSpecificField (Guid tenantId, string entityName, dynamic primaryKeyValue, string whichPropery, string whatValue);
+
+        Guid SelectInsert (string entityName, Guid tenantId, Guid Id, Guid userId);
+
+        bool GetDuplicateStatus (Guid tenantId, string entityName, Dictionary<string, dynamic> fields, Guid? id);
     }
 
     public class EntityQueryManager : IEntityQueryManager {
@@ -57,7 +56,7 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                 t.ReferenceTableName.Equals (tableName)
             ).ToList ();
             if (!foreinkeyTables.Any ()) return; {
-                foreach (ColumnAndField item in foreinkeyTables) {
+                foreach (var item in foreinkeyTables) {
                     var toTableName = item.TableName;
                     var toAlias = item.EntityPrefix;
                     var toColumnName = item.ColumnName;
@@ -80,7 +79,7 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                 t.TableName.Equals (tableName)
             ).ToList ();
             if (!inverseTables.Any ()) return; {
-                foreach (ColumnAndField item in inverseTables) {
+                foreach (var item in inverseTables) {
                     var curTable = item;
                     var toTableName = curTable.InverseTableName;
                     var toAlias = curTable.InversePrefixName;
@@ -92,7 +91,6 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                     var fromColumnName = item.ColumnName;
                     var joinType = item.IsNotNull ? JoinType.InnerJoin : JoinType.LeftJoin;
                     queryBuilder.AddJoin (joinType, toTableName, toAlias, toColumnName, Comparison.Equals, fromTableName, fromAlias, fromColumnName);
-                    //AddForeignKey (queryBuilder, columns, item.TableName);
                     AddInverseKey (queryBuilder, columns, toTableName, toAlias);
                 }
             }
@@ -126,10 +124,6 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                 var isAdded = queryColumns.Any (t => t.Equals (colStr));
                 if (isAdded) continue;
 
-                // var columnName1 = !string.IsNullOrEmpty (item.ClientName) ? item.ClientName + "." + item.FieldName : item.FieldName;
-                // queryColumns.Add (colStr);
-                // toDict.Add (item.EntityPrefix + "." + item.ColumnName, columnName1);
-
                 if (!isMappingRequired) {
                     var columnName1 = !string.IsNullOrEmpty (item.ClientName) ? item.ClientName + "." + item.FieldName : item.FieldName;
                     queryColumns.Add (colStr);
@@ -138,7 +132,7 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
 
                 switch (item.DataType) {
                     case Metadata.Business.DataAnnotations.DataType.PickList:
-                        var isEnumBased = item.TypeOf;
+
                         IPicklistManager iIPicklistManager = new PicklistManager ();
                         var isNonCustomizablePicklist = iIPicklistManager.IsNonCustomizablePicklist (item.TypeOf);
                         if (!isNonCustomizablePicklist) {
@@ -164,28 +158,19 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                     if (!isTextFieldMatch) continue;
                 }
 
-                var columnName = "";
-                if (isTextFieldMatch) {
-                    columnName = item.VirtualName;
-                } else {
-                    columnName = !string.IsNullOrEmpty (item.ClientName) ? item.ClientName + "." + item.FieldName : item.FieldName;
-                }
-                // var isAddedColumn = toDict.Where(t=>t.Value.Equals(columnName)).ToList();
-                // var isAddedKey = queryColumns.Where(t=>t.Equals(colStr.ToString())).ToList();
-                // if (isAddedKey.Any() || isAddedColumn.Any()) continue;
-                // var isAddedColumn = toDict.Where(t=>t.Value.Equals(columnName)).ToList();
-
+                var columnName = isTextFieldMatch?item.VirtualName: !string.IsNullOrEmpty (item.ClientName) ? item.ClientName + "." + item.FieldName : item.FieldName;
 
                 var isAddedKey = queryColumns.Where (t => t.Equals (colStr.ToString ())).ToList ();
                 if (isAddedKey.Any ()) continue;
                 var isAddedColumn = toDict.Where (t => t.Value.Equals (columnName)).ToList ();
-                if((isAddedKey.Any() ||isAddedColumn.Any() )) continue;
+                if ((isAddedKey.Any () || isAddedColumn.Any ())) continue;
+
                 // if (isAddedColumn.Any () && !string.IsNullOrEmpty(item.InversePrefixName)) {
                 //     //remove old
                 //     toDict.Remove (isAddedColumn[0].Key);
                 //     queryColumns.Remove (isAddedColumn[0].Key);
                 // }
-                
+
                 queryColumns.Add (colStr);
                 toDict.Add (colStr, columnName);
             }
@@ -203,29 +188,29 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             return queryStr;
 
         }
-        private string BuildInsertQuery (List<ColumnAndField> whatToInsert) {
-            var tables = whatToInsert
-                .GroupBy (u => u.EntityPrefix)
-                .Select (grp => new { key = grp.Key, data = grp.ToList () })
-                .ToList ();
+        //private string BuildInsertQuery (List<ColumnAndField> whatToInsert) {
+        //    var tables = whatToInsert
+        //        .GroupBy (u => u.EntityPrefix)
+        //        .Select (grp => new { key = grp.Key, data = grp.ToList () })
+        //        .ToList ();
 
-            var queryBuilder = new InsertQueryBuilder ();
-            foreach (var item in tables) {
-                var columns = new Dictionary<string, string> ();
-                foreach (var list in item.data) {
-                    if (list.ColumnName.Equals ("[***]")) continue;
-                    var match = columns.FirstOrDefault (t => t.Key == list.ColumnName);
-                    if (match.Key != null || list.Value == null) continue;
-                    columns.Add (list.ColumnName,
-                        Convert.ToString (list.DataType) == "DateTime" ?
-                        HelperUtility.ConvertDateToUTC (list.Value.ToString ()) :
-                        list.Value.ToString ());
-                }
-                queryBuilder.InsertIntoTable (item.data[0].TableName, columns, tables.Count > 1);
-            }
-            var query = queryBuilder.BuildQuery ();
-            return query;
-        }
+        //    var queryBuilder = new InsertQueryBuilder ();
+        //    foreach (var item in tables) {
+        //        var columns = new Dictionary<string, string> ();
+        //        foreach (var list in item.data) {
+        //            if (list.ColumnName.Equals ("[***]")) continue;
+        //            var match = columns.FirstOrDefault (t => t.Key == list.ColumnName);
+        //            if (match.Key != null || list.Value == null) continue;
+        //            columns.Add (list.ColumnName,
+        //                Convert.ToString (list.DataType) == "DateTime" ?
+        //                HelperUtility.ConvertDateToUTC (list.Value.ToString ()) :
+        //                list.Value.ToString ());
+        //        }
+        //        queryBuilder.InsertIntoTable (item.data[0].TableName, columns, tables.Count > 1);
+        //    }
+        //    var query = queryBuilder.BuildQuery ();
+        //    return query;
+        //}
 
         //private Comparison GetComparisonValue (string value) {
         //    Type myType = typeof (Operators);
@@ -380,6 +365,14 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             } else {
                 entityWithItemColumns = entityColumns;
             }
+
+            //--------------------------------------
+            var versionControlName = entityManager.GetVersionControlName (entityName);
+            if (!string.IsNullOrEmpty (versionControlName)) {
+                var versionColumns = entityManager.GetColumnNameByEntityName (versionControlName, null);
+                entityWithItemColumns.AddRange (versionColumns);
+            }
+            //--------------------------------------
             if (entityColumns == null || !entityColumns.Any ()) throw new FieldAccessException ("Entity column is not decorate.");
             if (queryModel != null) {
                 if (queryModel.Filters == null) {
@@ -391,10 +384,17 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                 //text search
                 MapSearchFilter (entityName, queryModel.FreeTextSearch, entityWithItemColumns);
             }
+
             var mergeColumns = GetMatchingColumnsWithSequenceForSelectQuery (result, entityWithItemColumns, tableName, entityTablePrimaryKey);
             return mergeColumns;
         }
         private string BuildSelectQuery (Guid tenantId, string entityName, QueryContext queryModel, bool pagingRequired = true) {
+            List<ColumnAndField> orderByColumns = GetColumnsUsingBusinessLogic (tenantId, entityName, queryModel);
+            var query = GetDbQuery (orderByColumns, queryModel, entityName, pagingRequired, true);
+            return query;
+        }
+
+        private List<ColumnAndField> GetColumnsUsingBusinessLogic (Guid tenantId, string entityName, QueryContext queryModel) {
             var result = queryModel?.Fields?.Split (',');
             var matchingColumnsWithSequence = GetCommonMatchingColumns (tenantId, entityName, queryModel, result);
             if (!matchingColumnsWithSequence.Any ()) throw new FieldAccessException ("Column not found");
@@ -413,12 +413,25 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                     item.QueryIndex = (index >= 0) ? index : sequence;
                 }
             }
+
             var orderByColumns = matchingColumnsWithSequence.OrderBy (t => t.QueryIndex).ToList ();
-            var query = GetDbQuery (orderByColumns, queryModel, entityName, pagingRequired, true);
-            return query;
+
+            IMetadataManager entityManager = new MetadataManager.Contracts.MetadataManager ();
+            var entityColumns = (result != null && result.Any ()) ? entityManager.GetColumnNameByEntityName (entityName, null) : entityManager.GetBasicColumnNameByEntityName (entityName, null);
+            AddVersionConrolProperties (entityName, entityColumns, orderByColumns, "activeversion");
+            AddVersionConrolProperties (entityName, entityColumns, orderByColumns, "draftversion");
+            return orderByColumns;
         }
 
         private string BuildGetByIdQuery (Guid tenantId, string entityName, QueryContext queryModel, bool pagingRequired = true) {
+
+            // var isApplicableForVersion = false;
+            // QueryFilter draftVersion = null;
+            // if (queryModel != null && queryModel.Filters.Any ()) {
+            //     draftVersion = queryModel.Filters.FirstOrDefault (t => t.FieldName.Equals ("DraftVersion"));
+            //     isApplicableForVersion = draftVersion != null;
+            // }
+
             IMetadataManager entityManager = new MetadataManager.Contracts.MetadataManager ();
             var tableName = entityManager.GetTableNameByEntityname (entityName);
             var context = entityManager.GetEntityContextByEntityName (entityName, BusinessConstant.IsPickList);
@@ -426,17 +439,16 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             var entityTablePrimaryKey = entityManager.GetPrimaryKeyByEntityname (entityName);
             var result = queryModel?.Fields?.Split (',');
             var entityColumns = (result != null && result.Any ()) ? entityManager.GetColumnNameByEntityName (entityName, null) : entityManager.GetBasicColumnNameByEntityName (entityName, null);
-            //var columns = MapColumnsAsperFielsWithIndex (tenantId, entityName, context, entityColumns, result);
             if (entityColumns == null || !entityColumns.Any ()) throw new FieldAccessException ("Entity column is not decorate.");
-            if (queryModel != null) {
-                if (queryModel.Filters == null) {
-                    queryModel.Filters = new List<QueryFilter> ();
-                }
-                //tapash need to change this method ...filter Search...
-                MapSearchFilter (entityName, queryModel.Filters, entityColumns);
-                //text search
-                MapSearchFilter (entityName, queryModel.FreeTextSearch, entityColumns);
-            }
+
+            //versions...
+            //  var versionControlName = entityManager.GetVersionControlName (entityName);
+            // // var versionColumns = new List<ColumnAndField> ();
+            // if (!string.IsNullOrEmpty (versionControlName)) {
+            //     // versionColumns = entityManager.GetColumnNameByEntityName (versionControlName, null);
+            //     // entityColumns.AddRange (versionColumns);
+            // }
+
             var itemTableColumns = new List<ColumnAndField> ();
             var isItem = entityManager.EntityIsAnItem (entityName, BusinessConstant.IsPickList);
             if (isItem) {
@@ -455,24 +467,84 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                 }
             }
             var orderByColumns = matchingColumnsWithSequence.OrderBy (t => t.QueryIndex).ToList ();
+
+            //---------------------filter
+
+            //
+            if (queryModel != null) {
+                if (queryModel.Filters == null) {
+                    queryModel.Filters = new List<QueryFilter> ();
+                }
+                //tapash need to change this method ...filter Search...
+                MapSearchFilter (entityName, queryModel.Filters, entityColumns);
+                //text search
+                MapSearchFilter (entityName, queryModel.FreeTextSearch, entityColumns);
+                //-------------------------------------
+
+                // if (!string.IsNullOrEmpty (versionControlName)) {
+                //     VersionControlMapper (entityName, entityColumns, versionControlName, versionColumns, orderByColumns, draftVersion);
+                // }
+            }
+            //----------------------------
+
+            AddVersionConrolProperties (entityName, entityColumns, orderByColumns, "activeversion");
+            AddVersionConrolProperties (entityName, entityColumns, orderByColumns, "draftversion");
             var query = GetDbQuery (orderByColumns, queryModel, entityName, pagingRequired, false);
             return query;
         }
+
+        private static void AddVersionConrolProperties (string entityName, List<ColumnAndField> entityColumns, List<ColumnAndField> orderByColumns, string properties) {
+            IMetadataManager entityManager = new MetadataManager.Contracts.MetadataManager ();
+            var versionControlName = entityManager.GetVersionControlName (entityName);
+            if (!string.IsNullOrEmpty (versionControlName)) {
+                var targetVersion = entityColumns.FirstOrDefault (t => t.FieldName.ToLower ().Equals (properties.ToLower ()));
+                if (properties == "activeversion") {
+                    SwitchActiveVersionInverseProperty (orderByColumns, versionControlName, targetVersion);
+                }
+
+                if (targetVersion != null) {
+                    orderByColumns.Add (targetVersion);
+                }
+            }
+
+        }
+
+        private static void SwitchActiveVersionInverseProperty (List<ColumnAndField> orderByColumns, string versionControlName, ColumnAndField targetVersion) {
+            var versionPrimaryField = orderByColumns.FirstOrDefault (t => t.EntityFullName.ToLower ().Equals (versionControlName.ToLower ()) && t.ColumnName.Equals (t.PrimaryKey));
+            if (versionPrimaryField != null && targetVersion != null) {
+                targetVersion.InversePrefixName = versionPrimaryField.EntityPrefix;
+                targetVersion.InverseColumnName = versionPrimaryField.ColumnName;
+                targetVersion.InverseTableName = versionPrimaryField.TableName;
+                targetVersion.IsNotNull = true;
+                foreach (var t in orderByColumns) {
+                    if (
+                        t.EntityFullName.ToLower ().Equals (versionControlName.ToLower ()) &&
+                        (!string.IsNullOrEmpty (t.ReferenceColumnName) && !string.IsNullOrEmpty (t.ReferenceTableName)) &&
+                        (t.ReferenceTableName.Equals (targetVersion.TableName))
+                    ) {
+                        t.ReferenceColumnName = string.Empty;
+                        t.ReferenceTableName = string.Empty;
+                        t.ReferencePrefixName = string.Empty;
+                    }
+                }
+            }
+        }
+
         DataTable IEntityQueryManager.GetResult (Guid tenantId, string entityName, QueryContext queryModel) {
             var query = BuildSelectQuery (tenantId, entityName, queryModel);
             IQueryReview review = new QueryReview ();
             var result = review.GetResult (tenantId, entityName, query);
-            if (result != null && result.Rows.Count > 0) {
-                var entityResultMapper = new EntityResultMapper ();
-                return entityResultMapper.MapResult (tenantId, entityName, result);
-            }
-            return result;
+            // return result;
+            var entityResultMapper = new EntityResultMapper ();
+            return entityResultMapper.MapResult (tenantId, entityName, result, queryModel);
         }
 
         DataTable IEntityQueryManager.GetResultById (Guid tenantId, string entityName, Guid id, QueryContext queryModel) {
             var query = BuildGetByIdQuery (tenantId, entityName, queryModel, false);
             IQueryReview review = new QueryReview ();
             var result = review.GetResult (tenantId, entityName, query);
+
+            //--intersectEntity..........................
             var intersectEntity = GetIntersectEntity (tenantId, entityName, id, queryModel);
             if (intersectEntity.Any ()) {
                 foreach (var item in intersectEntity) {
@@ -485,7 +557,12 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                     }
                 }
             }
-            return result;
+
+            //  return result;
+            var entityResultMapper = new EntityResultMapper ();
+            var mappedData = entityResultMapper.GetCustomField (tenantId, entityName, result, queryModel);
+            return mappedData;
+
         }
 
         //tapash why this two columns are static??
@@ -532,6 +609,35 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
         }
         /////// @todo remove id form column ...
         bool IEntityQueryManager.UpdateResult (Guid tenantId, Guid userId, string resourceName, Guid resourceId, JObject resource, string subType) {
+
+            var targetEntityObj = resource.Children ().FirstOrDefault (t => t.Path.ToLower ().Equals (resourceName.ToLower ()));
+            var entityObj = targetEntityObj.First ().ToObject<JObject> ();
+            entityObj.Remove ("internalId");
+            var updateStatus = UpdateEntity (tenantId, resourceName, resourceId, entityObj, subType);
+
+            foreach (var item in resource.Children ()) {
+                var path = item.Path.ToString ();
+                if (string.IsNullOrEmpty (path) || path.ToLower ().Equals (resourceName.ToLower ())) continue;
+                var childObj = item.First ().ToObject<JObject> ();
+                var getSubTypeId = GetSubTypeId (resourceName, path, subType);
+                try {
+                    var targetId = childObj["internalId"];
+                    childObj.Remove ("internalId");
+                    if (targetId != null) {
+                        Guid childId = Guid.Parse (targetId.ToString ());
+                        var childrenStatus = UpdateEntity (tenantId, path, childId, childObj, subType);
+                    }
+                } catch {
+
+                }
+            }
+
+            return true;
+        }
+
+        private bool UpdateEntity (Guid tenantId, string resourceName, Guid resourceId, JObject resource, string subType) {
+            var children = resource.Children ();
+
             IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager ();
             var entityTableName = iMetadataManager.GetTableNameByEntityname (resourceName);
             var entityTablePrimaryKey = iMetadataManager.GetPrimaryKeyByEntityname (resourceName);
@@ -547,11 +653,11 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             var codeValue = resource["Code"];
             var code = string.Empty;
 
-            if (itemNameValue != null && !string.IsNullOrEmpty (itemNameValue.ToString ())) {
+            if (!string.IsNullOrEmpty (itemNameValue?.ToString ())) {
                 name = itemNameValue.ToString ();
             }
 
-            if (codeValue != null && !string.IsNullOrEmpty (codeValue.ToString ())) {
+            if (!string.IsNullOrEmpty (codeValue?.ToString ())) {
                 code = codeValue.ToString ();
             }
 
@@ -587,9 +693,30 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             }
             var updateQuery = tables.Count > 1 ? TransactionHelper.BuildQuery (queryStr) : queryStr;
             IQueryAdmin admin = new QueryAdmin ();
-            var updateResult = admin.SaveResult (tenantId, resourceName, updateQuery);
             RemoveRelation (tenantId, resourceName, resourceId);
+            var updateResult = admin.SaveResult (tenantId, resourceName, updateQuery);
             AddRelatoin (tenantId, resourceName, resourceId, payload, columns);
+
+            var triggers = iMetadataManager.GetTriggerProperties (resourceName);
+            if (!triggers.Any ()) return true; {
+                var singletonTrigger = triggers[0];
+                var bodyProp = singletonTrigger.GetBody ();
+                // var search = matchingColumns.FirstOrDefault (t => t.EntityFullName.ToLower ().Equals (resourceName.ToLower ()));
+                // if (search == null) return true;
+                // {
+                var payload1 = bodyProp.Select (item => matchingColumns.FirstOrDefault (t => t.FieldName.ToLower ().Equals (item.ToLower ()))).Where (matching => matching != null).ToDictionary<ColumnAndField, string, string> (matching => matching.ColumnName, matching => matching.Value);
+                if (!payload1.Any ()) return true;
+                var triggerEngine = new TriggerEngine ();
+                var triggerExecutionPayload = new TriggerExecutionPayload {
+                    PayloadObj = payload1,
+                    ConditionalValue = resourceId.ToString ()
+                };
+                var triggerQuery = triggerEngine.GetQuery (triggers, triggerExecutionPayload);
+                if (string.IsNullOrEmpty (triggerQuery)) return true;
+                IQueryAdmin admin1 = new QueryAdmin ();
+                admin1.SaveResult (tenantId, resourceName, triggerQuery);
+                // }
+            }
             return true;
         }
 
@@ -626,132 +753,142 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             }
         }
 
-        private string BuildMultipleTableDeleteQuery (Guid tenantId, string entityTableName, string entityPrimaryKey, string value, List<ColumnAndField> tables, List<ColumnAndField> foreignKeys) {
-            var selectQueryBuilder = new SelectQueryBuilder ();
-            selectQueryBuilder.SelectFromTable (entityTableName, "_us");
-            selectQueryBuilder.AddWhere (entityPrimaryKey, Comparison.Equals, value, 1);
-            var selectQuery = selectQueryBuilder.BuildQuery ();
-            IQueryReview review = new QueryReview ();
-            var targetResult = review.GetResult (tenantId, entityTableName, selectQuery);
-            if (targetResult == null) return "";
-            var queryStr = string.Empty;
-            for (var i = tables.Count - 1; i >= 0; --i) {
-                var targetTable = tables[i];
-                var matchForeignKey = foreignKeys.FirstOrDefault (t => t.TableName.Equals (targetTable.TableName) && t.EntityPrefix.Equals (targetTable.EntityPrefix));
-                var columnName = (matchForeignKey != null) ? matchForeignKey.ColumnName : targetTable.PrimaryKey;
-                var targetValue = value;
-                if (!string.IsNullOrEmpty (targetTable.ReferenceTableName) && !string.IsNullOrEmpty (targetTable.ReferenceColumnName)) {
-                    targetValue = string.Empty;
-                    var targetColumn = targetTable.ReferenceColumnName.TrimStart ('[').TrimEnd (']');
-                    if (targetResult.Columns.Contains (targetColumn)) {
-                        targetValue = targetResult.Rows[0][targetColumn].ToString ();
-                    }
-                }
-                if (string.IsNullOrEmpty (targetValue)) continue;
-                var queryBuilder = new DeleteQueryBuilder ();
-                queryBuilder.SelectFromTable (targetTable.TableName);
-                queryBuilder.AddWhere (columnName, Comparison.Equals, targetValue, 1);
-                var query = queryBuilder.BuildQuery ();
-                queryStr += query;
-            }
-            return tables.Count > 1 ? TransactionHelper.BuildQuery (queryStr) : queryStr;
-        }
-        private string BuildSingleTableDeleteQuery (Guid tenantId, string entityTableName, string entityPrimaryKey, dynamic value) {
-            var queryBuilder = new DeleteQueryBuilder ();
-            queryBuilder.SelectFromTable (entityTableName);
-            queryBuilder.AddWhere (entityPrimaryKey, Comparison.Equals, value, 1);
-            return queryBuilder.BuildQuery ();
-        }
-        bool IEntityQueryManager.DeleteResult (Guid tenantId, string resourceName, Guid resourceId) {
-            IMetadataManager entityManager = new MetadataManager.Contracts.MetadataManager ();
-            var tableName = entityManager.GetTableNameByEntityname (resourceName);
-            var primaryKey = entityManager.GetPrimaryKeyByEntityname (resourceName);
-            var context = entityManager.GetEntityContextByEntityName (resourceName, BusinessConstant.IsPickList);
-            if (string.IsNullOrEmpty (tableName)) throw new FieldAccessException ("Entity not found.");
-            var entityColumns = entityManager.GetColumnNameByEntityName (resourceName, null);
-            var columns = MapColumnsAsperFielsWithIndex (tenantId, resourceName, context, entityColumns, null); // think is it not required
-            //    var columns = GetColumnName (tenantId, resourceName, null, isPickList);
-            var matchingColumns = columns;
-            var tables = matchingColumns.Where (x => ((x.ColumnName.Equals (x.PrimaryKey) && x.EntityFullName == resourceName)) || (x.ColumnName.Equals (x.PrimaryKey) && x.AllowCaseCadingDelete && x.EntityFullName != resourceName)).ToList ().GroupBy (x => new { x.EntityPrefix }).Select (x => x.FirstOrDefault ()).ToList ();
-            if (!tables.Any ()) throw new FieldAccessException ("Not allow to delete");
-            string query;
-            if (tables.Count > 1) {
-                tables.OrderByDescending (x => string.IsNullOrEmpty (x.Linker));
-                var foreignKeyLinker = columns.Where (t => !string.IsNullOrEmpty (t.ReferenceTableName)).ToList ();
-                query = BuildMultipleTableDeleteQuery (tenantId, tableName, primaryKey, resourceId.ToString (), tables, foreignKeyLinker);
-            } else {
-                query = BuildSingleTableDeleteQuery (tenantId, tableName, primaryKey, resourceId.ToString ());
-            }
-
+        bool IEntityQueryManager.DeleteResult (Guid tenantId, Guid userId, Guid itemId, string entityName) {
+            IDeleteHelper delete = new DeleteHelper ();
+            var deleteQuery = delete.BuildDeleteQuery (tenantId, userId, itemId, entityName);
+            if (string.IsNullOrEmpty (deleteQuery)) throw new FileNotFoundException (String.Format ("{0} with id {1} not found for deleting", entityName, itemId.ToString ()));
             IQueryAdmin admin = new QueryAdmin ();
-            var res = admin.DeleteResult (tenantId, resourceName, query);
+            var res = admin.DeleteResult (tenantId, entityName, deleteQuery);
             return res;
+        }
+
+        Guid IEntityQueryManager.SaveResult (Guid tenantId, string entityName, JObject resource, string subtype, Guid userId) {
+
+            var staticTenantEntityName = "tenant";
+
+            //save main entity....
+            var resultCache = new Dictionary<Guid, string> ();
+            var targetEntityObj = resource.Children ().FirstOrDefault (t => t.Path.ToLower ().Equals (entityName.ToLower ()));
+            var entityObj = targetEntityObj.First ().ToObject<JObject> ();
+
+            // var test = new Dictionary<string, dynamic> ();
+            // test.Add ("DrawingRefNo", "1");
+            // test.Add ("RevisionNo", "2");
+            // var duplicateChecking = GetDuplicateStatus (entityName, test);
+
+            // return Guid.Empty;
+
+            var entityId = SaveResult (tenantId, userId, entityName, entityObj, subtype);
+            var result = entityId;
+            resultCache.Add (entityId, entityName);
+            if (entityName.ToLower ().Equals (staticTenantEntityName)) {
+                tenantId = entityId;
+            }
+
+            var newlyCreatedUserId = Guid.Empty;
+            foreach (var item in resource.Children ()) {
+                var path = item.Path.ToString ();
+                if (string.IsNullOrEmpty (path) || path.ToLower ().Equals (entityName.ToLower ())) continue;
+
+                var obj = item.First ().ToObject<JObject> ();
+                var getSubTypeId = GetSubTypeId (entityName, path, subtype);
+
+                AddVersionSupportLogic (resultCache, path, obj);
+
+                var id = SaveResult (tenantId, userId, path, obj, getSubTypeId);
+                resultCache.Add (id, path);
+
+                // //when senario is different..
+                // if (path.ToLower ().Equals (entityName)) {
+                //     result = id;
+                // }
+                if (path.ToLower ().Equals ("user")) {
+                    newlyCreatedUserId = id;
+                }
+
+                //need to move in user.cs
+                //business logic to update user as superadmin.
+                if (entityName.ToLower ().Equals (staticTenantEntityName) && path.ToLower ().Equals ("user")) {
+                    UpdateQueryBuilder updateQuery = new UpdateQueryBuilder ();
+                    var columnWithValue = new Dictionary<string, string> ();
+                    columnWithValue.Add ("[SuperAdminId]", newlyCreatedUserId.ToString ());
+                    updateQuery.AddTable ("[dbo].[Tenant]", columnWithValue);
+                    updateQuery.AddWhere ("[Id]", Comparison.Equals, tenantId.ToString ());
+                    var queryRes = updateQuery.BuildQuery ();
+                    IQueryAdmin admin = new QueryAdmin ();
+                    admin.UpdateResult (tenantId, entityName, queryRes);
+                }
+
+            }
+            return result;
 
         }
-        Guid IEntityQueryManager.SaveResult (Guid tenantId, string entityName, JObject resource, string subtype, Guid userId) {
-            var primaryEntityId = SaveResult (tenantId, userId, entityName, resource, subtype);
+
+        private void AddVersionSupportLogic (Dictionary<Guid, string> resultCache, string path, JObject obj) {
+            if (!resultCache.Any ()) return;
             IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager ();
-            var entityField = iMetadataManager.GetEntitityByName (entityName);
-            if (entityField != null && entityField.ActivityEntity != null && entityField.ActivityEntity.Fields != null && entityField.ActivityEntity.Fields.Any ()) {
-                var activitySubType = iMetadataManager.GetSubTypes (entityField.ActivityEntity.Name);
-                if (activitySubType != null && activitySubType.Any ()) {
-                    var activitySubtypeId = iMetadataManager.GetSubTypeId (entityField.ActivityEntity.Name, activitySubType[0].Name);
+            var entityDetails = iMetadataManager.GetEntitityByName (path.ToLower ());
+            if (entityDetails == null || entityDetails.VersionOf == null) return;
 
-                    //need to discuss with @Amit
-                    resource.Properties ()
-                        .Where (attr => attr.Name.Equals ("Code") || attr.Name.Equals ("ItemName"))
-                        .ToList ()
-                        .ForEach (attr => attr.Remove ());
-
-                    var activitityEntityId = SaveResult (primaryEntityId, userId, entityField.ActivityEntity.Name, resource, activitySubtypeId);
-                    if (activitityEntityId != null) {
-                        UpdateQueryBuilder updateQuery = new UpdateQueryBuilder ();
-                        var columnWithValue = new Dictionary<string, string> ();
-                        columnWithValue.Add ("[SuperAdminId]", activitityEntityId.ToString ());
-                        updateQuery.AddTable ("[dbo].[Tenant]", columnWithValue);
-                        updateQuery.AddWhere ("[Id]", Comparison.Equals, primaryEntityId.ToString ());
-                        var queryRes = updateQuery.BuildQuery ();
-                        IQueryAdmin admin = new QueryAdmin ();
-                        admin.UpdateResult (tenantId, entityName, queryRes);
+            var parentId = resultCache.FirstOrDefault (t => t.Value.ToLower ().Equals (entityDetails.VersionOf.Name.ToLower ())).Key;
+            if (parentId != null) {
+                var foreignKeys = entityDetails.Fields.Where (t => t.TypeOf.ToLower ().Equals (entityDetails.VersionOf.Name.ToLower ())).ToList ();
+                if (foreignKeys.Any ()) {
+                    foreach (var item in foreignKeys) {
+                        obj.Add (item.Name, parentId.ToString ());
                     }
                 }
             }
-            return primaryEntityId;
+            var versionField = entityDetails.Fields.FirstOrDefault (t => t.Name.ToLower ().Equals ("versionno"));
+            if (versionField != null) {
+                obj.Add (versionField.Name, 1);
+            }
+
+        }
+
+        private string GetSubTypeId (string entityName, string path, string subtype) {
+            if (entityName.ToLower ().Equals (path.ToLower ())) {
+                return subtype;
+            };
+            IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager ();
+            var subTypes = iMetadataManager.GetSubTypes (path);
+            if (subTypes.Any ()) {
+                return iMetadataManager.GetSubTypeId (path, subTypes[0].Name);
+            }
+            return string.Empty;
         }
 
         private Guid SaveResult (Guid tenantId, Guid userId, string entityName, JObject resource, string subtype) {
-           
-          //  var tableName = iMetadataManager.GetTableNameByEntityname (entityName);
-          //  if (entityColumns == null) throw new FieldAccessException ("Column not found.");
-          //  var matchingColumns = GetMatchingColumnsForInsert (entityName, resource, entityColumns, tableName);
+            IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager ();
+            //  var details = iMetadataManager.GetEntitityByName(entityName);
+
+            //Preprocessor
+            //  IOperationFlowEngine operationEngine = new OperationFlowEngine ();
+            // var properties = new WorkFlowProcessProperties { EntityName = entityName, SubTypeCode = subtype, UserId = userId, IsSuperAdmin = false };
+            // if(details!=null && details.SupportWorkflow)
+            //     operationEngine.PreProcess (tenantId, new OperationWapper { OperationType = WorkFlowOperationType.Create, Data = resource }, properties);
 
             var itemId = Guid.NewGuid ();
             var rootTenantId = tenantId;
-            //tenant intialisation due to exception case..
+
             if (entityName == "tenant") {
                 tenantId = itemId;
             }
 
-            // var itemTableWithValue = AddDefaultValueForInsert (tenantId, userId, entityName, subtype, itemId, entityColumns, matchingColumns, resource);
-            // var validateMessage = CheckValidationRule (entityColumns, itemTableWithValue);
-            // if (validateMessage != string.Empty) throw new FieldAccessException (validateMessage);
-            // var insertQuery = BuildInsertQuery (itemTableWithValue);
-
-            IInsertHelper insertHelper = new InsertHelper();
-            var insertQuery =  insertHelper.BuildInsertQuery (itemId, tenantId, entityName, resource, subtype, userId);
+            IInsertHelper insertHelper = new InsertHelper ();
+            var insertQuery = insertHelper.BuildInsertQuery (itemId, tenantId, entityName, resource, subtype, userId);
 
             IQueryAdmin admin = new QueryAdmin ();
             admin.SaveResult (tenantId, entityName, insertQuery);
 
-            //added logic for intersect ... //need to change this logic..
-            IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager();
-           
+            //added logic for intersect ... //need to change this logic..         
+
             var entity = iMetadataManager.GetEntitityByName (entityName);
             if (entity != null && entity.DetailEntities != null && entity.DetailEntities.Any ()) {
 
                 var intersects = entity.DetailEntities.Where (t => t.Type.ToLower ().Equals ("intersectentity")).ToList ();
                 if (intersects.Any ()) {
-                    var entityColumns = iMetadataManager.GetColumnNameByEntityName(entityName, null);
+                    var entityColumns = iMetadataManager.GetColumnNameByEntityName (entityName, null);
                     var isRequiredToAddIntersect = (from item in intersects select resource[item.Name] into match where match != null select match.ToObject<string> ()).Any (value => !string.IsNullOrEmpty (value));
                     if (isRequiredToAddIntersect) {
                         Dictionary<string, string> payload = ((IDictionary<string, JToken>) (JObject) resource).ToDictionary (pair => pair.Key, pair => (string) pair.Value);
@@ -759,6 +896,7 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                     }
                 }
             }
+
             //update tenant intialisation due to exception case..
             if (entityName != "tenant") return itemId;
             var queryStr = SpecificFieldUpdate ("[dbo].[Tenant]", "[Id]", itemId, "[TenantId]", rootTenantId.ToString ());
@@ -769,7 +907,7 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             return itemId;
         }
 
-        private static string SpecificFieldUpdate (string tableName, string primaryKey, Guid itemId, string whichProperty, string whichValue) {
+        private string SpecificFieldUpdate (string tableName, string primaryKey, Guid itemId, string whichProperty, string whichValue) {
             UpdateQueryBuilder query = new UpdateQueryBuilder ();
             var columnWithValue = new Dictionary<string, string> { { whichProperty, whichValue } };
             query.AddTable (tableName, columnWithValue);
@@ -778,63 +916,6 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             return queryRes;
         }
 
-        //private static List<ColumnAndField> GetMatchingColumnsForInsert (string entityName, JObject resource, List<ColumnAndField> entityColumns,
-        //    string tableName) {
-        //    IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager ();
-        //    var matchingColumns = new List<ColumnAndField> ();
-        //    foreach (var col in entityColumns) {
-        //        var columnName = (!string.IsNullOrEmpty (col.ClientName)) ? col.ClientName + "." + col.FieldName : col.FieldName;
-        //        var matching = resource[columnName];
-        //        if (matching != null) {
-        //            col.Value = col.Value == "#ENTCAST" ? iMetadataManager.GetEntityContextByEntityName (matching.ToObject<dynamic> ()) : matching.ToObject<dynamic> ();
-        //            matchingColumns.Add (col);
-        //        } else if (col.Value != null && col.TableName.Equals (tableName) && col.EntityFullName.ToLower ().Equals (entityName.ToLower ())) {
-        //            matchingColumns.Add (col);
-        //        }
-        //    }
-        //    if (!matchingColumns.Any ()) throw new FieldAccessException ("Column not matching.");
-        //    return matchingColumns;
-        //}
-
-        private List<ColumnAndField> MapColumnsAsperFielsWithIndex (Guid tenantId, string entityName, string entityContext, List<ColumnAndField> decoratedColumns, string[] fields) {
-            if (fields == null) return decoratedColumns;
-            var highestValue = decoratedColumns.Count ();
-            var itemTableColumns = GetDataFromItem (tenantId, entityName, entityContext, highestValue);
-            foreach (var item in decoratedColumns) {
-                var colname = !string.IsNullOrEmpty (item.ClientName) ? item.ClientName + "." + item.FieldName : item.FieldName;
-                var userFieldsMatching = fields.FirstOrDefault (x =>
-                    x.Equals (colname)
-                );
-                var queryIndex = 0;
-                if (userFieldsMatching != null) {
-                    var keyIndex = Array.FindIndex (fields, w => w.Equals (colname));
-                    queryIndex = keyIndex + 1;
-                } else {
-                    if (item.ColumnName != item.PrimaryKey) continue;
-                    queryIndex = highestValue;
-                    highestValue++;
-                }
-                item.QueryIndex = queryIndex;
-                itemTableColumns.Add (item);
-            }
-
-            var inverseKey = decoratedColumns.Where (t => !string.IsNullOrEmpty (t.InverseColumnName) && !string.IsNullOrEmpty (t.InverseTableName)).ToList ();
-            foreach (var key in inverseKey) {
-                var isRequired = itemTableColumns.FirstOrDefault (t => t.TableName.Equals (key.InverseTableName));
-                if (isRequired != null) {
-                    itemTableColumns.Add (key);
-                }
-            }
-            // return itemTableColumns.OrderBy(p=>p.QueryIndex).ToList();
-            return itemTableColumns;
-        }
-
-        private List<ColumnAndField> GetDataFromItem (Guid tenantId, string entityName, string entityContext, int highestValue) {
-            IMetadataManager entityManager = new MetadataManager.Contracts.MetadataManager ();
-            var isItem = entityManager.EntityIsAnItem (entityName, BusinessConstant.IsPickList);
-            return (isItem) ?
-                ItemHelper.GetItemSelectDetails (tenantId, entityContext, highestValue) : new List<ColumnAndField> ();
-        }
         private List<ColumnAndField> GetMatchingColumnForUpdate (Guid tenantId, Guid resourceId, string resourceName, string entityTableName, string entityTablePrimaryKey, Dictionary<string, string> payload, List<ColumnAndField> columns) {
             var userKeys = payload.Select (t => t.Key).ToArray ();
             var matchNew = GetAllMatchingColumnsForEntity (userKeys, columns, entityTableName, entityTablePrimaryKey);
@@ -883,6 +964,10 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
         }
 
         dynamic IEntityQueryManager.GetSpecificIdByQuery (Guid tenantId, string entityName, dynamic primaryKeyValue, string whichPropery) {
+            return GetSpecificIdByQuery (tenantId, entityName, primaryKeyValue, whichPropery);
+        }
+
+        private static dynamic GetSpecificIdByQuery (Guid tenantId, string entityName, dynamic primaryKeyValue, string whichPropery) {
             IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager ();
             var entityTableName = iMetadataManager.GetTableNameByEntityname (entityName);
 
@@ -929,6 +1014,111 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                 return updateResult;
             }
             return false;
+        }
+
+        Guid IEntityQueryManager.SelectInsert (string entityName, Guid tenantId, Guid Id, Guid userId) {
+            IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager ();
+            var entityColumns = iMetadataManager.GetColumnNameByEntityName (entityName, null);
+
+            var itemId = Guid.NewGuid ();
+
+            var tableName = iMetadataManager.GetTableNameByEntityname (entityName);
+            var primaryKey = iMetadataManager.GetPrimaryKeyByEntityname (entityName);
+            var query = GetColumnsOnlyPrimaryKeyValue (tenantId, entityName, tableName, primaryKey, entityColumns, itemId, Id);
+
+            var isItem = iMetadataManager.EntityIsAnItem (entityName, BusinessConstant.IsPickList);
+
+            if (isItem) {
+                var context = iMetadataManager.GetEntityContextByEntityName (entityName, BusinessConstant.IsPickList);
+                var itemColumns = ItemHelper.GetItemSelectDetails (tenantId, context, 0);
+                query += GetColumnsOnlyPrimaryKeyValue (tenantId, itemColumns[0].EntityFullName, ItemHelper.ItemTableName, ItemHelper.ItemTablePrimarykey, itemColumns, itemId, Id);
+                query = TransactionHelper.BuildQuery (query);
+            }
+            IQueryAdmin admin = new QueryAdmin ();
+            admin.SaveResult (tenantId, entityName, query);
+            return itemId;
+
+        }
+
+        private static string GetColumnsOnlyPrimaryKeyValue (Guid tenantId, string entityName, string tableName, string primaryKey, List<ColumnAndField> entityColumns, Guid itemId, Guid id) {
+
+            var primaryColumns = new Dictionary<string, string> ();
+            foreach (var item in entityColumns) {
+                if (item.EntityFullName.ToLower () != entityName.ToLower ()) continue;
+                var value = (item.ColumnName.Equals (primaryKey)) ? itemId.ToString () : string.Empty;
+
+                //--need to check this data..
+                if (primaryColumns.Any ()) {
+                    var addedList = primaryColumns.Where (t => t.Key.Equals (item.ColumnName));
+                    if (addedList.Any ()) continue;
+                }
+
+                //-- add auto update value 
+                if (item.AutoIncrement != null && item.AutoIncrement.Equals (IncrementType.Version)) {
+                    var versionNo = GetLastValue (tenantId, entityName, tableName, item, id);
+                    value = versionNo.ToString ();
+                }
+
+                //-----------------------
+                primaryColumns.Add (item.ColumnName, value);
+            }
+            if (primaryColumns != null && primaryColumns.Any ()) {
+                var selectInsertQueryBuilder = new SelectInsertQueryBuilder ();
+                selectInsertQueryBuilder.SelectInsertIntoTable (tableName, tableName, primaryColumns);
+                selectInsertQueryBuilder.AddWhere (primaryKey, Comparison.Equals, id.ToString (), 1);
+                var query = selectInsertQueryBuilder.BuildQuery ();
+                return query;
+            }
+            return string.Empty;
+        }
+
+        private static dynamic GetLastValue (Guid tenantId, string entityName, string tableName, ColumnAndField item, Guid id) {
+            var value = GetSpecificIdByQuery (tenantId, entityName, id, item.FieldName);
+            if (value != null) {
+                value = value + 1;
+            }
+            return value;
+        }
+
+        bool IEntityQueryManager.GetDuplicateStatus (Guid tenantId, string entityName, Dictionary<string, dynamic> fields, Guid? id) {
+            return GetDuplicateStatus (entityName, fields);
+        }
+
+        private static bool GetDuplicateStatus (string entityName, Dictionary<string, dynamic> fields) {
+            IMetadataManager entityManager = new MetadataManager.Contracts.MetadataManager ();
+            var columns = entityManager.GetColumnNameByEntityName (entityName, null);
+            var queryContext = new QueryContext ();
+            var fieldArr = fields.Select (t => t.Key).ToArray ();
+            queryContext.Fields = string.Join (",", fieldArr);
+            //List<ColumnAndField> orderByColumns = GetColumnsUsingBusinessLogic (tenantId, entityName, queryContext);
+
+            queryContext.Filters = new List<QueryFilter> ();
+
+            foreach (var item in fields) {
+                var colName = columns.FirstOrDefault (t => t.FieldName.ToLower ().Equals (item.Key.ToLower ()));
+                if (colName != null) {
+                    var filter = new QueryFilter ();
+                    filter.FieldName = colName.ColumnName;
+                    filter.Operator = "=";
+                    filter.Value = item.Value;
+                    queryContext.Filters.Add (filter);
+                }
+            }
+
+            var primaryTable = columns.FirstOrDefault (t => t.PrimaryKey.Equals (t.ColumnName) && t.EntityFullName.ToLower ().Equals (entityName.ToLower ()));
+
+            var queryBuilder = new SelectQueryBuilder ();
+            if (primaryTable != null) {
+                queryBuilder.SelectFromTable (primaryTable.TableName, primaryTable.EntityPrefix);
+                var itemTable = columns.FirstOrDefault (t =>
+                    t.PrimaryKey.Equals (t.ColumnName) && t.EntityFullName.ToLower ().Equals ("item"));
+                if (itemTable != null) {
+                    queryBuilder.AddJoin (JoinType.InnerJoin, itemTable.TableName, itemTable.EntityPrefix, itemTable.PrimaryKey, Comparison.Equals,
+                        primaryTable.TableName, primaryTable.EntityPrefix, primaryTable.PrimaryKey);
+                }
+            }
+            var query = queryBuilder.BuildQuery ();
+            return true;
         }
     }
 }

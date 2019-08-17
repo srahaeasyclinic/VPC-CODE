@@ -11,6 +11,8 @@ import { BatchTypeInfo } from '../model/batchtypeinfo';
 import { SchedulerComponent } from './scheduler.component';
 import { MenuService } from '../services/menu.service';import{GlobalResourceService} from '../global-resource/global-resource.service';
 import{Resource} from '../model/resource';
+import { CommonService } from 'src/app/services/common.service';
+
 @Component({
   selector: 'app-batchtype',
   templateUrl: './batchtype.component.html',
@@ -22,6 +24,7 @@ export class BatchTypeComponent implements OnInit {
   public gridDatas: BatchTypeInfo[];
   public batchInfo:BatchTypeInfo;
   public resource:Resource;
+  public pageSize : number = this.commonService.defaultPageSize();
   
   constructor(private activatedRoute: ActivatedRoute, 
     private router: Router, 
@@ -29,7 +32,7 @@ export class BatchTypeComponent implements OnInit {
     private modalService: NgbModal,
     private toster: TosterService,   
     private formBuilder: FormBuilder,
-	private globalResourceService:GlobalResourceService,    ) { }
+	private globalResourceService:GlobalResourceService, private commonService:CommonService   ) { }
 
  
 
@@ -123,6 +126,19 @@ deleteBatch(batchTypeId){
       if (data) {
         this.getBatches();          
         this.toster.showSuccess(this.getResourceValue("BatchDisabledSuccessfully")); 
+      }
+    },
+    error => {
+      console.log(error);
+    });
+}
+
+updateBatchItemNextRunTime()
+{
+  this.batchTypeService.updateBatchItemNextRunTime().pipe(first()).subscribe(
+    data => {   
+      if (data) {            
+        this.toster.showSuccess(this.getResourceValue("BatchUpdatedNextRunnTime")); 
       }
     },
     error => {

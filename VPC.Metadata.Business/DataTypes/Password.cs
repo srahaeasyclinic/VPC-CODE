@@ -17,7 +17,10 @@ namespace VPC.Metadata.Business.DataTypes {
 
             var lengthValidator = new LengthValidator ();
             lengthValidator.Dblength = 20;
+            lengthValidator.MinDblength = 8;
             AddValidator (lengthValidator);
+             var defaultValueValidattor = new DefaultValueValidator (ControlType);
+            this.AddValidator (defaultValueValidattor);
         }
 
         public override string Value { get; set; }

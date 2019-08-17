@@ -7,6 +7,7 @@ import { GlobalResourceService } from '../global-resource/global-resource.servic
 
 import { Picklists } from '../model/picklists';
 import { GridDataResult, DataStateChangeEvent } from '@progress/kendo-angular-grid';
+import { CommonService } from '../services/common.service';
 
 @Component({
   selector: 'app-picklist',
@@ -21,14 +22,16 @@ export class PicklistComponent implements OnInit {
   public gridData: any = this.picklistList;
   public resourceData: any ;
   public none : any;
-
+  public pageSize:number = this.commonService.defaultPageSize();
 
   constructor(
+    private commonService : CommonService,
     private route: ActivatedRoute,
     private router: Router,
     private picklistService: PicklistService,
     private globalResourceService: GlobalResourceService,
-  ) { }
+  ) { 
+  }
 
   ngOnInit() {
     this.resourceData = this.globalResourceService.getGlobalResources();
@@ -39,12 +42,14 @@ export class PicklistComponent implements OnInit {
  
 
   private getPicklists() {
+    var that=this;
     this.picklistService.getPicklists()
       .pipe(first())
       .subscribe(
         data => { 
           if(data && data){
             this.gridData = data;
+            //this.gridData.map(function (i) { return i["displayName"] =that.getResourceValue(i.name.toLowerCase()+'_displayname') });
           }
           
         },

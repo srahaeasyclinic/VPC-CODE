@@ -34,8 +34,10 @@ export class LayoutfieldsComponent implements OnInit {
   private isdataexistsvalues: boolean = false;
   public layoutInfo: LayoutModel = new LayoutModel();
   public clickableColumn: string = '';
-  public searchText: any;
+  public searchText: string = '';
   public resource: Resource;
+  public clickableList: any;
+
   constructor(
     private layoutService: LayoutService,
     private activatedRoute: ActivatedRoute,
@@ -47,6 +49,7 @@ export class LayoutfieldsComponent implements OnInit {
     this.layoutInfo = this.activatedRoute.snapshot.parent.data['layoutDetails'];
 
     this.addedItemToMainList = [];
+    this.clickableList = [];
     this.addedItemToMainList = this.layoutInfo.listLayoutDetails.fields;
     this.pickListSource = [];
     // console.log(JSON.stringify(this.layoutInfo.listLayoutDetails.fields));
@@ -63,6 +66,14 @@ export class LayoutfieldsComponent implements OnInit {
 
     this.addedItemToMainList.forEach(item => {
       item.isRowSelected = '';
+    });
+
+    //this.clickableList = [...this.addedItemToMainList];
+
+    this.addedItemToMainList.forEach((item) => {
+      if (!item.hidden) {
+        this.clickableList.push(item);
+      }
     });
 
     if (this.addedItemToMainList && this.addedItemToMainList.length > 0) {
@@ -131,6 +142,7 @@ export class LayoutfieldsComponent implements OnInit {
       if (this.isdatamainlist === false) {
         this.selectedItemFromMainList.sequence = (this.addedItemToMainList != null) ? this.addedItemToMainList.length + 1 : 1;
         this.addedItemToMainList.push(this.selectedItemFromMainList);
+        this.clickableList.push(this.selectedItemFromMainList);
         this.reOrderMainList();
         this.selectedItemFromMainList.isAdded = true;
         this.processSelectedField(this.selectedItemFromMainList)
@@ -218,6 +230,11 @@ export class LayoutfieldsComponent implements OnInit {
           }
         }
 
+        var clickableIndex = this.clickableList.indexOf(this.selectedItemFromAddedList);
+        if (clickableIndex != -1) {
+          this.clickableList.splice(clickableIndex, 1);
+        }
+
         this.reOrderMainList();
       }
     }
@@ -247,6 +264,14 @@ export class LayoutfieldsComponent implements OnInit {
   private reOrderMainList() {
     let a = 0;
     this.addedItemToMainList.forEach((item) => {
+      item.sequence = a;
+      a++;
+    });
+  }
+
+  private reOrderClickableList() {
+    let a = 0;
+    this.clickableList.forEach((item) => {
       item.sequence = a;
       a++;
     });
@@ -360,6 +385,18 @@ export class LayoutfieldsComponent implements OnInit {
 
         if (ev.target.checked === true) {
           this.layoutInfo.listLayoutDetails.fields[i].clickable = false;
+          var a: number = this.clickableList.findIndex(i => i.name === this.selectedItemFromAddedList.name);
+          if (a > -1) {
+            this.clickableList.splice(a, 1);
+          }
+        }
+        else {         
+          var clickableIndex = this.clickableList.indexOf(this.selectedItemFromAddedList);
+          if (clickableIndex == -1) {
+            this.clickableList.push(this.selectedItemFromAddedList);
+          }   
+
+          this.reOrderClickableList();
         }
       }
     }
@@ -408,4 +445,13 @@ export class LayoutfieldsComponent implements OnInit {
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
   }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
+  }
+
 }

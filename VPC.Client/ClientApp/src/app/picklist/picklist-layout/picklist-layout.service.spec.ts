@@ -1,15 +1,12 @@
 import { TestBed, inject } from '@angular/core/testing';
+import { PicklistLayoutService } from './picklist-layout.service';
 
-import { App\picklist\picklistLayout\picklistLayoutService } from './app\picklist\picklist-layout\picklist-layout.service';
+describe('PicklistLayoutService', () => {
+  beforeEach(() => TestBed.configureTestingModule({}));
 
-describe('App\picklist\picklistLayout\picklistLayoutService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [App\picklist\picklistLayout\picklistLayoutService]
-    });
-  });
+  // it('should be created', () => {
+  //   const service: PicklistLayoutService = TestBed.get(PicklistLayoutService);
+  //   expect(service).toBeTruthy();
+  // });
 
-  it('should be created', inject([App\picklist\picklistLayout\picklistLayoutService], (service: App\picklist\picklistLayout\picklistLayoutService) => {
-    expect(service).toBeTruthy();
-  }));
 });

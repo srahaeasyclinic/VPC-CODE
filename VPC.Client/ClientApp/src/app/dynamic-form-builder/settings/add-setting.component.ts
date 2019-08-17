@@ -9,7 +9,7 @@ import { Resource } from '../../model/resource';
   template: `
   <div class="modal-header">
     <label id="modal-title">
-    {{getResourceValue('AddSection')}}
+    {{getResourceValue('metadata_addsection')}}
     </label>
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
@@ -23,7 +23,7 @@ import { Resource } from '../../model/resource';
           <div class="col-md-12">
             <div class="checkbox">
             <label class="control control--checkbox">
-            {{getResourceValue('ShowHeader')}}
+            {{getResourceValue('metadata_showheader')}}
             <input type="checkbox" [(ngModel)]="node.setting.showHeader">
             <span class="control__indicator"></span>
           </label>
@@ -37,7 +37,7 @@ import { Resource } from '../../model/resource';
       <div class="row">
           <div class="col-md-12">
             <div class="form-group">
-              <label for="sel1">{{getResourceValue('SelectWidth')}} {{node.setting.columnWidth}}</label>
+              <label for="sel1">{{getResourceValue('metadata_label_width')}} {{node.setting.columnWidth}}</label>
               <select [(ngModel)]="node.setting.columnWidth" class="input-control">
                 <option *ngFor="let w of widths" [ngValue]="w.id">{{w.name}}</option>
               </select>
@@ -47,8 +47,9 @@ import { Resource } from '../../model/resource';
 
 
       <div class="modal-footer" style="border-top:0px">
-      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('Cancel')}}</button>
-      <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('Create')}}</button>
+      <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('operation_create')}}</button>
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
+     
     
 
 

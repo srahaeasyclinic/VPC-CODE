@@ -1,4 +1,5 @@
 using VPC.Entities.EntityCore.Metadata.Picklist;
+using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Metadata.Business.DataAnnotations;
 using VPC.Metadata.Business.DataTypes;
 using VPC.Metadata.Business.Entity.Configuration;
@@ -15,7 +16,7 @@ namespace VPC.Entities.EntityCore.Metadata.Runtime
         [NotNull]
         public InternalId TenantId { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [NonQueryable]
         [NotNull]
         [ColumnName("Id")]
@@ -31,31 +32,31 @@ namespace VPC.Entities.EntityCore.Metadata.Runtime
         [NotNull]
         public StringType EntitySubTypeCode { get; set; }
 
-        [AccessibleLayout(1, 2, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.Form, (int)LayoutType.List)]
         [ColumnName("[Name]")]
         [BasicColumn]
         [FreeTextSearch]
         public XLargeText ItemName { get; set; }
        
-        [AccessibleLayout(1,2,3)]
+        [AccessibleLayout((int)LayoutType.View,(int)LayoutType.Form,(int)LayoutType.List)]
         [ColumnName("[Code]")]
         [FreeTextSearch]
         public XSmallText Code { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View,(int)LayoutType.Form, (int)LayoutType.List)]
         [ApplicableForFilter]
         [AdvanceSearch]
         [SimpleSearch]
-        [NotNull]
+       // [NotNull]
         [ColumnName("[Active]")]        
         public PickList<Active> Active { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [ColumnName("[UpdatedBy]")]
         [NotNull]
         public Lookup<User> UpdatedBy { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [ColumnName("[UpdatedOn]")]
         [NotNull]        
         public DateTime UpdatedOn { get; set; }

@@ -1,14 +1,17 @@
-﻿namespace VPC.Metadata.Business.DataAnnotations
-{
-    public static class Operations
-    {
+﻿namespace VPC.Metadata.Business.DataAnnotations {
+    public static class Operations {
         public const string
-            Create = "Create",
+        Create = "Create",
             Update = "Update",
-            
+
             UpdateStatus = "UpdateStatus",
             Delete = "Delete",
-            Save = "Save";
+            Save = "Save",
+
+            Checkout = "Checkout",
+            CheckIn = "CheckIn",
+
+            Cancel = "Cancel";
     }
 
 }

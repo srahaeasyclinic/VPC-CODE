@@ -1,33 +1,39 @@
+
 <div class="msg-tips-left">
   <div *ngFor="let toolbarButton of this.toolbarButtons">
     <div *ngIf="!toolbarButton.group">
-      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body" *ngIf="toolbarButton.name==='Create'"
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}" container="body" *ngIf="toolbarButton.name==='Create'"
         (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
-        <i class="fa fa-plus"></i> {{getResourceValue(toolbarButton.name)}}
+        <i class="fa fa-plus"></i> {{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}
       </div>
-      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body" *ngIf="toolbarButton.name==='Edit'"
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}" container="body" *ngIf="toolbarButton.name==='Edit'"
         (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
-        <i class="fa fa-pencil-square-o"></i>{{getResourceValue(toolbarButton.name)}}
+        <i class="fa fa-pencil-square-o"></i>{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}
       </div>
-      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body" *ngIf="toolbarButton.name==='Update'"
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}" container="body" *ngIf="toolbarButton.name==='Update'"
         (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
-        <i class="fa fa-save"></i>{{getResourceValue(toolbarButton.name)}}
+        <i class="fa fa-save"></i>{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}
       </div>
-      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body" *ngIf="toolbarButton.name==='Save'"
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}" container="body" *ngIf="toolbarButton.name==='Save'"
         (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
-        <i class="fa fa-save"></i>{{getResourceValue(toolbarButton.name)}}
+        <i class="fa fa-save"></i>{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}
       </div>
-      <div class="msg-entrance" ngbTooltip="{{getResourceValue(toolbarButton.name)}}" container="body"
-        *ngIf="toolbarButton.name!=='Create' && toolbarButton.name!=='Edit' && toolbarButton.name!=='Update' && toolbarButton.name!=='Save'"
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}" container="body"
+        *ngIf="toolbarButton.name!=='Create' && toolbarButton.name!=='Edit' && toolbarButton.name!=='Update' && toolbarButton.name!=='Save' && (toolbarButton.hasOwnProperty('type')===false)"
         (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
-        <i class="fa fa-check-square-o"></i>{{getResourceValue(toolbarButton.name)}}
+        <i class="fa fa-check-square-o"></i>{{getResourceValue('operation_'+toolbarButton.name.toLowerCase())}}
+      </div>
+      <div class="msg-entrance" ngbTooltip="{{getResourceValue('task_'+toolbarButton.name.toLowerCase())}}" container="body"
+        *ngIf="toolbarButton.name!=='Create' && toolbarButton.name!=='Edit' && toolbarButton.name!=='Update' && toolbarButton.name!=='Save' && (toolbarButton.hasOwnProperty('type') && toolbarButton.type==='task' && taskProductVersionButton)"
+        (click)="toolbarButtonOperation(toolbarButton, updaterolecontent)">
+        <i class="fa fa-check-square-o"></i>{{getResourceValue('task_'+toolbarButton.name.toLowerCase())}}
       </div>
     </div>
   </div>
   <!-- <div class="msg-drp" *ngIf="this.possiblesteps?.length > 0"> -->
   <div class="msg-drp" *ngIf="possiblesteps?.length > 0">
     <div ngbDropdown class="">
-      <a ngbDropdownToggle>{{getResourceValue("SendTo")}}</a>
+      <a ngbDropdownToggle>{{getResourceValue('metadata_task_sendto')}}</a>
 
       <div ngbDropdownMenu class="d-text">
         <a (click)="onToolBarWorkFlowClick(possiblestep)"
@@ -38,18 +44,18 @@
   <!-- <div class="msg-drp" *ngIf="this.sendToButtons?.length > 0"> -->
   <div class="msg-drp" *ngIf="sendToButtons?.length > 0">
     <div ngbDropdown class="">
-      <a ngbDropdownToggle>{{getResourceValue("Communication")}}</a>
+      <a ngbDropdownToggle>{{getResourceValue('operation_communication')}}</a>
       <div ngbDropdownMenu class="d-text">
-        <a (click)="toolbarButtonOperation(button)" *ngFor="let button of sendToButtons">{{button.name}}</a>
+        <a (click)="toolbarButtonOperation(button)" *ngFor="let button of sendToButtons">{{getResourceValue('task_'+button.name.toLowerCase())}}</a>
       </div>
     </div>
   </div>
   <!-- <div class="msg-drp" *ngIf="this.printButtons?.length > 0"> -->
   <div class="msg-drp" *ngIf="printButtons?.length > 0">
     <div ngbDropdown class="">
-      <a ngbDropdownToggle>{{getResourceValue("Print")}}</a>
+      <a ngbDropdownToggle>{{getResourceValue('task_print')}}</a>
       <div ngbDropdownMenu class="d-text">
-        <a (click)="toolbarButtonOperation(button)" *ngFor="let button of printButtons">{{button.name}}</a>
+        <a (click)="toolbarButtonOperation(button)" *ngFor="let button of printButtons">{{getResourceValue('task_'+button.name.toLowerCase())}}</a>
       </div>
     </div>
   </div>
@@ -57,25 +63,25 @@
 
 <ng-template #contentExchange let-modal>
   <div class="modal-header">
-    <label class="text-important">{{getResourceValue("SelectSubtype")}}</label>
+    <label class="text-important">{{getResourceValue("metadata_dropdownoption_subtype")}}</label>
     <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <div class="modal-body">
     <form (ngSubmit)="navigate()">
-      <div class="container">
+     
         <div class="form-group">
-          <label for="drpType">{{getResourceValue("SubType")}}</label>
+          <label for="drpType">{{getResourceValue(entityName.toLowerCase()+'_field_subtype')}}</label>
           <select class="input-control" (change)="onSubTypeChange($event.target.value)">
             <option *ngFor="let subtype of subTypes" value={{subtype.name}}>
               {{subtype.name}}
             </option>
           </select>
         </div>
-      </div>
+      
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" (click)="navigate('Save click')">{{getResourceValue("Continue")}}</button>
+        <button type="button" class="btn btn-primary" (click)="navigate('Save click')">{{getResourceValue("task_continue")}}</button>
       </div>
     </form>
   </div>
@@ -83,7 +89,7 @@
 
 <ng-template #updaterolecontent let-modal>
   <div class="modal-header">
-    <label id="modal-title">{{getResourceValue("OopsValidationWasFailedBecause")}}</label>
+    <label id="modal-title">{{getResourceValue("metadata_label_validationfaild")}}</label>
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -100,7 +106,7 @@
       </div>
     
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("task_cancel")}}</button>
     </div>
   </div>
 </ng-template>

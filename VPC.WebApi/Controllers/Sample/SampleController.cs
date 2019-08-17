@@ -10,7 +10,7 @@ using VPC.Framework.Business.DynamicQueryManager.Contracts;
 using VPC.Framework.Business.MetadataManager.Contracts;
 using VPC.Framework.Business.SampleBusiness.Contracts; 
 using VPC.WebApi.Utility;
-
+using VPC.Framework.Business.Initilize.Contracts;
 
 namespace VPC.WebApi.Controllers.SampleController
 {
@@ -131,30 +131,36 @@ namespace VPC.WebApi.Controllers.SampleController
 
 
         [HttpGet]
-        [Route("{name}/columnname")]
-        public IActionResult GetDefaultColumnName([FromRoute] string name)
+        [Route("delete-test/{entityName}/{id:guid}")]
+        public IActionResult GetDefaultColumnName([FromRoute] string entityName, Guid id)
         {
             HttpRequestMessage request = new HttpRequestMessage();
             try
             {
-                //  IEntityQueryManager queryManager = new EntityQueryManager ();
-                // var subscriptionId = queryManager.GetSpecificIdByQuery(TenantCode, "Tenant", "EA3A7E30-AFD8-4A17-9B83-1247A4EDB87C", "Code");
-                // return this.Ok(subscriptionId);
-                var columns = _iMetadataManager.GetColumnNameByEntityName(name, null);
+                // //  IEntityQueryManager queryManager = new EntityQueryManager ();
+                // // var subscriptionId = queryManager.GetSpecificIdByQuery(TenantCode, "Tenant", "EA3A7E30-AFD8-4A17-9B83-1247A4EDB87C", "Code");
+                // // return this.Ok(subscriptionId);
+                // var columns = _iMetadataManager.GetColumnNameByEntityName(name, null);
 
-                // var list = new List<dynamic>();
-                // foreach (var item in columns)
+                // // var list = new List<dynamic>();
+                // // foreach (var item in columns)
+                // // {
+                // //     if(string.IsNullOrEmpty(item.InversePrefixName))continue;
+                // //     list.Add(item);
+                // // }
+                // var entity =  _iMetadataManager.GetEntitityByName(name);
+                // var fieldsStr = string.Empty;
+                // foreach (var item in entity.Fields)
                 // {
-                //     if(string.IsNullOrEmpty(item.InversePrefixName))continue;
-                //     list.Add(item);
+                //     fieldsStr+=item.Name+",";
                 // }
-                var entity =  _iMetadataManager.GetEntitityByName(name);
-                var fieldsStr = string.Empty;
-                foreach (var item in entity.Fields)
-                {
-                    fieldsStr+=item.Name+",";
-                }
-                return this.Ok(new { columns, fieldsStr});
+                // return this.Ok(new { columns, fieldsStr});
+
+                // IDeleteHelper delete = new DeleteHelper();
+        
+                // var res = delete.BuildDeleteQuery(id, TenantCode, entityName, UserId);
+                // return this.Ok(res);
+                return this.Ok("test");
             }
             catch (Exception ex)
             {
@@ -162,5 +168,26 @@ namespace VPC.WebApi.Controllers.SampleController
                 return StatusCode((int)HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
             }
         }
+
+
+        [HttpGet]
+        [Route("value-replace/{rootTenantId:guid}/{initTenantId:guid}")]
+        public IActionResult GetDefaultColumnName(Guid rootTenantId, Guid initTenantId)
+        {
+            HttpRequestMessage request = new HttpRequestMessage();
+            try
+            {
+                var replacer = new InitilizeManager();
+                replacer.Test(rootTenantId, initTenantId);
+                return this.Ok("test");
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ExceptionFormatter.SerializeToString(ex));
+                return StatusCode((int)HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            }
+        }
+
+       
     }
 }

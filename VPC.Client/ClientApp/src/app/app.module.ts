@@ -108,7 +108,19 @@ import { BaseIntialiser } from "./initialiser/baseintialiser.component";
 //Dynamic Menu
 import{BreadcrumbComponent} from './bread-crumb/breadcrumb.component';
 import{LanguageComponent} from './global-resource/language/language.component';
+import { SecondaryAppModule } from "./secondaryModule/secondary-app.module";
+import { LinkSettingComponent } from "./dynamic-form-builder/settings/link-setting.component";
+import { CalendarSettingComponent } from "./dynamic-form-builder/settings/calendar-setting.component";
+
+import { QuickAddSettingComponent } from "./dynamic-form-builder/settings/custom/quickadd-setting.component";
+import { MetaDataConfigurer } from "./meta-data/layout/layout-detail-list/metadataconfigurer/metadataconfigurer.component";
+import { SessionExpiryPopupComponent } from "./sessionexpirypopup/sessionexpirypopup.component";
+import { MenuGroupComponent } from "./menu-group/menu-group.component";
+import { DeletepopupComponent } from "./deletepopup/deletepopup.component";
 //import { MenuGroupComponent } from './top-menu/menu-group.component';
+
+//import { MenuFilterPipe } from './utility/menuFilter';
+
 @NgModule({
   bootstrap: [
     AppComponent
@@ -128,6 +140,7 @@ import{LanguageComponent} from './global-resource/language/language.component';
     SectionSettingComponent,
     TabSettingComponent,
     TextboxSettingComponent,
+	LinkSettingComponent,			 
     AddSettingComponent,
     RequiredValidatorComponent,
     LengthValidatorComponent,
@@ -141,7 +154,11 @@ import{LanguageComponent} from './global-resource/language/language.component';
     MetadataDetailComponent,
     FieldsComponent,
     SchedulerComponent,
-    RuleUpsertComponent
+    RuleUpsertComponent,
+	QuickAddSettingComponent,
+    CalendarSettingComponent,						 
+    LinkSettingComponent,	
+  MenuGroupComponent
 
   ],
   imports: [
@@ -195,6 +212,7 @@ import{LanguageComponent} from './global-resource/language/language.component';
     }),
     ToastrModule.forRoot(),
     NgHttpLoaderModule.forRoot(),
+    SecondaryAppModule
   ],
 
   exports: [
@@ -211,6 +229,10 @@ import{LanguageComponent} from './global-resource/language/language.component';
     BreadcrumbComponent,
     CounterComponent,
     LanguageComponent,
+    MetaDataConfigurer,
+    SessionExpiryPopupComponent,
+    DeletepopupComponent,
+    //MenuFilterPipe
     //MenuGroupComponent
   ],
 
@@ -220,6 +242,7 @@ import{LanguageComponent} from './global-resource/language/language.component';
     Data,
     AuthorizationCheck,
     UserInfoService,
+
     //LoginService,
     { provide: HTTP_INTERCEPTORS, useClass: httpInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

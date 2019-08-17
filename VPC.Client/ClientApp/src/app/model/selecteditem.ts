@@ -12,4 +12,6 @@ export class SelectedItem {
   clickable: boolean;
   defaultView: string;
   typeOf: string;
+  contextType:string;
+  context:string;
 }

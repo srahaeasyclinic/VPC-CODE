@@ -25,28 +25,47 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
   
     public class BOMProduced : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.BOMProduced);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20027-ST01", "Standard"}
         };
 
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+
+        [DisplayName("BOM Id")]
         public Lookup<BOM> BOMId { get; set; }
-        public Lookup<Product> ProductCode { get; set; }
+
+        [DisplayName("Product code")]
+        public Lookup<VPC.Entities.EntityCore.Metadata.Product.Entity.Product> ProductCode { get; set; }
+
+        [DisplayName("Quantity")]
         public DecimalType Quantity { get; set; }
+
+        [DisplayName("UOM")]
         public PickList<Uom> UOM { get; set; }
+
+        [DisplayName("Produced type")]
         public PickList<ProducedType> ProducedType { get; set; }
+
+        [DisplayName("Share percentage")]
         public DecimalType SharePercentage { get; set; }
+
+        [DisplayName("Yield percentage")]
         public DecimalType YieldPercentage { get; set; }
     }
 }

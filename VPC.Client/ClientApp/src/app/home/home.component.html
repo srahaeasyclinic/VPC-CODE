@@ -1,66 +1,15 @@
-<div class="pages-wrap" *ngIf="menus && menus.length">
-  <app-top-menu class="home_top_menu" [menus]="menus" [onlyLogin]="true" (groupClickEvent)="nevigateGroup($event)"></app-top-menu>
-  <!-- <div class="pages-body">
-    <div class="pages-content">
-      <router-outlet></router-outlet>
-    </div>
-  </div> -->
-</div>
+<!-- <div class="pages-wrap" *ngIf="menus && menus.length">
+    <app-top-menu class="home_top_menu" [menus]="menus" [onlyLogin]="true" (groupClickEvent)="navigateUrl($event)">
+    </app-top-menu> -->
+    <div class="page-wrapper">
+      <!-- <app-sidebar [menus]="menus" class="sidebar" [currentGroup]="currentGroup" [currentmenuId]="currentmenuId"
+        (menuClickEvent)="nevigateChildren($event)"></app-sidebar> -->
+      <div class="coming-soon">
+        <h1>Coming soon...!</h1>
+        <h2>OOPS! NOTHING WAS FOUND</h2>
+        <p>Sorry for the inconvenience but we're performing some maintenance at the moment.</p>
+      </div>
+      
+      <!-- <app-breadcrumb [segmenttree]="breadcum"></app-breadcrumb> -->
+    <!-- </div> -->
 
-<div class="page-content">
-  <div class="home-heading">
-    <h2>All the features of our production software</h2>
-    <p>If you use View Software's production solution, you get all the features you need to get a more efficient
-      everyday life and control of your machines and equipment.</p>
-  </div>
-  <div class="home-block">
-    <a (click)="navigateUrl(group)" class="block" *ngFor="let group of groups">
-      <div class="icon">
-          <i class="{{group.groupName}}"></i>
-      </div>
-      <div class="heading">
-        <h2>{{group.groupName}}</h2>
-      </div>
-      <p>Picklist manager shall enable you to create, update and delete wellknown dropdown list in the applicaton like
-        country, currency etc.</p>
-    </a>
-
-    <!-- <a class="block">
-      <div class="icon"><img src="assets/img/manager.png"></div>
-      <div class="heading">
-        <h2>Picklist manager</h2>
-      </div>
-      <p>Picklist manager shall enable you to create, update and delete wellknown dropdown list in the applicaton like
-        country, currency etc.</p>
-    </a>
-    <a class="block">
-      <div class="icon"><img src="assets/img/target.png"></div>
-      <div class="heading">
-        <h2>Object manager</h2>
-      </div>
-      <p>Object manager shall enable you to manage various objects generated within application in due course of writing
-        various modules.</p>
-    </a>
-    <a class="block">
-      <div class="icon"><img src="assets/img/settings.png"></div>
-      <div class="heading">
-        <h2>Configuration manager</h2>
-      </div>
-      <p>This manager is all about various settings governing features in the application.</p>
-    </a>
-    <a class="block">
-      <div class="icon"><img src="assets/img/set-square.png"></div>
-      <div class="heading">
-        <h2>Entity designer</h2>
-      </div>
-      <p>This manager enables the user to define and configure various properties of general classes in application.</p>
-    </a>
-    <a class="block">
-      <div class="icon"><img src="assets/img/cms.png"></div>
-      <div class="heading">
-        <h2>Picklist designer</h2>
-      </div>
-      <p>Picklist designer shall enable you to manage UI acpects of the picklist.</p>
-    </a> -->
-  </div>
-</div>

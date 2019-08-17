@@ -171,7 +171,7 @@ namespace VPC.Entities.Common
                                           
                                 if (property.Name=="Value")
                                 {                                    
-                                       if(dataTableValue!=null && dataTableValue != DBNull.Value && dataTableValue != "" )
+                                       if(dataTableValue!=null && dataTableValue != DBNull.Value && dataTableValue.ToString() != "" )
                                        {
                                            var valueCast=Convert.ChangeType(dataTableValue, property.PropertyType);
                                             property.SetValue(instance, valueCast, null);   

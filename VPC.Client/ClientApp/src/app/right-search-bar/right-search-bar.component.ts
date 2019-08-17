@@ -18,6 +18,7 @@ import { LayoutModel } from '../model/layoutmodel';
 import { CommonService } from '../services/common.service';
 import { LayoutService } from '../meta-data/layout/layout.service';
 import { element } from '@angular/core/src/render3/instructions';
+import { MenuService } from '../services/menu.service';
 
 
 @Component({
@@ -46,7 +47,8 @@ export class RightSearchBarComponent implements OnInit {
     private commonService: CommonService,
     private resourceService: ResourceService,
     private layoutService: LayoutService,
-    private globalResourceService:GlobalResourceService,
+    private globalResourceService: GlobalResourceService,
+    private menuService: MenuService
     ) { }
 
   public toolbarButtons = [];
@@ -101,10 +103,12 @@ export class RightSearchBarComponent implements OnInit {
   ngOnInit() {
     this.selectedSubType = '';
 
+      let result=this.menuService.getMenuconext();
+      this.entityName = result.param_name;
     //Get the entity name from URL route 
-    this.route.parent.params.subscribe((urlPath) => {
-      this.entityName = urlPath["name"];
-    });
+    // this.route.parent.params.subscribe((urlPath) => {
+    //   this.entityName = urlPath["name"];
+    // });
 
     if (this.resourceData) {
       this.resource = this.resourceData;
@@ -173,15 +177,15 @@ export class RightSearchBarComponent implements OnInit {
         break;
       }
       case "send email": {
-        this.toster.showWarning("Not yet implemented");
+        this.toster.showWarning(this.getResourceValue('metadata_operation_alert_notyetimplemented'));
         break;
       }
       case "print": {
-        this.toster.showWarning("Not yet implemented");
+        this.toster.showWarning(this.getResourceValue('metadata_operation_alert_notyetimplemented'));
         break;
       }
       default: {
-        this.toster.showWarning("Not yet implemented");
+        this.toster.showWarning(this.getResourceValue('metadata_operation_alert_notyetimplemented'));
         break;
       }
     }
@@ -220,7 +224,7 @@ export class RightSearchBarComponent implements OnInit {
 
       } else {
         isvalid = false;
-        this.toster.showWarning('No fields found !');
+        this.toster.showWarning(this.getResourceValue('metadata_operation_warning_notfoundmessage'));
       }
 
       if (layout.listLayoutDetails.searchProperties && layout.listLayoutDetails.searchProperties.length > 0) {
@@ -591,7 +595,7 @@ export class RightSearchBarComponent implements OnInit {
       }
       
     } else {
-      this.toster.showWarning('Url tempered! or no entity name found! or entity not yet decoreted!');
+      this.toster.showWarning(this.getResourceValue('metadata_operation_alert_warning_message'));
     }
   }
 

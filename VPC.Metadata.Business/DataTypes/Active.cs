@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using VPC.Metadata.Business.Validator.Schema;
 using VPC.Metadata.Business.DataAnnotations;
+using VPC.Metadata.Business.Validator;
 
 namespace VPC.Metadata.Business.DataTypes
 {
@@ -12,6 +13,8 @@ namespace VPC.Metadata.Business.DataTypes
             this.DataType = DataType.Bool;
             this.ControlType = ControlType.Checkbox;
             this.IsConfigurable = true;
+            var defaultValueValidattor = new DefaultValueValidator(ControlType.DropDown);
+            this.AddValidator(defaultValueValidattor);
         }
 
 

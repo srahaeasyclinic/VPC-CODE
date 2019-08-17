@@ -27,7 +27,7 @@ export class RoleComponent implements OnInit {
   ) { }
 
 
-
+ 
 
   ngOnInit() {
     this.getRoles();
@@ -38,10 +38,10 @@ export class RoleComponent implements OnInit {
 
 
     if (this.roleInfo.name === "") {
-      errorMessage += this.getResourceValue("Nameisrequired") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("role_field_name") + "<br/>";
     }
     if (this.roleInfo.roleType === "") {
-      errorMessage += this.getResourceValue("TypeIsRequired") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("role_field_type") + "<br/>";
     }
 
     if (errorMessage != "") {
@@ -66,7 +66,7 @@ export class RoleComponent implements OnInit {
           if (data) {
             this.getRoles();
             this.modalService.dismissAll();
-            this.toster.showSuccess(this.getResourceValue('RoleAddedSuccessfully') + "<br/>");
+            this.toster.showSuccess(this.globalResourceService.createSuccessMessage('role_displayname'));
           }
         },
         error => {

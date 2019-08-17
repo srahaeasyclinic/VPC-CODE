@@ -14,7 +14,7 @@ import { Resource } from '../../model/resource';
                 <div *ngSwitchCase="'textbox'"><input type="text" class="input-control" [(ngModel)]="option.value"></div>
                 <div *ngSwitchCase="'checkbox'">
                      <label class="control control--checkbox">
-                     {{getResourceValue(option.name)}}
+                     {{getResourceValue('metadata_label_'+option.name.toLowerCase())}}
                         <input type="checkbox" [(ngModel)]="option.value">
                         <span class="control__indicator"></span>
                     </label>

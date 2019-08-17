@@ -43,8 +43,9 @@ export class ModalLayoutComponent implements OnInit {
   ];
 
   contexts = [
-    new Context(1, 'New'),
-    new Context(2, 'Edit')
+    new Context(1, 'Add'),
+    new Context(2, 'Edit'),
+    new Context(3, 'Quick Add')
   ];
 
   constructor(
@@ -115,6 +116,11 @@ export class ModalLayoutComponent implements OnInit {
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
   }
+  getRequiredFieldMessageFromResource(field:string){
+      return this.globalResourceService.requiredValidator(field);
+  }
+
+
   public submitForm() {
     this.submitted = true;
 
@@ -126,10 +132,10 @@ export class ModalLayoutComponent implements OnInit {
     this.layoutModel.name = this.myForm.value.layoutName;
     this.layoutModel.layoutType = this.myForm.value.drpType;
     this.layoutModel.subtypeeName = (this.myForm.value.drpSubtype == '') ? '' : this.getSubTypeName(parseInt(this.myForm.value.drpSubtype));
-    this.layoutModel.Context = (this.myForm.value.drpContext == '') ? 0 : this.myForm.value.drpContext;
+    this.layoutModel.context = (this.myForm.value.drpContext == '') ? 0 : this.myForm.value.drpContext;
 
     this.layoutService.saveLayout(this.layoutModel, this.layout.name).subscribe(result => {
-      this.toster.showSuccess(this.getResourceValue("LayoutSavedSuccessfully"));
+      this.toster.showSuccess(this.getResourceValue("metadata_operation_save_success_message"));
       this.activeModal.close();
       var myObj = {
         id:result,

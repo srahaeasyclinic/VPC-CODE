@@ -1,78 +1,127 @@
 <div class="tab-section">
-<a class="btn btn-primary margin-top-10 margin-bottom-10" (click)="openLayoutPopup(content)">{{getResourceValue("AddLayout")}}</a>
-<kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true"
-   [resizable]="true">
-  <kendo-grid-column field="name" [width]="130" title="{{getResourceValue('Name')}}" [minResizableWidth]="30">
-    <ng-template kendoGridCellTemplate let-gridData>
-      <a class="gridLink" (click)="goToLayoutDetail(gridData.id,gridData.layoutTypeName)">{{gridData.name}}</a>
-    </ng-template>
-  </kendo-grid-column>
-  <kendo-grid-column field="layoutTypeName" [width]="130" title="{{getResourceValue('Type')}}" [minResizableWidth]="30"></kendo-grid-column>
-  <kendo-grid-column field="contextName" [width]="130" title="{{getResourceValue('Context')}}"  [minResizableWidth]="30"></kendo-grid-column>
-  <kendo-grid-column field="modifiedDate" [width]="130" title="{{getResourceValue('UpdatedOn')}}"  filter="date" format="dd-MMM-yyyy HH:mm:ss"
-    [minResizableWidth]="30"></kendo-grid-column>
-  <kendo-grid-column [width]="50" [minResizableWidth]="30">
-    <ng-template kendoGridCellTemplate let-gridData>
-      <div ngbTooltip="{{getResourceValue('DefaultLayout')}}" container="body" placement="left" filter="a" *ngIf="gridData.defaultLayout">
-        <a class="statusRoundedGreen">{{getResourceValue("D")}}</a>
-      </div>
-    </ng-template>
-  </kendo-grid-column>
-  <kendo-grid-column [width]="100" [minResizableWidth]="30">
-    <ng-template kendoGridCellTemplate let-gridData>
-      <button mat-icon-button [matMenuTriggerFor]="menu" class="actions" *ngIf="!gridData.defaultLayout">
-        <mat-icon>
-          ...
-        </mat-icon>
+  <a class="btn btn-primary margin-bottom-10"
+    (click)="openLayoutPopup(content)">{{getResourceValue("operation_add")}}</a>
+  <kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true"
+    [resizable]="true">
+    <kendo-grid-column field="name" [width]="130" title="{{getResourceValue('metadata_field_name')}}" [minResizableWidth]="30">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <a class="gridLink" (click)="goToLayoutDetail(gridData.id,gridData.layoutTypeName)">{{gridData.name}}</a>
+      </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-column field="layoutTypeName" [width]="130" title="{{getResourceValue('metadata_field_type')}}"
+      [minResizableWidth]="30"></kendo-grid-column>
+    <kendo-grid-column field="contextName" [width]="130" title="{{getResourceValue('metadata_field_context')}}"
+      [minResizableWidth]="30"></kendo-grid-column>
+    <kendo-grid-column field="modifiedDate" [width]="130" title="{{getResourceValue('metadata_field_updatedon')}}" filter="date"
+      format="dd-MMM-yyyy HH:mm:ss" [minResizableWidth]="30"></kendo-grid-column>
+    <kendo-grid-column [width]="50" [minResizableWidth]="30">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <div ngbTooltip="{{getResourceValue('metadata_field_defaultlayout')}}" container="body" placement="left" filter="a"
+          *ngIf="gridData.defaultLayout">
+          <a class="statusRoundedGreen">{{"D"}}</a>
+        </div>
+      </ng-template>
+    </kendo-grid-column>
+    <kendo-grid-column [width]="100" [minResizableWidth]="30">
+      <ng-template kendoGridCellTemplate let-gridData>
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
+          <mat-icon>
+            ...
+          </mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <a class="dropdown-item" (click)="deleteLayout(gridData)" *ngIf="!gridData.defaultLayout">{{getResourceValue("operation_delete")}}</a>
+          <a class="dropdown-item" (click)="saveLayoutDefault(gridData)" *ngIf="!gridData.defaultLayout">{{getResourceValue("task_setdefault")}}</a>
+          <a class="dropdown-item"
+            (click)="cloneLayout(gridData, contentClone)">{{getResourceValue('metadata_clonelayout')}}</a>
+        </mat-menu>
+      </ng-template>
+    </kendo-grid-column>
+  </kendo-grid>
+
+
+  <ng-template #content let-modal>
+    <div class="modal-header">
+      <label>{{getResourceValue("metadata_task_add")}}</label>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
       </button>
-      <mat-menu #menu="matMenu">
-        <a class="dropdown-item" (click)="deleteLayout(gridData)">{{getResourceValue("Delete")}}</a>
-        <a class="dropdown-item" (click)="saveLayoutDefault(gridData)">{{getResourceValue("SetDefault")}}</a>
-      </mat-menu>
-    </ng-template>
-  </kendo-grid-column>
-</kendo-grid>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label>{{getResourceValue("metadata_field_name")}}</label><label class="text-mandatory margin-left-3">*</label>
+        <input type="text" class="input-control" [(ngModel)]="layoutName" />
+      </div>
+      <div class="form-group">
+        <label>{{getResourceValue("metadata_field_type")}}</label><label class="text-mandatory margin-left-3">*</label>
+        <select class="input-control" [(ngModel)]="drpType" (ngModelChange)="onTypeChange($event)">
+          <option *ngFor="let layoutType of layoutTypes" value={{layoutType.id}}>
+            {{layoutType.name}}
+          </option>
+        </select>
+      </div>
+      <div class="form-group" *ngIf="showSubType">
+        <label>{{getResourceValue("metadata_field_context")}}</label>
+        <select class="input-control" [(ngModel)]="drpContext">
+          <option *ngFor="let context of contexts" value={{context.id}}>
+            {{context.name}}
+          </option>
+        </select>
+      </div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-primary"
+          (click)="saveLayout('Save click')">{{getResourceValue("operation_save")}}</button>
+        <button type="button" class="btn btn-secondary"
+          (click)="modal.dismiss('cancel click')">{{getResourceValue("task_cancel")}}</button>
+        
+        <!--(click)="modal.close('Save click')"-->
+      </div>
 
 
+    </div>
+
+  </ng-template>
+
+  <ng-template #contentClone let-modal>
+    <div class="modal-header">
+      <label>{{getResourceValue("metadata_clonelayout")}}</label>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label>{{getResourceValue("metadata_field_name")}}</label><label class="text-mandatory margin-left-3">*</label>
+        <input type="text" class="input-control" [(ngModel)]="cloneLayoutName" />
+      </div>
+      <!-- <div class="form-group">
+        <label>{{getResourceValue("Type")}}</label><label class="text-mandatory margin-left-3">*</label>
+        <select class="input-control" [(ngModel)]="drpType" (ngModelChange)="onTypeChange($event)">
+          <option *ngFor="let layoutType of layoutTypes" value={{layoutType.id}}>
+            {{layoutType.name}}
+          </option>
+        </select>
+      </div> -->
+      <div class="form-group" *ngIf="showContext">
+        <label>{{getResourceValue("metadata_field_context")}}</label>
+        <select class="input-control" [(ngModel)]="drpCloneContext">
+          <option *ngFor="let context of contexts" value={{context.id}}>
+            {{context.name}}
+          </option>
+        </select>
+      </div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-primary"
+          (click)="saveClone('Save click')">{{getResourceValue("operation_save")}}</button>
+        <button type="button" class="btn btn-secondary"
+          (click)="modal.dismiss('cancel click')">{{getResourceValue("task_cancel")}}</button>
+        
+        <!--(click)="modal.close('Save click')"-->
+      </div>
+    </div>
+  </ng-template>
 
 
-<ng-template #content let-modal>
-  <div class="modal-header">
-    <label>{{getResourceValue("AddLayout")}}</label>
-    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-     
-        <div class="form-group">
-          <label>{{getResourceValue("Name")}}</label><label class="text-mandatory margin-left-3">*</label>
-          <input type="text" class="input-control" [(ngModel)]="layoutName" />
-        </div>
-        <div class="form-group">
-          <label>{{getResourceValue("Type")}}</label><label class="text-mandatory margin-left-3">*</label>
-          <select class="input-control" [(ngModel)]="drpType" (ngModelChange)="onTypeChange($event)">
-            <option *ngFor="let layoutType of layoutTypes" value={{layoutType.id}}>
-              {{layoutType.name}}
-            </option>
-          </select>
-        </div>
-        <div class="form-group" *ngIf="showSubType">
-          <label>{{getResourceValue("Context")}}</label>
-          <select class="input-control" [(ngModel)]="drpContext">
-            <option *ngFor="let context of contexts" value={{context.id}}>
-              {{context.name}}
-            </option>
-          </select>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
-          <button type="button" class="btn btn-primary" (click)="saveLayout('Save click')">{{getResourceValue("Save")}}</button>
-          <!--(click)="modal.close('Save click')"-->
-        </div>
-      
-    
-  </div>
-
-</ng-template>
 </div>

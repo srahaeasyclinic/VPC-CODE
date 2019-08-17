@@ -7,12 +7,15 @@ import { Operation } from './operation';
 import {ITreeNode,Validator, Setting} from '../model/treeNode'
 
 export class FormLayoutDetails implements ITreeNode {
+    supportedQuickAddModes: number[];
+    isQuickAddSupported:boolean;
     typeOf: string;
     validators: Validator[];
     setting: Setting;
     controlType: string;
     readOnly: boolean;
     dataType: string;
+    displayName: string; //Added by Soma
     decimalPrecision: number;
     defaultValue: string;
     properties: string;
@@ -22,6 +25,7 @@ export class FormLayoutDetails implements ITreeNode {
     fields: ITreeNode[];
     tabs: any[];
     selectedView: any;
+    selectedFormOrList:any;
     receivingTypes: string[];
     receiverDataTypes: string[];
     broadcastingTypes: string[];

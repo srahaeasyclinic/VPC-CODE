@@ -111,6 +111,14 @@ namespace VPC.Framework.Business.EntityResourceManager.Contracts {
             foreach (var item in pickListOrLookupWhichFoundInQuery) {
                 var virtualName = !string.IsNullOrEmpty (item.ClientName) ? item.ClientName + "." + item.FieldName : item.FieldName;
                 if (item.DataType.Equals (VPC.Metadata.Business.DataAnnotations.DataType.Lookup)) {
+
+                    //newly added condition need to fix this portion 
+                    //reason product :: product version workflow..
+
+                    if(
+                        !string.IsNullOrEmpty(item.ReferenceColumnName)
+                    ) continue;
+
                     var isItem = entityManager.EntityIsAnItem (item.TypeOf, false);
                     if (isItem) {
                         var context = entityManager.GetEntityContextByEntityName (item.TypeOf, false);

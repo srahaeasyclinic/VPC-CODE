@@ -1,4 +1,5 @@
 ﻿using System;
+using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Metadata.Business.DataAnnotations;
 using VPC.Metadata.Business.DataTypes;
 using VPC.Metadata.Business.Entity;
@@ -27,7 +28,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NotNull]
         public override InternalId TenantId { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
@@ -36,46 +37,46 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NonQueryable]
         public override Name Name { get; set; }
 
-        [AccessibleLayout(1, 2, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.Form, (int)LayoutType.List)]
         [ColumnName("[Key]")]
         [FreeTextSearch]
         [NotNull]
         public SmallText Key { get; set; }
 
-        [AccessibleLayout(1, 2, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.Form, (int)LayoutType.List)]
         [ColumnName("[Text]")]
         [FreeTextSearch]
         [NotNull]
         public MediumText Text { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [DefaultValue()]
         [NonQueryable]
         [ColumnName("[UpdatedBy]")]
         [NotNull]
         public Lookup<User> UpdatedBy { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [DefaultValue()]
         [NonQueryable]
         [ColumnName("[UpdatedDate]")]
         [NotNull]
         public DateTime UpdatedDate { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [DefaultValue("1")]
         [ColumnName("[Active]")]
         [NotNull]
         [SimpleSearch]
         public PickList<Active> Active { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [DefaultValue("0")]
         [ColumnName("[IsDeletetd]")]
         [NotNull]
         public BooleanType IsDeletetd { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [DefaultValue("0")]
         [ColumnName("[Flagged]")]
         [NotNull]

@@ -28,7 +28,12 @@ export class PicklistLayoutService {
     let layoutUrl = `${environment.apiUrl}` + this.layout + '/' + name + '/layouts/' + id; 
     return this.http.put(layoutUrl, layoutModel);
   }
-
+  updateFormLayout(layoutModel, name, id,type): Observable<any> {
+    let layouturl=""
+    layouturl=type=='picklist'?'/api/picklists':'/api/meta-data'
+    let layoutUrl = `${environment.apiUrl}` + layouturl + '/' + name + '/layouts/' + id; 
+    return this.http.put(layoutUrl, layoutModel);
+  }
   saveLayoutDefault(layoutModel, name): Observable<any> {
     let layoutUrl = `${environment.apiUrl}` + this.layout + '/' + name + '/layouts'; 
     return this.http.patch(layoutUrl, layoutModel);
@@ -38,6 +43,11 @@ export class PicklistLayoutService {
   deleteLayout(id, name): Observable<any> {
     let layoutUrl = `${environment.apiUrl}` + this.layout + '/' + name + '/layouts/' + id; 
     return this.http.delete(layoutUrl);
+  }
+
+  cloneLayout(layoutModel:LayoutModel, name:string, id:string): Observable<any> {
+    let layoutUrl = `${environment.apiUrl}` + this.layout + '/' + name + '/layouts/' + id + '/clone';
+    return this.http.post(layoutUrl, layoutModel);
   }
 
 }

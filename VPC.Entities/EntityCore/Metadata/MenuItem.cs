@@ -20,8 +20,13 @@ namespace VPC.Entities.EntityCore.Metadata
     // [PluralName("Menu")]
     // [Import(false)]
     // [Export(false)]
-    public class MenuItem 
+    public class MenuItem
     {
+
+        // public MenuItem()
+        // {
+        //     SubGroup = new List<MenuItem>();
+        // }
         // [DefaultValue(InfoType.Menu)]
         // public EntityContext EntityContext => new EntityContext(InfoType.Menu);   
         public Guid TenantId { get; set; }
@@ -29,16 +34,26 @@ namespace VPC.Entities.EntityCore.Metadata
         public string Name { get; set; }
         public Guid GroupId { get; set; }
         public string GroupName { get; set; }
-        public int MenuTypeId  { get; set; }
+        public int MenuTypeId { get; set; }
         public string MenuTypeName { get; set; }
         public string ReferenceEntityId { get; set; }
-        public int ActionTypeId  { get; set; }
+        public int ActionTypeId { get; set; }
         public string ActionTypeName { get; set; }
         public string WellKnownLink { get; set; }
         public Guid ModifiedBy { get; set; }
         public Guid LayoutId { get; set; }
         public string ModifiedByName { get; set; }
         public DateTime ModifiedDate { get; set; }
+        public Guid ParentId { get; set; }
+        public int? SortItem { get; set; }
+        public string MenuIcon { get; set; }
+        public string Menucode { get; set; }
+
+        public Boolean IsMenuGroup { get; set; }
+
+        public int GroupIdSort { get; set; }
+
+        // public List<MenuItem> SubGroup { get; set; }
 
     }
 }

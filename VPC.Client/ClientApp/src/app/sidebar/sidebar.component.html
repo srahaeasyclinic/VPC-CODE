@@ -1,118 +1,59 @@
 <!-- *ngIf="isLoggedIn$ | async as isLoggedIn" -->
-
-
 <button class="config-switch" (click)="configToggle()" *ngIf="authService.isLoggedIn">
     <!-- <button class="config-switch" (click)="configToggle()"> -->
-    <i class="fa fa-dedent fa-fw pnl-close" *ngIf="!isConfigToggle"></i>
-    <i class="fa fa-indent fa-fw pnl-open" *ngIf="isConfigToggle"></i>
+    <i class="fa fa-dedent fa-lg pnl-close" *ngIf="!isConfigToggle"></i>
+    <i class="fa fa-indent fa-lg pnl-open" *ngIf="isConfigToggle"></i>
 </button>
 
 <div class="left-config-wrap" [ngClass]="{'left-config-wrap-on':isConfigToggle}" *ngIf="authService.isLoggedIn">
-    <!-- <div class="left-config-wrap" [ngClass]="{'left-config-wrap-on':isConfigToggle}"> -->
+    
+<div *ngIf="currentGroup && currentGroup.groupName">
     <ul class="menu-wrap animated fadeIn">
-        <li class="menu-item" *ngIf="currentGroup && currentGroup.groupName">
-            <a class="menu-link" (click)="menuToggle()">
+          <ng-container *ngFor="let items of sidebarmenu">
+            <li class="menu-item" >
+        <div *ngIf="items.subGroup!=null && items.subGroup.length>0">
+             <a class="menu-link" (click)="menuToggle(items)">
                 <div class="placeholder">
-                    <i class="fa fa-cogs"></i>
+                    <i class="{{(items.menuIcon!='' && items.menuIcon!=null && items.menuIcon!=undefined)?items.menuIcon:'fa fa-th'}}"></i>
                 </div>
-                <span class="text">{{currentGroup.groupName}}</span>
+                <span class="text">
+                    <!-- {{items.name}} -->
+                    {{getResourceValue(items.menucode)}}
+                </span>
                 <div class="menu-icon">
-                    <i class="fa fa-angle-right" *ngIf="!isMenuopen"></i>
-                    <i class="fa fa-angle-up" *ngIf="isMenuopen"></i>
+                    <i class="fa fa-angle-right" *ngIf="items.name!=currentmenuName"></i>
+                    <i class="fa fa-angle-up" *ngIf="items.name==currentmenuName"></i>
                 </div>
-            </a>
-            <div class="collapse-menu" [ngClass]="{'collapse-menu-on':isMenuopen}">
-                <ul class="child-menu">
-                    <ng-container *ngFor="let item of menus">
-                        <li [ngClass]="{'active': (item.name==menuItemName), 'child-item': true}"
-                            *ngIf="item.groupName==currentGroup.groupName">
-                            <a (click)="navigateUrl(item)" class="child-item-link">
+               </a>
+        </div>
+        <!-- <ng-template #else_content>
+             <a (click)="navigateUrl(items)" class="child-item-link">
                                 <div class="placeholder"></div>
-                                <span class="text">{{item.name}}</span>
+                                <span class="text">{{items.name}}</span>
+             </a>
+        </ng-template> -->
+             
+      
+            <div [ngClass]="(items.name==currentmenuName) ? 'collapse-menu-on' : 'collapse-menu'">
+                <ul class="child-menu" *ngIf="items.subGroup!=null && items.subGroup.length>0">
+                    <ng-container *ngFor="let item of items.subGroup">
+                        <li [ngClass]="{'active': (item.name==menuItemName), 'child-item': true}">
+                            <a (click)="navigateUrl(item,items.name)" class="child-item-link">
+                                <div class="placeholder"></div>
+                                <span class="text">
+                                    <!-- {{item.name}} -->
+                                    {{getResourceValue(item.menucode)}}
+                                </span>
                             </a>
                         </li>
                     </ng-container>
                 </ul>
             </div>
         </li>
+        </ng-container>
     </ul>
-
-    <!-- <ul class="menu-wrap animated fadeIn">
-            <li class="menu-item">
-                <a class="menu-link" (click)="goToMenuItem()">
-                    <div class="placeholder">
-                        <i class="fa fa-link"></i>
-                    </div>
-                    <span class="text">Menu item</span>
-                </a>
-            </li>
-        </ul>
-    
-        <ul class="menu-wrap animated fadeIn">
-            <li class="menu-item">
-                <a class="menu-link" (click)="goToBatchType()">
-                    <div class="placeholder">
-                        <i class="fa fa-link"></i>
-                    </div>
-                    <span class="text">BatchType</span>
-                </a>
-            </li>
-        </ul>
-    
-        <ul class="menu-wrap animated fadeIn">
-            <li class="menu-item">
-                <a class="menu-link" (click)="goToCommunication()">
-                    <div class="placeholder">
-                        <i class="fa fa-link"></i>
-                    </div>
-                    <span class="text">Communication</span>
-                </a>
-            </li>
-        </ul>
-    
-        <ul class="menu-wrap animated fadeIn">
-            <li class="menu-item">
-                <a class="menu-link" (click)="goToEmail()">
-                    <div class="placeholder">
-                        <i class="fa fa-link"></i>
-                    </div>
-                    <span class="text">Email</span>
-                </a>
-            </li>
-        </ul>
-    
-        <ul class="menu-wrap animated fadeIn">
-            <li class="menu-item">
-                <a class="menu-link" (click)="goToSms()">
-                    <div class="placeholder">
-                        <i class="fa fa-link"></i>
-                    </div>
-                    <span class="text">SMS</span>
-                </a>
-            </li>
-        </ul>
-    
-        <ul class="menu-wrap animated fadeIn">
-            <li class="menu-item">
-                <a class="menu-link" (click)="goToEmailTemplate()">
-                    <div class="placeholder">
-                        <i class="fa fa-link"></i>
-                    </div>
-                    <span class="text">Email Template</span>
-                </a>
-            </li>
-        </ul>
-    
-        <ul class="menu-wrap animated fadeIn">
-            <li class="menu-item">
-                <a class="menu-link" (click)="goToSmsTemplate()">
-                    <div class="placeholder">
-                        <i class="fa fa-link"></i>
-                    </div>
-                    <span class="text">SMS Template</span>
-                </a>
-            </li>
-        </ul> -->
+    </div>
+  
 </div>
 
 

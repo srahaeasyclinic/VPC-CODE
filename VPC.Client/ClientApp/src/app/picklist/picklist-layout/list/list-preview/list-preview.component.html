@@ -1,6 +1,6 @@
 <div class="detailsMenu">
   <div class="msg-tips-wrap">
-    <div class="msg-entrance" (click)="configToggle()" ngbTooltip="{{resource[generateResourceName('SearchFilter')]}}" container="body">
+    <div class="msg-entrance" (click)="configToggle()" ngbTooltip="{{getResourceValue('metadata_searchfilter')}}" container="body">
       <span class="fa fa-search" *ngIf="!isExpanded"></span>
       <span class="fa fa-chevron-right" *ngIf="isExpanded"></span>
     </div>

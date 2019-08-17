@@ -14,8 +14,8 @@ import { Resource } from '../../model/resource';
                 <div *ngSwitchCase="'textbox'"><input type="text" class="input-control" [(ngModel)]="option.value"></div>
                 <div *ngSwitchCase="'checkbox'">
                      <label class="control control--checkbox">
-                     {{getResourceValue(option.name)}}
-                        <input type="checkbox" [(ngModel)]="option.value">
+                     {{getResourceValue('metadata_label_required_checkbox')}}
+                        <input type="checkbox" [(ngModel)]="option.value" [disabled]="requiredField">
                         <span class="control__indicator"></span>
                     </label>
 
@@ -30,6 +30,8 @@ export class RequiredValidatorComponent implements OnInit {
     @Input() validator: any;
     @Input() node: any;
     public resource = Resource;
+    public requiredField: boolean = false;
+
     constructor(public modal: NgbActiveModal, public globalResourceService: GlobalResourceService) {
 
     }
@@ -37,21 +39,24 @@ export class RequiredValidatorComponent implements OnInit {
     ngOnInit(): void {
         //this.resource = this.globalResourceService.getGlobalResources();
 
-        if (this.node&&this.node.required)
-        {
+        if (this.node && this.node.required) {
             this.validator.options.forEach(element => {
 
-                if (element&&element.controlType=='Checkbox')
-                {
+                if (element && element.controlType == 'Checkbox') {
                     element.value = true;
+                    this.requiredField = true;
                 }
-                
+
             });
-    }
+        }
+        else
+        {
+            this.requiredField = false;
+        }
     }
     getResourceValue(key: string) {
-    return this.globalResourceService.getResourceValueByKey(key);
-  }
+        return this.globalResourceService.getResourceValueByKey(key);
+    }
 
 }
 

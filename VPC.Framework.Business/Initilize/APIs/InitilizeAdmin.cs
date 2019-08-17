@@ -37,5 +37,6 @@ namespace VPC.Framework.Business.Initilize.APIs
         {
            _data.InitializeMenu (rootTenantCode, initilizedTenantCode);
         }
+
     }
 }

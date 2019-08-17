@@ -92,7 +92,7 @@ export class LayoutPreviewComponent implements OnInit {
         this.freetextsearch = '';
         this.getLayoutById(this.entityname, this.id);
       } else {
-        this.toster.showWarning(this.globalResourceService.getResourceByKey("UrlTemperedorNoEntityNameoridFoundorEntityNotYetDecorated"));
+        this.toster.showWarning(this.getResourceValue("metadata_operation_alert_warning_message"));
       }
     });
 
@@ -334,7 +334,7 @@ export class LayoutPreviewComponent implements OnInit {
 
         let columnTitle: string = '';
         if (isFieldAvailable) {
-          columnTitle = that.globalResourceService.getResourceByKey(fields.filter(x => x.name.toLowerCase().includes(key.toLowerCase()) && x.dataType !== 'PickList' && !x.hidden)[0].name);
+          columnTitle = that.getResourceValue(that.entityname+'_field_'+(fields.filter(x => x.name.toLowerCase().includes(key.toLowerCase()) && x.dataType !== 'PickList' && !x.hidden)[0].name)).replace('.','_').toLowerCase();
         }
         columnObj.field = key.replace('.', '_');
         columnObj.title = columnTitle;
@@ -344,7 +344,7 @@ export class LayoutPreviewComponent implements OnInit {
     }
 
     if (isActionsAvailable) {
-      let actionColumnObj = { field: actions.length > 1 ? 'Actions' : 'Action', title: actions.length > 1 ? 'Actions' : 'Action', width: 20, isVisible: true, isStatus: false, position: 0, isAction: true };
+      let actionColumnObj = { field: actions.length > 1 ? 'Actions' : 'Action', title: actions.length > 1 ?that.getResourceValue('metadata_actions') : that.getResourceValue('metadata_action'), width: 20, isVisible: true, isStatus: false, position: 0, isAction: true };
       that.columns.push(actionColumnObj);
     }
 
@@ -526,31 +526,47 @@ export class LayoutPreviewComponent implements OnInit {
 
   onActionClick(event) {
     if (event.actionName.toLowerCase() == 'Delete'.toLowerCase()) {
-      swal({
-        title: this.globalResourceService.getResourceByKey("Areyousure"),
-        text: this.globalResourceService.getResourceByKey("Youwntbeabletorevertthis"),
-        type: this.globalResourceService.getResourceByKey('warning'),
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: this.globalResourceService.getResourceByKey('Yesdeleteit'),
-        showLoaderOnConfirm: true,
-      })
-        .then((willDelete) => {
-          if (willDelete.value) {
-            this.layoutService.deleteUserValues(this.entityname, event.internalId).subscribe(result => {
-              if (result) {
-                this.displayPreview();
-              }
-            });
-          } else {
-            //write the code for cancel click
-          }
+      this.globalResourceService.openDeleteModal.emit()
+      this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
 
-        });
+      this.layoutService.deleteUserValues(this.entityname, event.internalId).subscribe(result => {
+        if (result) {
+          this.displayPreview();
+        }
+      });
+         
+        })
+
+
+
+
+
+
+      // swal({
+      //   title: this.getResourceValue("common_message_areyousure"),
+      //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+      //   type: 'warning',
+      //   showCancelButton: true,
+      //   confirmButtonColor: '#3085d6',
+      //   cancelButtonColor: '#d33',
+      //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+      //   showLoaderOnConfirm: true,
+      // })
+      //   .then((willDelete) => {
+      //     if (willDelete.value) {
+      //       this.layoutService.deleteUserValues(this.entityname, event.internalId).subscribe(result => {
+      //         if (result) {
+      //           this.displayPreview();
+      //         }
+      //       });
+      //     } else {
+      //       //write the code for cancel click
+      //     }
+
+      //   });
     }
     if (event.actionName.toLowerCase() == 'UpdateStatus'.toLowerCase()) {
-      this.toster.showWarning('Method not implemented !');
+      this.toster.showWarning(this.getResourceValue('metadata_method_notimplement_message'));
     }
 
   }

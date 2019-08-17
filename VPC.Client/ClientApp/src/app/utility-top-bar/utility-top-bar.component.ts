@@ -19,7 +19,9 @@ import { ValidationService } from '../services/validation.service';
 import { ITreeNode } from '../dynamic-form-builder/tree.module';
 import { MetadataService } from '../meta-data/metadata.service';
 import { PicklistUiService } from "../picklist-ui/picklist-ui.service";
-import {GlobalResourceService} from '../global-resource/global-resource.service';
+import { GlobalResourceService } from '../global-resource/global-resource.service';
+import { MenuService } from '../services/menu.service';
+import { BreadcrumbsService } from '../bread-crumb/BreadcrumbsService';
 
 
 @Component({
@@ -34,6 +36,7 @@ export class UtilityTopBarComponent implements OnInit {
 
   @ViewChild('contentExchange') modalRef: ElementRef;
   @Input() public possiblesteps;
+  @Input() public entityInfo;
   public toolBarWorkFlowClick: EventEmitter<any>;
 
   // @Output() freetextsearchEvent = new EventEmitter();
@@ -51,9 +54,13 @@ export class UtilityTopBarComponent implements OnInit {
     private layoutService: LayoutService,
     private validateService: ValidationService,
     private metadataService: MetadataService,
-    private globalResourceService:GlobalResourceService,
-    private picklistService: PicklistUiService) {
+    private globalResourceService: GlobalResourceService,
+    private picklistService: PicklistUiService,
+    private menuService: MenuService,
+    private breadcrumsService: BreadcrumbsService,
+  ) {
     this.toolBarWorkFlowClick = new EventEmitter();
+
   }
 
   public toolbarButtons = [];
@@ -101,12 +108,16 @@ export class UtilityTopBarComponent implements OnInit {
   public resourceData: any;
   public defaultLayoutData: LayoutModel = new LayoutModel();
 
+  public taskProductVersionButton: boolean;
+
   ngOnInit() {
 
     //Get the entity name from URL route 
-    this.route.parent.params.subscribe((urlPath) => {
-      this.entityName = urlPath["name"];
-    });
+    // this.route.parent.params.subscribe((urlPath) => {
+    //   this.entityName = urlPath["name"];
+    // });
+    let result = this.menuService.getMenuconext();
+    this.entityName = result.param_name;
 
     if (this.route.snapshot.url !== null && this.route.snapshot.url.length > 0)
       this.pageType = this.route.snapshot.url[0].path
@@ -115,6 +126,15 @@ export class UtilityTopBarComponent implements OnInit {
     this.selectedSubType = '';
     this.subType = this.route.snapshot.queryParams["subType"];
 
+    if (this.entityInfo) {
+      if (this.entityInfo.product.draftVersion == null) {
+        this.taskProductVersionButton = true;
+      }
+      else {
+        this.taskProductVersionButton = false;
+      }
+      //console.log('this.entityInfo.product.draftVersion ', this.entityInfo.product.draftVersion);
+    }
     if (this.resourceData) {
       this.resource = this.resourceData;
       //console.log('Resource -' + JSON.stringify(this.resource));
@@ -133,24 +153,22 @@ export class UtilityTopBarComponent implements OnInit {
         data => {
           if (data && data.length != 0) {
             this.subTypes = [];
-              this.subTypes = data;
-              this.selectedSubType = this.subTypes[0].name;
-            if(data.length===1)
-            {              
-                 this.router.navigate(["./new"], { queryParams: { subType: this.selectedSubType }, relativeTo: this.route });
-            }else{              
-                    let ngbModalOptions: NgbModalOptions = {
-                    backdrop: 'static',
-                    keyboard: false
-                  };
-                  this.modalReference = this.modalService.open(this.modalRef, ngbModalOptions);
-
+            this.subTypes = data;
+            this.selectedSubType = this.subTypes[0].name;
+            if (data.length === 1) {
+              this.breadcrumsService.setchildMenuBreadcums([{ elementName: "new", 'elementURL': "", 'isGroup': false }]);
+              this.router.navigate(["./new"], { queryParams: { subType: this.selectedSubType }, relativeTo: this.route });
+            } else {
+              let ngbModalOptions: NgbModalOptions = {
+                backdrop: 'static',
+                keyboard: false
+              };
+              this.modalReference = this.modalService.open(this.modalRef, ngbModalOptions);
             }
-            
-            
           }
           else if (this.selectedSubType === "") {//picklist
             var currentUrl = this.router.url;
+            this.breadcrumsService.setchildMenuBreadcums([{ elementName: "new", 'elementURL': "", 'isGroup': false }]);
             this.router.navigate([currentUrl + "/new"]);
           }
           else {
@@ -194,13 +212,16 @@ export class UtilityTopBarComponent implements OnInit {
     }
     else if (taskAttribute.name === "Update") {
       this.validateMessages = [];
-      this.validateMessages = this.validateService.validate(this.tree.fields);
+      this.validateMessages = this.validateService.validate(this.tree.fields, this.entityName.toLowerCase());
       if (this.validateMessages.length > 0) {
         this.modalService.open(content);
         return
       }
       let value: any = {};
-      value = this.commonService.createKeyValue(this.tree.fields, value);
+
+
+      //value = this.commonService.createKeyValue(this.tree.fields, value);
+      // value = this.commonService.buildkey(this.tree.fields, value);
 
       //let id = this.getEntityValueId();
       this.route.params.subscribe((params: Params) => {
@@ -208,15 +229,20 @@ export class UtilityTopBarComponent implements OnInit {
         if (entityValueId) {
           //console.log('this.subType ', this.subType);
           if (this.subType === undefined) { //picklist
+
+
+            value = this.commonService.createKeyValue(this.tree.fields, value);
             this.picklistService.updatePicklistValues(this.entityName, value, entityValueId)
               .pipe(first())
               .subscribe(
                 data => {
                   //debugger;
-                 // this.toster.showSuccess(this.entityName + this.resource[this.generateResourceName("UpdatedSuccessfully")]);
+                  // this.toster.showSuccess(this.entityName + this.resource[this.generateResourceName("UpdatedSuccessfully")]);
 
-                    this.router.navigate(["../../"], { relativeTo: this.route }).then(() => {
-                    this.toster.showSuccess(this.entityName+' ' +  this.getResourceValue("UpdatedSuccessfully"));
+                  this.router.navigate(["../../"], { relativeTo: this.route }).then(() => {
+                    this.toster.showSuccess(this.globalResourceService.updateSuccessMessage(this.entityName.toLowerCase() + '_displayname'));
+                    // this.toster.showSuccess(this.getResourceValue(this.entityName.toLowerCase() + "_operation_update_success_message")); //by debdut
+                    this.breadcrumsService.splicebreadcrums({ elementName: "edit", 'elementURL': "", 'isGroup': false }, true);
                   });
                   //this.router.navigate(["../../"], { relativeTo: this.route });
                   //this.router.navigate(["../../"], { relativeTo: this.route });
@@ -225,10 +251,19 @@ export class UtilityTopBarComponent implements OnInit {
                   console.log(error);
                 });
           } else {
+            value = this.commonService.buildkey(this.tree.fields, value, this.entityName);
+            if (this.entityInfo != null) {
+              Object.keys(this.entityInfo).forEach(element => {
+                if (value.hasOwnProperty(element.toLowerCase()) && this.entityInfo[element]['internalId']) {
+                  value[element.toLowerCase()]['internalId'] = this.entityInfo[element]['internalId']
+                }
+              });
+            }
             this.entityValueService.updateEntityValues(this.entityName, value, entityValueId, this.subType)
               .pipe(first())
               .subscribe(
                 data => {
+                  this.toster.showSuccess(this.globalResourceService.updateSuccessMessage(this.entityName.toLowerCase() + '_displayname'));
                   //this.toster.showSuccess(this.entityName + this.resource[this.generateResourceName("UpdatedSuccessfully")]);
                   this.redirectToListPage();
                 },
@@ -244,24 +279,28 @@ export class UtilityTopBarComponent implements OnInit {
     }
     else if (taskAttribute.name === "Save") {
       this.validateMessages = [];
-      this.validateMessages = this.validateService.validate(this.tree.fields);
+      this.validateMessages = this.validateService.validate(this.tree.fields, this.entityName.toLowerCase());
       if (this.validateMessages.length > 0) {
         this.modalService.open(content);
         return
       }
       let newValue: any = {};
-      newValue = this.commonService.createKeyValue(this.tree.fields, newValue);
+      // newValue = this.commonService.createKeyValue(this.tree.fields, newValue);
+      //newValue = this.commonService.buildkey(this.tree.fields, newValue);
 
       if (this.subType !== undefined) {
+        newValue = this.commonService.buildkey(this.tree.fields, newValue, this.entityName);
         this.entityValueService.saveEntityValue(this.entityName, this.subType, newValue)
           .pipe(first())
           .subscribe(
             data => {
-                this.router.navigate(["../"], { relativeTo: this.route }).then(() => {
-                    this.toster.showSuccess(this.entityName +' ' +  this.getResourceValue("SavedSuccessfully"));
-                  });
+              this.router.navigate(["../"], { relativeTo: this.route }).then(() => {
+                this.toster.showSuccess(this.globalResourceService.saveSuccessMessage(this.entityName.toLowerCase() + '_displayname'));
+                //this.toster.showSuccess(this.getResourceValue(this.entityName.toLowerCase() + "_operation_save_success_message")); // by debdut
+                this.breadcrumsService.splicebreadcrums({ elementName: "new", 'elementURL': "", 'isGroup': false }, true);
+              });
               //this.toster.showSuccess(this.entityName + this.resource[this.generateResourceName("SavedSuccessfully")]);
-             // this.router.navigate(["../"], { relativeTo: this.route });
+              // this.router.navigate(["../"], { relativeTo: this.route });
             },
             error => {
               if (error.status === 501) {
@@ -270,16 +309,19 @@ export class UtilityTopBarComponent implements OnInit {
             });
       }
       else { //picklist
+        newValue = this.commonService.createKeyValue(this.tree.fields, newValue);
         this.picklistService.savePicklistValues(this.entityName, newValue)
           .pipe(first())
           .subscribe(
             data => {
 
-             // this.toster.showSuccess(this.entityName + this.resource[this.generateResourceName("SavedSuccessfully")]);
+              // this.toster.showSuccess(this.entityName + this.resource[this.generateResourceName("SavedSuccessfully")]);
               //this.router.navigate(["../"], { relativeTo: this.route });
-                this.router.navigate(["../"], { relativeTo: this.route }).then(() => {
-                    this.toster.showSuccess(this.entityName+' ' + this.getResourceValue("SavedSuccessfully"));
-                  });
+              this.router.navigate(["../"], { relativeTo: this.route }).then(() => {
+                this.toster.showSuccess(this.globalResourceService.saveSuccessMessage(this.entityName.toLowerCase() + '_displayname'));
+                //this.toster.showSuccess(this.getResourceValue(this.entityName.toLowerCase() + "_operation_save_success_message"));// by debdut
+                this.breadcrumsService.splicebreadcrums({ elementName: "new", 'elementURL': "", 'isGroup': false }, true);
+              });
 
               // this.router.navigate(['picklist/ui/' + this.entityName.toLowerCase()]);
               //this.router.navigate(["../"], { relativeTo: this.activatedRoute });
@@ -322,7 +364,7 @@ export class UtilityTopBarComponent implements OnInit {
       }
     } else if (taskAttribute.taskType === "BackTask") {
       if (taskAttribute.taskVerb === "") {
-        this.toster.showWarning(this.getResourceValue("VerbNotDefined"));
+        this.toster.showWarning(this.getResourceValue("metadata_verb_undefined"));
         return;
       }
 
@@ -334,8 +376,16 @@ export class UtilityTopBarComponent implements OnInit {
           };
           this.commonService.executeTask(this.entityName, taskAttribute, obj).pipe(first()).subscribe(
             data => {
-              if (data) {
-                this.toster.showSuccess(this.getResourceValue("TaskExecutedSuccessfully"));
+              if (data && data.result) {
+                if (data.result.message) {
+                  if (data.result.message == "308") {
+                    this.router.navigate(['.'], { relativeTo: this.route, queryParams: { versionId: data.result.id }, queryParamsHandling: 'merge' });
+                  } else if (data.result.message == "409") {
+                    this.toster.showWarning(this.getResourceValue("metadata_task_warning_message"));
+                  }
+                }else{
+                  this.toster.showSuccess(this.getResourceValue("metadata_task_success_message"));
+                }
               }
             },
             error => {
@@ -345,7 +395,7 @@ export class UtilityTopBarComponent implements OnInit {
       });
 
     } else {
-      this.toster.showWarning(this.getResourceValue("TaskNotDecorated"));
+      this.toster.showWarning(this.getResourceValue("metadata_task_notdecorate_message"));
       return;
     }
 
@@ -430,7 +480,7 @@ export class UtilityTopBarComponent implements OnInit {
 
       } else {
         isvalid = false;
-        this.toster.showWarning(this.getResourceValue("NoFieldsFound"));
+        this.toster.showWarning(this.getResourceValue("metadata_operation_warning_notfoundmessage"));
       }
 
       if (layout.listLayoutDetails.searchProperties && layout.listLayoutDetails.searchProperties.length > 0) {
@@ -500,40 +550,40 @@ export class UtilityTopBarComponent implements OnInit {
   }
 
   private getResource(): void {
-           // this.resource = this.globalResourceService.getGlobalResources();;
-            this.getLayout();
+    // this.resource = this.globalResourceService.getGlobalResources();;
+    this.getLayout();
 
-            // //Get the entity name from URL route 
-            // this.route.parent.params.subscribe((urlPath) => {
-            //   this.entityName = urlPath["name"];
+    // //Get the entity name from URL route 
+    // this.route.parent.params.subscribe((urlPath) => {
+    //   this.entityName = urlPath["name"];
 
-            //   if (this.route.snapshot.url !== null && this.route.snapshot.url.length > 0)
-            //     this.pageType = this.route.snapshot.url[0].path
+    //   if (this.route.snapshot.url !== null && this.route.snapshot.url.length > 0)
+    //     this.pageType = this.route.snapshot.url[0].path
 
-            //   // if (urlPath != null && urlPath.length > 2) {
-            //   //   this.pageType = urlPath[2].path;
-            //   // }
+    //   // if (urlPath != null && urlPath.length > 2) {
+    //   //   this.pageType = urlPath[2].path;
+    //   // }
 
-            //   if (this.entityName) {
-            //     // this.pageindex = 1;
-            //     // this.skip = 0;
-            //     // this.freetextsearch = '';
-            //     if (this.pageType !== null && this.pageType !== "" && this.pageType === "new") {
-            //       this.getDefaultLayout(this.entityName, 'Form', this.subType, 'New');
-            //     }
-            //     else if (this.pageType !== null && this.pageType !== "" && this.pageType === "edit") {
-            //       this.getDefaultLayout(this.entityName, 'Form', this.subType, 'Edit');
-            //     }
-            //     else if (this.pageType !== null && this.pageType !== "" && this.pageType === "preview") {
-            //       this.getDefaultLayout(this.entityName, 'Form', this.subType, 'Edit');
-            //     }
-            //     else {
-            //       this.getDefaultLayout(this.entityName, this.layoutType, '', '');
-            //     }
-            //   } else {
-            //     this.toster.showWarning('Url tempered! or no entity name found! or entity not yet decoreted!');
-            //   }
-            // });
+    //   if (this.entityName) {
+    //     // this.pageindex = 1;
+    //     // this.skip = 0;
+    //     // this.freetextsearch = '';
+    //     if (this.pageType !== null && this.pageType !== "" && this.pageType === "new") {
+    //       this.getDefaultLayout(this.entityName, 'Form', this.subType, 'New');
+    //     }
+    //     else if (this.pageType !== null && this.pageType !== "" && this.pageType === "edit") {
+    //       this.getDefaultLayout(this.entityName, 'Form', this.subType, 'Edit');
+    //     }
+    //     else if (this.pageType !== null && this.pageType !== "" && this.pageType === "preview") {
+    //       this.getDefaultLayout(this.entityName, 'Form', this.subType, 'Edit');
+    //     }
+    //     else {
+    //       this.getDefaultLayout(this.entityName, this.layoutType, '', '');
+    //     }
+    //   } else {
+    //     this.toster.showWarning('Url tempered! or no entity name found! or entity not yet decoreted!');
+    //   }
+    // });
   }
 
   // private getQuery(): string {
@@ -626,9 +676,11 @@ export class UtilityTopBarComponent implements OnInit {
 
   private redirectToListPage() {
 
-  this.router.navigate(["../../"], { relativeTo: this.route }).then(() => {
-                    this.toster.showSuccess(this.entityName +' ' + this.getResourceValue("UpdatedSuccessfully"));
-                  });
+    this.router.navigate(["../../"], { relativeTo: this.route }).then(() => {
+      this.toster.showSuccess(this.globalResourceService.updateSuccessMessage(this.entityName.toLowerCase() + '_displayname'));
+      //this.toster.showSuccess(this.getResourceValue(this.entityName.toLowerCase() + "_operation_update_success_message")); // by debdut
+      this.breadcrumsService.splicebreadcrums({ elementName: "edit", 'elementURL': "", 'isGroup': false }, true);
+    });
     //this.toster.showSuccess(this.entityName + this.resource[this.generateResourceName("UpdatedSuccessfully")]);
     //this.router.navigate(['ui/' + this.entityName]);
     //console.log('this.route ', this.route);
@@ -659,12 +711,13 @@ export class UtilityTopBarComponent implements OnInit {
   private getLayout(): void {
     if (this.entityName) {
       if (this.defaultLayoutData) {
+        //console.log('this.defaultLayout ', this.defaultLayout);
         this.defaultLayout = this.defaultLayoutData;
         this.renderToolbar();
       }
       else {
         if (this.pageType !== null && this.pageType !== "" && this.pageType === "new") {
-          this.getDefaultLayout(this.entityName, 'Form', this.subType, 'New');
+          this.getDefaultLayout(this.entityName, 'Form', this.subType, 'Add');
         }
         else if (this.pageType !== null && this.pageType !== "" && this.pageType === "edit") {
           this.getDefaultLayout(this.entityName, 'Form', this.subType, 'Edit');
@@ -678,7 +731,7 @@ export class UtilityTopBarComponent implements OnInit {
       }
 
     } else {
-      this.toster.showWarning(this.getResourceValue("UrlTemperedorNoEntityNameoridFoundorEntityNotYetDecorated"));
+      this.toster.showWarning(this.getResourceValue("metadata_operation_alert_warning_message"));
     }
   }
 
@@ -733,6 +786,8 @@ export class UtilityTopBarComponent implements OnInit {
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
   }
-
+  getResourceForMessage(messagekey, object: any[]) {
+    return this.globalResourceService.getResourceByStringReplacer(messagekey, object);
+  }
 
 }

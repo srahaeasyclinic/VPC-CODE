@@ -18,6 +18,8 @@ namespace VPC.Metadata.Business.DataTypes
 
             var requiredValidator2 = new RangeValidator();
             this.AddValidator(requiredValidator2);
+             var defaultValueValidattor = new DefaultValueValidator (ControlType);
+            this.AddValidator (defaultValueValidattor);
         }
 
         public string AutoNumbers { get; set; }

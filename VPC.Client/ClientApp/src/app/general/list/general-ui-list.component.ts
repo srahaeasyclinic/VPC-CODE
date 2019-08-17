@@ -1,9 +1,9 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
+import { Component, OnInit,OnDestroy, ViewChild, ElementRef, Input, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { GridDataResult, DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { SortDescriptor, GroupDescriptor } from '@progress/kendo-data-query';
 import { Router, ActivatedRoute, NavigationExtras, Params, NavigationEnd } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { debounceTime, distinctUntilChanged } from 'rxjs/internal/operators';
 import swal from 'sweetalert2';
@@ -19,14 +19,16 @@ import { EntityValueService } from '../entityValue.service';
 import { WorkFlowService } from '../../meta-data/workflow/workflow.service';
 import { MODALS } from '../../dynamic-form-builder/tree.config';
 import { LogService } from 'src/app/services/log.service';
-import {GlobalResourceService} from '../../global-resource/global-resource.service';
+import { GlobalResourceService } from '../../global-resource/global-resource.service';
+import { SelectedItem } from 'src/app/model/selecteditem';
+import { MenuService } from 'src/app/services/menu.service';
 @Component({
   selector: 'app-general-ui-list',
   templateUrl: './general-ui-list.component.html',
   styleUrls: ['./general-ui-list.component.css'],
   inputs: ['entityName', 'displaysearchQueryString', 'layoutType', 'mode', 'resourceData', 'defaultLayoutData']
 })
-export class GeneralUiListComponent implements OnInit, OnChanges {
+export class GeneralUiListComponent implements OnInit,OnDestroy, OnChanges {
 
  // @ViewChild('contentExchange') modalRef: ElementRef;
   //@Input() entityName;
@@ -44,7 +46,8 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
     private modalService: NgbModal,
     private formBuilder: FormBuilder,
     private workFlowService: WorkFlowService,
-    private globalResourceService:GlobalResourceService,
+    private globalResourceService: GlobalResourceService,
+    private menuService: MenuService
     ) {
     this.router.routeReuseStrategy.shouldReuseRoute = function () {
       return false;
@@ -83,7 +86,7 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
   private entityName: string = '';
   private layoutType: string = 'List'; // List page
   public pageindex: number = 1;
-  private pageSize: number = 10;
+  public pageSize: number = this.commonService.defaultPageSize();
   public totalRecords: number = 0;
   public resource: any;
   private orderBy: string = '';
@@ -101,10 +104,16 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
   public resourceData: any;
   public sortingOrder: string;
   public defaultLayoutData: LayoutModel = new LayoutModel();
+  public activeEntity:string;
+  private subscrib:Subscription;
 
+  public clientItems: Array<SelectedItem> = [];
   ngOnChanges() {
     //console.log('ngOnChanges GUIL :: '+this.displaysearchQueryString);
     this.generateListlayout(this.defaultLayout, this.entityName);
+    this.subscrib=this.globalResourceService.resourcePopulated.subscribe(a=>{
+      this.generateListlayout(this.defaultLayout, this.entityName);
+    });
   }
 
   ngOnInit() {
@@ -114,13 +123,20 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
 
     //this.getResource();
 
+       
+
+
     if (this.resourceData) {
       this.resource = this.resourceData;
 
       if (this.entityName == null || this.entityName == "") {
-        this.route.parent.params.subscribe((urlPath) => {
-          this.entityName = urlPath["name"];
-        });
+
+        let result=this.menuService.getMenuconext();
+      this.entityName = result.param_name;
+  
+        // this.route.parent.params.subscribe((urlPath) => {
+        //   this.entityName = urlPath["name"];
+        // });
       }
 
       //console.log('getResource called with '+this.entityName);
@@ -128,11 +144,17 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
       this.skip = 0;
       this.freetextsearch = '';
 
-      this.getCurrentUserWorkflows();
+     // this.getCurrentUserWorkflows();
     }
     else {
       this.getResource();
     }
+
+    if (this.defaultLayoutData) {
+      this.activeEntity=((this.defaultLayoutData.versionName) ?  this.defaultLayoutData.versionName : this.entityName);
+    }
+
+    this.getCurrentUserWorkflows();   
 
     this.freetextsearchChanged
       .pipe(debounceTime(500), distinctUntilChanged())
@@ -166,60 +188,131 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
   public onActionClick(event): void {
     //console.log(actionName);
     //console.log(id); 
-    if (event.actionName.toLowerCase() === 'Delete'.toLowerCase()) {
-      swal({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!',
-        showLoaderOnConfirm: true,
-      })
-        .then((willDelete) => {
-          if (willDelete.value) {
-            this.entityValueService.deleteEntityValue(this.entityName, event.internalId).subscribe(result => {
-              if (result) {
-                this.generateListlayout(this.defaultLayout, this.entityName)
+    if (event.action.type === 'task'.toLowerCase()) {
+
+      if (event.action.taskType === "FrontTask") {
+        if (event.action.taskDisplay === "PopUp") {
+
+          this.router.config.forEach((item) => {
+            if (item.component.name === event.action.name + "Component") {
+              this.modalService.open(item.component);
+              return;
+            } else {
+              if (item.children) {
+                item.children.forEach(element => {
+                  if (element.component) {
+                    if (element.component.name === event.action.name + "Component") {
+                      this.modalService.open(element.component);
+                      return;
+                    }
+                  }
+                });
               }
+            }
+          });
+        } else {
+          this.router.config.forEach((item) => {
+            if (item.component.name === event.action.name + "Component") {
+              this.router.navigate([item.path]);
+              return;
+            }
+          });
+        }
+      } else if (event.action.taskType === "BackTask") {
+        if (event.action.taskVerb === "") {
+          this.toster.showWarning(this.getResourceValue("metadata_verb_undefined"));
+          return;
+        }
+
+        this.route.params.subscribe((params: Params) => {
+          var obj = {
+            id: event.internalId
+          };
+          this.commonService.executeTask(this.entityName, event.action, obj).pipe(first()).subscribe(
+            data => {
+              if (data) {
+                this.toster.showSuccess(this.getResourceValue("metadata_task_success_message"));
+              }
+            },
+            error => {
+              console.log(error);
             });
-
-          } else {
-            //write the code for cancel click
-          }
-
+          //}
         });
+
+      } else {
+        this.toster.showWarning(this.getResourceValue("TaskNotDecorated"));
+        return;
+      }
+
+    } else if (event.action.name.toLowerCase() === 'Delete'.toLowerCase()) {
+
+      this.globalResourceService.openDeleteModal.emit()
+      this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+
+        this.entityValueService.deleteEntityValue(this.entityName, event.internalId).subscribe(result => {
+          if (result) {
+              // this.toster.showSuccess(this.globalResourceService.deleteSuccessMessage(this.entityName + "_displayname"));
+            this.generateListlayout(this.defaultLayout, this.entityName)
+          }
+        });
+      });
+
+
+
+
+      // swal({
+      //   title: this.getResourceValue("common_message_areyousure"),
+      //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+      //   type: 'warning',
+      //   showCancelButton: true,
+      //   confirmButtonColor: '#3085d6',
+      //   cancelButtonColor: '#d33',
+      //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+      //   showLoaderOnConfirm: true,
+      // })
+      //   .then((willDelete) => {
+      //     if (willDelete.value) {
+      //       this.entityValueService.deleteEntityValue(this.entityName, event.internalId).subscribe(result => {
+      //         if (result) {
+      //           this.toster.showSuccess(this.getResourceValue(this.entityName + "_operation_delete_success_message"));
+      //           this.generateListlayout(this.defaultLayout, this.entityName)
+      //         }
+      //       });
+
+      //     } else {
+      //       //write the code for cancel click
+      //     }
+
+      //   });
     }
 
-    if (event.actionName.toLowerCase() == 'UpdateStatus'.toLowerCase()) {
-      this.toster.showWarning('Method not implemented !');
+    if (event.action.name.toLowerCase() == 'UpdateStatus'.toLowerCase()) {
+      this.toster.showWarning(this.getResourceValue('metadata_method_notimplement_message'));
     }
 
   }
   //WorkFlow step change
 
-  public onActionWorkFlowClick(transitionWapper): void { 
-    
-    transitionWapper.entityName=this.entityName;
-    var roleIds=[];
-    if(transitionWapper.innerStep.roles)  
-    {      
+  public onActionWorkFlowClick(transitionWapper): void {
+    transitionWapper.stepId=transitionWapper.innerStep.innerStepId;
+    transitionWapper.entityName = this.entityName;
+    var roleIds = [];
+    if (transitionWapper.innerStep.roles) {
       transitionWapper.innerStep.roles.forEach(role => {
-         roleIds.push(role.roleId);
+        roleIds.push(role.roleId);
       });
     }
 
-    if(roleIds.length>0)
-    {
-      
+    if (roleIds.length > 0) {
+
     }
-    delete transitionWapper.currentTransitionType;
+    delete transitionWapper.currentTransitionType;  
 
     this.workFlowService.managerTransition(transitionWapper).pipe(first()).subscribe(
       data => {
-        this.toster.showSuccess('Step changed successfully.');
-        this.generateListlayout(this.defaultLayout, this.entityName);       
+        this.toster.showSuccess(this.getResourceValue('metadata_stepchange_success_message'));
+        this.generateListlayout(this.defaultLayout, this.entityName);
       },
       error => {
         console.log(error);
@@ -517,7 +610,7 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
         // }
       } else {
         isvalid = false;
-        this.toster.showWarning('No fields found !');
+        this.toster.showWarning(this.getResourceValue('metadata_operation_warning_notfoundmessage'));
       }
     }
     console.log('onGridChangeEvent');
@@ -528,19 +621,21 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
             this.resource = this.globalResourceService.getGlobalResources();
             //this.entityName is a property binded in the selector of general-ui-list
 
-            if (this.entityName == null || this.entityName == "") {
-              this.route.parent.params.subscribe((urlPath) => {
-                this.entityName = urlPath["name"];
-              });
+    if (this.entityName == null || this.entityName == "") {
+              let result=this.menuService.getMenuconext();
+             this.entityName= result.param_name;
+              // this.route.parent.params.subscribe((urlPath) => {
+              //   this.entityName = urlPath["name"];
+              // });
             }
             this.pageindex = 1;
             this.skip = 0;
             this.freetextsearch = '';
-            this.getCurrentUserWorkflows();            
+            //this.getCurrentUserWorkflows();            
   }
 
   private getCurrentUserWorkflows() {   
-    this.workFlowService.getCurrentUserWorkflows(this.entityName)
+    this.workFlowService.getCurrentUserWorkflows(this.activeEntity)
     .pipe(first()).subscribe(
       data => {
         if (data) {
@@ -555,7 +650,7 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
 }
 
   private getWorkflows() {
-    this.workFlowService.getWorkFlows(this.entityName)
+    this.workFlowService.getWorkFlows(this.activeEntity)
       .pipe(first()).subscribe(
         data => { 
           if (data) {
@@ -595,7 +690,13 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
             }
 
             //this.renderToolbar();
-
+            if (this.defaultLayout && this.defaultLayout.listLayoutDetails && this.defaultLayout.listLayoutDetails.fields) {
+              this.defaultLayout.listLayoutDetails.fields.forEach(element => {
+                if (element.contextType != null && element.contextType.toLowerCase() == "customclientfieldbase") {
+                  this.clientItems.push(element);
+                }
+              });
+            }
             this.generateListlayout(this.defaultLayout, this.entityName);
           }
           else {
@@ -692,7 +793,7 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
 
       } else {
         isvalid = false;
-        this.toster.showWarning('No fields found !');
+        this.toster.showWarning(this.getResourceValue('metadata_operation_warning_notfoundmessage'));
       }
 
       if (targetDetails && targetDetails.defaultGroupBy) {
@@ -916,9 +1017,12 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
         //this.parentEntity = params['name'];
       });
 
-      this.route.parent.params.subscribe((urlPath) => {
-        this.parentEntity = urlPath["name"];      
-      });
+      let result=this.menuService.getMenuconext();
+      this.parentEntity= result.param_name;
+
+      // this.route.parent.params.subscribe((urlPath) => {
+      //   this.parentEntity = urlPath["name"];      
+      // });
 
       if (this.parentId !== undefined && this.parentId !== "" && this.subType !== undefined) {
         this.entityValueService.getDetailEntities(this.parentEntity, this.parentId, this.entityName, query)
@@ -940,6 +1044,29 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
             });
       }
 
+    }
+  }
+  getClientField(info: any) {
+
+    //info.internalId
+    for (let key of Object.keys(info)) {
+      // meals[key];
+      this.clientItems.forEach(element => {
+        if (element.name.toLowerCase() == key.toLowerCase()) {
+          this.entityValueService.getClientFieldValue(this.entityName, info.internalId, key)
+            .pipe(first())
+            .subscribe(
+              data => {
+                if (data) {
+                  info[key] = data;
+                  this.gridData = [...this.results];
+                }
+              },
+              error => {
+                console.log(error);
+              });
+        }
+      });
     }
   }
 
@@ -1008,15 +1135,18 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
   // }
 
   private openDetailsEntityCreatePopup(id): void {
+
+     let result=this.menuService.getMenuconext();
+    this.parentEntity= result.param_name;
+    
     this.route.params.subscribe((params: Params) => {
       this.parentId = params['id'];
-      this.parentEntity = params['name'];
     });
     let ngbModalOptions: NgbModalOptions = {
       backdrop : 'static',
       keyboard : false
     };
-    var modalName = "custom_detailEntity";
+    var modalName = this.getResourceValue("metadata_label_custom_detailentity");
     const modalRef = this.modalService.open(MODALS[modalName], ngbModalOptions);
     // let nodeObj = JSON.parse(JSON.stringify(node))
     //modalRef.componentInstance.node = nodeObj;
@@ -1065,6 +1195,17 @@ export class GeneralUiListComponent implements OnInit, OnChanges {
           });
         }
       }
+    }
+  }
+
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
+
+    
+  }
+  ngOnDestroy(){
+    if(this.subscrib){
+      this.subscrib.unsubscribe();
     }
   }
 

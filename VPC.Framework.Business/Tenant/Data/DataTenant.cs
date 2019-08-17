@@ -10,58 +10,67 @@ namespace VPC.Framework.Business.Rule.Data
     {
         
 
-        internal List<TenantInfo> GetTenantInfo(Guid tenantId)
+        internal TenantLanguageInfo GetTenantLanguageInfo(Guid tenantId)
         {
-            List<TenantInfo> lstTenantInfo = new List<TenantInfo>();
+            TenantLanguageInfo lstTenantInfo = new TenantLanguageInfo();
             try
             {
-                var cmd = CreateProcedureCommand("dbo.Tenant_GetDefaultLanguageDetails");
+                var cmd = CreateProcedureCommand("Tenant_GetDefaultLanguageDetails");
                 cmd.AppendGuid("@guidTenantId", tenantId);
                 
                 using (SqlDataReader reader = ExecuteCommandAndReturnReader(cmd))
                 {
-                    while (reader.Read())
+                    if (reader.HasRows)
                     {
-                        lstTenantInfo.Add(ReadRule(reader));
+                        while (reader.Read())
+                        {
+                            //lstTenantInfo.Add(ReadRule(reader));
+                            lstTenantInfo = ReadRule(reader);
+                        }
                     }
+                    else
+                    {
+                        var tenantLanguageInfo = new TenantLanguageInfo
+                        {
+                               Key = Configuration.AlternativeLanguage.GetAltLanguageKey()
+                              ,Text = Configuration.AlternativeLanguage.GetAltLanguage()
+                        };
+                        lstTenantInfo = tenantLanguageInfo;
+                    }
+                      
                 }
 
 
             }
             catch (SqlException e)
             {
-                throw ReportAndTranslateException(e, "Tenant::GetTenantInfo");
+                throw ReportAndTranslateException(e, "Tenant::GetTenantLanguageInfo");
             }
             return lstTenantInfo;
         }
-        private static TenantInfo ReadRule(SqlDataReader reader)
+        private static TenantLanguageInfo ReadRule(SqlDataReader reader)
         {
             try
             {
                 
-                var tenantCode = reader.IsDBNull(0) ? Guid.Empty : reader.GetGuid(0);
-                var tenent_Id = reader.IsDBNull(1) ? Guid.Empty : reader.GetGuid(1);
-                var orgNo = reader.IsDBNull(2) ? String.Empty : reader.GetString(2);
-                var pickListValue_Id = reader.IsDBNull(3) ? Guid.Empty : reader.GetGuid(3);
-                var pickListId = reader.IsDBNull(4) ? 0 : reader.GetInt16(4);
-                var key = reader.IsDBNull(5) ? String.Empty : reader.GetString(5);
-                var text = reader.IsDBNull(6) ? String.Empty : reader.GetString(6);
-                var languageId = reader.IsDBNull(7) ? Guid.Empty : reader.GetGuid(7);
+                //var tenantCode = reader.IsDBNull(0) ? Guid.Empty : reader.GetGuid(0);
+                var key = reader.IsDBNull(0) ? String.Empty : reader.GetString(0);
+                var text = reader.IsDBNull(1) ? String.Empty : reader.GetString(1);
 
-                var tenantInfo = new TenantInfo
+                if(text == String.Empty || key ==String.Empty)
                 {
-                    TenantCode = tenantCode
-                    ,TenantId = tenent_Id
-                    ,OrgNo = orgNo
-                    ,PickListValue_Id = pickListValue_Id
-                    ,PickListId = pickListId
-                    ,Key = key
+                    key=Configuration.AlternativeLanguage.GetAltLanguage();
+                    text=Configuration.AlternativeLanguage.GetAltLanguage();
+                }
+
+                var tenantLanguageInfo = new TenantLanguageInfo
+                {
+
+                     Key = key
                     ,Text = text
-                    ,LanguageId = languageId
-                    ,DefaultLanguage = text
                 };
 
-                return tenantInfo;
+                return tenantLanguageInfo;
             }
             catch (System.Exception ex)
             {

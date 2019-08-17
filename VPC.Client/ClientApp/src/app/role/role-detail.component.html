@@ -1,8 +1,8 @@
-<div *ngIf=(roleInfo) class="text-header">{{roleInfo.name}}</div>
+<div *ngIf=(roleInfo) class="text-header">{{getResourceValue('role_label_edit')}}</div>
 <div class="detailsMenu">
   <div class="msg-tips-left">
-    <div class="msg-entrance" ngbTooltip="{{getResourceValue('Role_Operation_Save')}}" container="body" (click)="updateRole()">
-      <i class="fa fa-save"></i>Update
+    <div class="msg-entrance" ngbTooltip="{{getResourceValue('role_operation_update')}}" container="body" (click)="updateRole()">
+      <i class="fa fa-save"></i>{{getResourceValue('role_operation_update')}}
     </div>
   </div>
 </div>
@@ -12,13 +12,13 @@
   <div class="card-wrapper">
     <div class="card-block">
       <div class="card-row">
-        <label class="text-less-important">{{getResourceValue('Role_Field_Name')}}</label>
+        <label class="text-less-important">{{getResourceValue('role_field_name')}}</label>
         <input type="text" class="input-control" [(ngModel)]="roleInfo.name" name="name" />
       </div>
     </div>
     <div class="card-block">
       <div class="card-row">
-        <label class="text-less-important">{{getResourceValue('Role_Field_Type')}}</label>
+        <label class="text-less-important">{{getResourceValue('role_field_type')}}</label>
         <select class="form-control" disabled="disabled" [(ngModel)]="roleInfo.roleType"
           name="roleType">
           <option *ngFor="let roleType of roleTypes" value={{roleType.id}}>
@@ -29,9 +29,9 @@
     </div>
     <div></div>
   </div>
-  <kendo-grid [kendoGridBinding]="gridData" [selectable]="true" [pageSize]="10" [pageable]="true" [sortable]="true"
-    [filterable]="true" [resizable]="true">
-    <kendo-grid-column field="name" title="{{getResourceValue('EntityName')}}"></kendo-grid-column>
+  <kendo-grid [kendoGridBinding]="gridData" [selectable]="true" [pageSize]="pageSize" [pageable]="true" [sortable]="true"
+    [filterable]="true" [resizable]="true" [style.maxHeight.px]="750">
+    <kendo-grid-column field="name" title="{{getResourceValue('role_field_entityname')}}"></kendo-grid-column>
     <ng-template kendoGridDetailTemplate let-dataItem>
       <mat-tab-group animationDuration="0ms">
         <mat-tab label="Entity">

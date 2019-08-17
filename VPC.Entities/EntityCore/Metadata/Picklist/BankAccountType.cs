@@ -17,7 +17,10 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+         [DisplayName("Tenant Id")]
         public override InternalId TenantId { get; set; }
+
+         [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         public override PicklistContext PicklistContext => new PicklistContext(PicklistType.BankAccountType);

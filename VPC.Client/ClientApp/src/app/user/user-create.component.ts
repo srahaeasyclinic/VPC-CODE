@@ -86,7 +86,7 @@ export class UserCreateComponent implements OnInit {
         
 
         this.entityname = "User";
-        this.getDefaultLayout(this.entityname, "Form", "employee", "New");
+        this.getDefaultLayout(this.entityname, "Form", "employee", "Add");
         this.getRuleList(this.entityname);
     }
     private getDefaultLayout(name: string, type: string, subtype: string, context: string) {

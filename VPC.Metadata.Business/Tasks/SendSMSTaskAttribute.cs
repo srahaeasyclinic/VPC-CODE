@@ -8,7 +8,7 @@ namespace VPC.Metadata.Business.Tasks
 {
     public class SendSMSTaskAttribute : TaskAttribute
     {
-        public SendSMSTaskAttribute(string name,string task,string verb="" ,string taskDisplay="") : base(name,task,verb,taskDisplay)
+        public SendSMSTaskAttribute(string name,string task,string verb="" ,string taskDisplay="Send sms") : base(name,task,verb,taskDisplay)
         {
         }
     }

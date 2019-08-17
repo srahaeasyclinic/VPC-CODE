@@ -91,7 +91,7 @@ namespace VPC.Framework.Business.SchedulerConfiguration.SchedulerWeekly.Data
     #region Review
       internal SchedulerWeeklyInfo GetSchedulerWeekly(Guid tenantId,Guid schedulerId )
         {
-            SchedulerWeeklyInfo info =null;
+            SchedulerWeeklyInfo info =new SchedulerWeeklyInfo();
             try
             {
                 var cmd = CreateProcedureCommand("dbo.SchedulerWeekly_GetBy_SchedulerId");

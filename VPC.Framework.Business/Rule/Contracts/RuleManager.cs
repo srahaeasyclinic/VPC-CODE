@@ -17,6 +17,8 @@ namespace VPC.Framework.Business.Rule.Contracts
         bool Update(Guid tenantId, RuleInfo ruleInfo, ref string strMsg);
         bool Delete(Guid tenantId, Guid ruleId);
 
+        RuleInfo GetUniqueFieldsRuleByEntity(Guid tenantId,string entityId);
+
     }
     public class RuleManager : IManageRule
     {        
@@ -42,6 +44,11 @@ namespace VPC.Framework.Business.Rule.Contracts
         RuleInfo IManageRule.GetRuleById(Guid tenantId, Guid ruleId, string entityId)
         {   
             return ruleReview.GetRuleById(tenantId, ruleId,entityId);
+        }
+
+        RuleInfo IManageRule.GetUniqueFieldsRuleByEntity(Guid tenantId, string entityId)
+        {
+            return ruleReview.GetuniquefieldsRules(tenantId, entityId);
         }
 
         bool IManageRule.Update(Guid tenantId, RuleInfo ruleInfo, ref string strMsg)

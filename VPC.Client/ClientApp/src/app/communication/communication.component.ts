@@ -21,6 +21,7 @@ export class CommunicationComponent implements OnInit {
   smsInfoModel: SmsCommunication;
   emailInfoModel: EmailCommunication;
  public validateMessages: Array<string> = [];
+ public helpBlock:boolean = true;
   constructor(
    // private resourceService: ResourceService,
     private communicationService: CommunicationService,
@@ -104,7 +105,7 @@ export class CommunicationComponent implements OnInit {
           data => {
             if (data) {
 
-              this.toster.showSuccess(this.generateResourceName("SavedSuccessfully"));
+              this.toster.showSuccess(this.globalResourceService.saveSuccessMessage("communication_displayname"));
             }
           },
           error => {
@@ -118,7 +119,7 @@ export class CommunicationComponent implements OnInit {
           data => {
             if (data) {
 
-              this.toster.showSuccess(this.generateResourceName("SavedSuccessfully"));
+              this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("communication_displayname"));
             }
           },
           error => {
@@ -147,6 +148,11 @@ export class CommunicationComponent implements OnInit {
 
 
   }
+
+private closeHelpBlock(){
+  this.helpBlock = false;
+}
+
   private SetContent() {
     if (this.communication.length <= 0) {
       this.communication = [];
@@ -212,26 +218,32 @@ export class CommunicationComponent implements OnInit {
     // return resourceData;
      return this.globalResourceService.getResourceValueByKey(key);
   }
+
+
+
+
+
+
   validate():Array<string>
   {
     let messageArrays = new Array<string>();
      if (this.emailInfoModel.emailServer == "") {
-      messageArrays.push("emaillabelserver")
+      messageArrays.push(this.globalResourceService.requiredValidator("communication_field_emaillabelserver"));
     }
     if (this.emailInfoModel.emailPort == "") {
-      messageArrays.push("emaillabelport")
+      messageArrays.push(this.globalResourceService.requiredValidator("communication_field_emaillabelport"));
     }
     if (this.emailInfoModel.emailEmail == "") {
-      messageArrays.push("emaillabelemail")
+      messageArrays.push(this.globalResourceService.requiredValidator("communication_field_emaillabelemail"));
     }
     if (this.emailInfoModel.emailUserName == "") {
-     messageArrays.push("emaillabelusername")
+     messageArrays.push(this.globalResourceService.requiredValidator("communication_field_emaillabelusername"));
     }
     if (this.emailInfoModel.emailPassword == "") {
-      messageArrays.push("emaillabelpassword")
+      messageArrays.push(this.globalResourceService.requiredValidator("communication_field_emaillabelpassword"));
     }
     if (this.emailInfoModel.emailSender == "") {
-      messageArrays.push("emaillabelsender")
+      messageArrays.push(this.globalResourceService.requiredValidator("communication_field_emaillabelsender"));
     }
 
     // if (this.smsInfoModel.smsBaseUrl == "") {

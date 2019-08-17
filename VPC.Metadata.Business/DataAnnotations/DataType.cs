@@ -18,7 +18,15 @@ namespace VPC.Metadata.Business.DataAnnotations
         Lookup,
         Composite,
         MetaDataPicklist,
-        Password
+        Password,
+
+       // CustomServerField,
+      //  CustomClientField
         //HierarchyPicklist
+
+        CustomServerInt,
+        CustomServerString,
+         CustomClientInt,
+        CustomClientString,
     }
 }

@@ -1,25 +1,26 @@
-
-
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using NLog;
+using VPC.Entities.Common;
 using VPC.Entities.Credential;
+using VPC.Entities.EntityCore;
 using VPC.Entities.EntityCore.Model.Query;
 using VPC.Entities.WorkFlow;
 using VPC.Entities.WorkFlow.Engine;
+using VPC.Framework.Business.Common;
 using VPC.Framework.Business.Credential;
+using VPC.Framework.Business.DynamicQueryManager.Contracts;
 using VPC.Framework.Business.EntityResourceManager.Contracts;
+using VPC.Framework.Business.Initilize.Contracts;
 using VPC.Framework.Business.MetadataManager.Contracts;
+using VPC.Framework.Business.TenantSubscription.Contracts;
 using VPC.Framework.Business.WorkFlow.Attribute;
 using VPC.Metadata.Business.DataAnnotations;
-using VPC.Framework.Business.Common;
-using VPC.Entities.EntityCore;
 using static VPC.Entities.EntityCore.Metadata.Picklist.CommunicationContextType;
-using VPC.Entities.Common;
-using VPC.Framework.Business.DynamicQueryManager.Contracts;
 
 namespace VPC.Framework.Business.WorkFlow.Operation.User
 {
@@ -42,24 +43,20 @@ namespace VPC.Framework.Business.WorkFlow.Operation.User
                 var workFlowProcessProperties = (WorkFlowProcessProperties)obj[0];
                 var jObject = (JObject)obj[1];
                 var tenantId = (Guid)obj[2];
-                var userEntity = EntityMapper<VPC.Entities.EntityCore.Metadata.User>.MapperJObject(jObject);
+
+
+                
+                var userObj = jObject.Children ().FirstOrDefault (t => t.Path.ToLower ().Equals ("user"));
+                var details = userObj.First ().ToObject<JObject> ();
+             
+
+                var userEntity = EntityMapper<VPC.Entities.EntityCore.Metadata.User>.MapperJObject(details);
 
                 var tenantCode = _queryManager.GetSpecificIdByQuery(tenantId, "Tenant", tenantId, "Code");
-                jObject.Add(new JProperty("TenantCode", tenantCode));
-                var template = _iEntityResourceManager.GetWellKnownTemplate(tenantId, "Emailtemplate", "User", (int)ContextTypeEnum.Welcome, jObject);
 
-
-                //   if(template!=null)
-                //     {
-                //         if ( template.Body !=null &&  !string.IsNullOrEmpty(template.Body.Value))
-                //         {   
-                //             string json = @"{'TenantCode': '"+tenantCode+"'}";
-                //             JObject jObjectTenantCode = JObject.Parse(json);                      
-                //             template.Body.Value=iMetadataManager.GetTemplateBodyWithTagablesValue(template.Body.Value, jObjectTenantCode);
-                //         }
-                //     }
-
-                var returnVal = DataUtility.SaveEmail(tenantId, workFlowProcessProperties.UserId, template, userEntity.UserCredential.Username.Value);
+                details.Add(new JProperty("TenantCode", tenantCode));
+                var template = _iEntityResourceManager.GetWellKnownTemplate(tenantId, "Emailtemplate", "User", (int)ContextTypeEnum.Welcome, details);
+                var returnVal = DataUtility.SaveEmail(tenantId, workFlowProcessProperties.UserId, template, userEntity.UserCredential.Username.Value,"NewUserCredential",InfoType.User);
                 return objWorkFlowProcessMessage;
             }
             catch (System.Exception ex)

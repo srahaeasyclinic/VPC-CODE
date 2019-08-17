@@ -22,6 +22,7 @@ export class LayoutactionComponent implements OnInit {
   private isdatamainlist: boolean = false;
   public layoutInfo: LayoutModel = new LayoutModel();
   public resource: Resource;
+  public searchText: string = '';
 
   constructor(
     private layoutservice: LayoutService,
@@ -67,6 +68,12 @@ export class LayoutactionComponent implements OnInit {
           if (data.operations) {
             for (var k = 0; k < data.operations.length; k++) {
               this.actionSource.push(data.operations[k]);
+            }
+          }
+
+          if (data.tasks) {
+            for (var k = 0; k < data.tasks.length; k++) {
+              this.actionSource.push(data.tasks[k]);
             }
           }
 
@@ -202,6 +209,14 @@ export class LayoutactionComponent implements OnInit {
       item.sequence = a;
       a++;
     });
+  }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
   }
 
 }

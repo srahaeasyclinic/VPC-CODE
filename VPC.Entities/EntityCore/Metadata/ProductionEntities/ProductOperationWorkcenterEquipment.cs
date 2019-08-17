@@ -23,26 +23,35 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
   
     public class ProductOperationWorkcenterEquipment : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.ProductOperationWorkcenterEquipment);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20033-ST01", "Standard"}
         };
 
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+
         [Tagable]
+        [DisplayName("Operation workcenter code")]
         public XSmallText OperationWorkcenterCode { get; set; }
+
         [Tagable]
+        [DisplayName("Equipment code")]
         public PickList<Equipment> EquipmentCode { get; set; }
     }
 }

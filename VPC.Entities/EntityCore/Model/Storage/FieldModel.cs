@@ -15,6 +15,8 @@ namespace VPC.Entities.EntityCore.Model.Storage
         public List<Validator> Validators { get; set; }
         public dynamic SelectedView { get; set; }
 
+        public dynamic SelectedFormOrList { get; set; }
+
         //only for address
         public List<FieldModel> Fields { get; set; }
         public List<FieldModel> Tabs { get; set; }
@@ -40,5 +42,12 @@ namespace VPC.Entities.EntityCore.Model.Storage
         public string RefId { get; set; }
         public List<Operation> Toolbar { get; set; } 
          public string EntityName {get;set;}
+
+        public List<int> SupportedQuickAddModes { get; set; }
+
+        public List<ErrorCode> ErrorCodes { get; set; }
+        public string DisplayName { get; set; }
+        public string Context { get; set; }
+        public string ContextType { get; set; }
     }
 }

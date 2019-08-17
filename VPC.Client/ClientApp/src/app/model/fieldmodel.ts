@@ -14,11 +14,21 @@ export class FieldModel {
   refId: string;
   defaultValue: string;
   properties: string;
-  isQueryable:boolean;
+  isQueryable: boolean;
+  typeOf: string;
+  dataType: string;
+  readOnly: boolean;
   //isRowSelected: boolean;
   //sequence: number;
   draggedItem: boolean;
   accessibleLayoutTypes: number[];
   toolbar: Operation[];
   entityName: string;
+  applicableForSimpleSearch: boolean;
+  applicableForAdvanceSearch: boolean;
+  applicableForFreeTextSearch: boolean;
+  required: boolean;
+  isTagable: boolean;
+  supportedQuickAddModes:number[];
+  isQuickAddSupported:boolean
 }

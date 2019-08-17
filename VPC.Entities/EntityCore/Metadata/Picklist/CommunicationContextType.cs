@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Metadata.Business.DataAnnotations;
 using VPC.Metadata.Business.DataTypes;
 using VPC.Metadata.Business.Entity;
@@ -18,7 +19,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
     [Standard]
     public class CommunicationContextType : SimplePicklist
     {
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
@@ -46,9 +47,12 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
             Forgotpassword = 3,
 
             [System.ComponentModel.Description("New tenant credential")]
-            NewTenantCredential = 4
+            NewTenantCredential = 4,
 
-            // Please do not use 4 ,as it is internally used for susyem admin mail template(Ajay Chouhan)
+            [System.ComponentModel.Description("Export user")]
+            ExportUser = 5
+
+            // Please do not use 4 ,as it is internally used for System admin mail template(Ajay Chouhan)
 
 
 

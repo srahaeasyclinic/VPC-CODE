@@ -29,6 +29,7 @@ export class SimpleSearchComponent implements OnInit {
   private isdataexistsvalues: boolean = false;
   public layoutInfo: LayoutModel = new LayoutModel();
   public resource: Resource;
+  public searchText: string = '';
   constructor(
     private layoutservice: LayoutService,
     private activatedRoute: ActivatedRoute,
@@ -313,6 +314,14 @@ export class SimpleSearchComponent implements OnInit {
       item.sequence = a;
       a++;
     });
+  }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
   }
 
 }

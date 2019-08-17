@@ -105,6 +105,30 @@ namespace VPC.Framework.Business.Rule.Data
             
         }
 
+        internal RuleInfo GetUniquefieldsRulesByEntity(Guid tenantId, string entityId)
+        {
+            RuleInfo rule = null;
+            try
+            {
+                var cmd = CreateProcedureCommand("dbo.Rule_Unique_GetByEntity");
+                cmd.AppendGuid("@guidTenantId", tenantId);
+                cmd.AppendXSmallText("@strEntityId", entityId);
+                cmd.AppendSmallInt("@intRuleType", (int)RuleTypeEnum.Unique);
+                using (SqlDataReader reader = ExecuteCommandAndReturnReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        rule = ReadRule(reader);
+                    }
+                }
+            }
+            catch (SqlException e)
+            {
+                throw ReportAndTranslateException(e, "Rule::Rule_Unique_GetByEntity");
+            }
+            return rule;
+        }
+
         #endregion
 
         #region Manage

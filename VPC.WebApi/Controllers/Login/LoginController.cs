@@ -12,14 +12,14 @@ using VPC.Framework.Business.Credential;
 using System.Collections.Generic;
 namespace VPC.WebApi.Controllers.Login
 {
-    [Route("api/login")]
+    [Route("api/security")]
     [ApiController]
     [AllowAnonymous]
     public class LoginController : ControllerBase
     {
         [AllowAnonymous]
         [HttpPost]
-        [Route("")]
+        [Route("login")]
         public IActionResult Login([FromBody] LoginInfo login)
         {
             IActionResult response = Unauthorized();
@@ -110,7 +110,7 @@ namespace VPC.WebApi.Controllers.Login
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("forgotpass")]
+        [Route("forgotpassword")]
         public IActionResult ForgotPassword([FromBody] LoginInfo login)
         {
             IActionResult response = Unauthorized();
@@ -156,7 +156,7 @@ namespace VPC.WebApi.Controllers.Login
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("changepass")]
+        [Route("changepassword")]
         public IActionResult ChangePassword([FromBody] ChangePasswordInfo changepassword)
         {
             if (string.IsNullOrEmpty(changepassword.TenantCode) || string.IsNullOrEmpty(changepassword.UserName) || string.IsNullOrEmpty(changepassword.OldPassword) || string.IsNullOrEmpty(changepassword.NewPassword))

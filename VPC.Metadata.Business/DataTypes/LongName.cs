@@ -8,5 +8,6 @@ namespace VPC.Metadata.Business.DataTypes
 {
     class LongName
     {
+        
     }
 }

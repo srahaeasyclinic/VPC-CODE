@@ -23,23 +23,32 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
    
     public class RouteTemplate : PrimaryEntity, IItem<Item>
     {
+        [DisplayName ("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.RouteTemplate);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName ("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName ("Name")]
         public override Name Name { get; set; }
 
+         [DisplayName ("Sub types")]   
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20017-ST01", "Standard"}
         };
 
+        [DisplayName ("Sub type")]
         public override XSmallText SubType { get; set; }
+
+        [DisplayName ("Is default")]
         public BooleanType IsDefault { get; set; }
+
+        [DisplayName ("Type")]
         public PickList<RouteTemplateType> Type { get; set; }
 
     }

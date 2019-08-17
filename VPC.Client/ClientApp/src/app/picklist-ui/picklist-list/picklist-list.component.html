@@ -1,4 +1,4 @@
-<div *ngIf="(defaultLayout)" class="text-header">{{defaultLayout.pluralName}}</div>
+<div *ngIf="(defaultLayout)" class="text-header">{{getResourceValue(entityName.toLowerCase()+"_pluralname")}}</div>
 <div class="detailsMenu">
   <!-- <div class="msg-tips-left">
     <div *ngFor="let toolbarButton of this.toolbarButtons">
@@ -38,8 +38,8 @@
   <div class="right-config-wrap" [ngClass]="{'right-config-wrap-on':isExpanded}">
     <div class="msg-tips-wrap">
       <div class="msg-entrance" (click)="configToggle()">
-        <span class="fa fa-search" *ngIf="!isExpanded" ngbTooltip="{{getResourceValue('SearchFilter')}}" container="body" position="left"></span>
-        <span class="fa fa-th fa-chevron-right" *ngIf="isExpanded" ngbTooltip="{{getResourceValue('CloseFilter')}}" container="body"></span>
+        <span class="fa fa-search" *ngIf="!isExpanded" ngbTooltip="{{getResourceValue('metadata_searchfilter')}}" container="body" position="left"></span>
+        <span class="fa fa-th fa-chevron-right" *ngIf="isExpanded" ngbTooltip="{{getResourceValue('metadata_closefilter')}}" container="body"></span>
       </div>
     </div>
     <!-- <div *ngIf="defaultLayout.listLayoutDetails"> -->
@@ -47,7 +47,7 @@
       <div class="right-filter">
         <div *ngFor="let item of defaultLayout.listLayoutDetails.searchProperties">
           <div *ngIf="item.name == 'FreeTextSearch'" class="form-group">
-            <label *ngIf="resource">{{getResourceValue(item.name)}}</label>
+            <label *ngIf="resource">{{getResourceValue('metadata_'+item.name.toLowerCase())}}</label>
             <input type="text" class="input-control" [(ngModel)]="freetextsearch"
               (ngModelChange)="onFreeTextSearch($event)" />
           </div>
@@ -56,12 +56,12 @@
             <div *ngFor="let prop of item.properties">
 
               <div *ngIf="prop.controlType==='TextBox'" class="form-group">
-                <label *ngIf="resource">{{getResourceValue(prop.name)}}</label>
+                <label *ngIf="resource">{{getResourceValue(entityName+'_field_'+prop.name.toLowerCase())}}</label>
                 <input type="text" class="input-control" [(ngModel)]="prop.value" (change)="onSimpleSearch()" />
               </div>
 
               <div *ngIf="prop.controlType==='Dropdown'" class="form-group">
-                <label *ngIf="resource">{{getResourceValue(prop.name)}}</label>
+                <label *ngIf="resource">{{getResourceValue(entityName+'_field_'+prop.name.toLowerCase())}}</label>
                 <select class="input-control" [(ngModel)]='prop.value' (change)="onSimpleSearch()">
                   <option [ngValue]="null"></option>
                   <option *ngFor="let vals of prop.values" [ngValue]="vals.id">{{vals.value}}</option>
@@ -69,7 +69,7 @@
               </div>
 
               <div *ngIf="prop.controlType==='Radio'">
-                <label *ngIf="resource">{{getResourceValue(prop.name)}}</label>
+                <label *ngIf="resource">{{getResourceValue(entityName+'_field_'+prop.name.toLowerCase())}}</label>
                 <label class="control control--radio" *ngFor="let option of prop.values">
                   <span class="text-important">{{ option.value }}</span>
                   <input type="radio" [(ngModel)]="prop.value" (change)="onSimpleSearch()" [value]="option.id">
@@ -87,7 +87,7 @@
 <div class="page-content">
   <div class="r-filter-page">
 
-    <dynamic-grid [gridData]="gridData" [totalRecords]="totalRecords" [resources]="resource"
+    <dynamic-grid [gridData]="gridData" [totalRecords]="totalRecords" [resources]="resource" [pageSize]="pageSize" [pageable]="true" 
       [defaultLayout]="defaultLayout" [defaultSortOrder]="sort" [currentPage]="pageindex" [dataSkip]="skip"
       [groupBy]="groups" (columnClick)="edit($event)" (onActionClick)="onActionClick($event)"
       (onGridChangeEvent)="onGridChangeEvent($event)"></dynamic-grid>

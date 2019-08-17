@@ -45,6 +45,11 @@ export class BatchTypeService {
     return this.http.get<any>(batchUrl);
   } 
 
+  updateBatchItemNextRunTime(): Observable<any> {
+    var batchUrl = `${environment.apiUrl}` + this.batchRoute+'/item/nextRunTime';
+    return this.http.put(batchUrl, '');
+  } 
+
  
 
 }

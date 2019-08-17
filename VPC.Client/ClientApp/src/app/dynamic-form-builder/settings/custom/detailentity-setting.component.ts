@@ -14,20 +14,26 @@ import { GlobalResourceService } from '../../../global-resource/global-resource.
   selector: 'detailentity-setting',
   template: `
   <div class="modal-header">
-    <label id="modal-title">{{headerString}}</label>
+    <label id="modal-title">{{getResourceValue(node.entityName.toLowerCase()+'_field_'+node.name.toLowerCase())}}</label> <!-- headerString -->
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <div class="modal-body">
-    
       <!--<my-tree [rootNode]="tree"  [resource]="resource" [mode]="1" *ngIf="isTreeReady" class="detail-entity-modal">-->
-      <my-tree [rootNode]="tree"  [resource]="resource" [mode]="1" [displayRule]="displayRule" *ngIf="isTreeReady" class="detail-entity-modal">
+      <div *ngIf="selectedFormOrList==='1'">
+      <my-tree [rootNode]="tree"  [resource]="resource" [entityName]="detailEntityName.toLowerCase()" [mode]="1" [displayRule]="displayRule" *ngIf="isTreeReady" class="detail-entity-modal">
       </my-tree>
       <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
-      <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue("Submit")}}</button>
+      <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue("operation_submit")}}</button>
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("task_cancel")}}</button>
+      </div>
     </div>
+
+    <div *ngIf="selectedFormOrList==='2'">    
+    <app-general-ui-list entityName="{{detailEntityName.toLowerCase()}}" layoutType="List" ></app-general-ui-list>
+    </div>
+
   </div>
   
   `
@@ -38,9 +44,11 @@ export class DetailEntityComponent {
   public isTreeReady:boolean = false;  
   private editdata: any;
   public headerString: string;
-
+  public gridData:any;
   public displayRule: any;
+  public selectedFormOrList:string;
 
+  @Input() field: any;
   @Input() entityName: string;
   @Input() userid: string;
   @Input() detailEntityName: string;
@@ -67,19 +75,23 @@ export class DetailEntityComponent {
     private getResource() {
       this.resource =this.resourceService.getResources();
 
+      this.selectedFormOrList=this.field.selectedFormOrList;
+
               //console.log("resource found", data);
               
               if(this.id != '' && this.id.length > 0)
               {
-                this.headerString = this.getResourceValue("Editdetailentity");
+                this.headerString = this.getResourceValue("metadata_label_edit_detailentity");
                 this.layoutService.getDetailEntityById(this.entityName, this.userid, this.detailEntityName, this.id)
                 .pipe(first())
                 .subscribe(
                   data => {
                     if (data) {                      
                       this.editdata = data;
-                      //this.getDefaultLayout(this.detailEntityName, "Form", "EN10003-ST01", "Edit");                      
-                      this.getDefaultLayout(this.detailEntityName, "Form", this.subType, "Edit");
+                      if(this.field.selectedFormOrList==="1")                     
+                          this.getDefaultLayout(this.detailEntityName, "Form", this.subType, "Edit");
+                       else 
+                          this.getDefaultLayout(this.detailEntityName, "List", "", "");
                     }
                   },
                   error => {
@@ -88,9 +100,11 @@ export class DetailEntityComponent {
               }
               else
               {
-                this.headerString = this.getResourceValue("Adddetailentity");
-                //this.getDefaultLayout(this.detailEntityName, "Form", "EN10003-ST01", "New");
-                this.getDefaultLayout(this.detailEntityName, "Form", this.subType, "New");
+                this.headerString = this.getResourceValue("metadata_label_add_detailentity");
+                if(this.field.selectedFormOrList==="1")   
+                      this.getDefaultLayout(this.detailEntityName, "Form", this.subType, "Add");
+                   else 
+                      this.getDefaultLayout(this.detailEntityName, "List", "", "");
               }
 
     }
@@ -103,23 +117,34 @@ export class DetailEntityComponent {
           if (data) {
             if(this.id != '' && this.id.length > 0)
             {
-              data.formLayoutDetails.fields.forEach(element => {
-                if(element.name in this.editdata)
-                {
-                  element.value = this.editdata[element.name];
-                }
-              });
-
-              this.tree = data.formLayoutDetails;
-              this.isTreeReady = true;
+              if(this.field.selectedFormOrList==="1")   
+              {
+                data.formLayoutDetails.fields.forEach(element => {
+                  if(element.name in this.editdata)
+                  {
+                    element.value = this.editdata[element.name];
+                  }
+                });
+                this.tree = data.formLayoutDetails;
+                this.isTreeReady = true;
+              }else{               
+                this.gridData = data.listLayoutDetails;
+              } 
+              
             }
             else
             {
-              this.tree = data.formLayoutDetails;
-              this.isTreeReady = true;
-            }    
-            
-            this.tree.name = '';
+
+              if(this.field.selectedFormOrList==="1")   
+              {
+                this.tree = data.formLayoutDetails;
+                this.isTreeReady = true;
+              }else{               
+                this.gridData = data.listLayoutDetails;             
+
+              }
+            }  
+          //  this.tree.name = '';
           }
         },
         error => {
@@ -163,10 +188,11 @@ export class DetailEntityComponent {
     
     this.validateMessages = [];
     let errorMessage: string = "";
-    this.validateMessages = this.validateService.validate(this.tree.fields);
+    this.validateMessages = this.validateService.validate(this.tree.fields,this.entityName);
     if (this.validateMessages.length > 0) {
       this.validateMessages.forEach(element=>{
-        errorMessage += element +  this.getResourceValue("Requriedmessage")+"<br/>";
+        //errorMessage += element +  this.getResourceValue("Requriedmessage")+"<br/>";
+        errorMessage +=this.getResourceValue(element)+"<br/>";
       });
 
       // this.modalService.open(content);
@@ -175,8 +201,8 @@ export class DetailEntityComponent {
     }
    
     let value = {};
-    
-    value = this.commonService.createKeyValue(this.tree.fields, value);
+    value = this.commonService.buildkey(this.tree.fields, value, this.detailEntityName);
+    //value = this.commonService.createKeyValue(this.tree.fields, value);
     // this.createKeyValue(this.tree.fields, value);
 
     // this.tree.fields.forEach(element =>
@@ -200,7 +226,7 @@ export class DetailEntityComponent {
       .pipe(first())
       .subscribe(
         data => {
-          this.toster.showSuccess(this.getResourceValue("DetailEntityUpdatedSuccessfully"));              
+          this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("detailentity_displayname"));              
         },
         error => {
           console.log(error);
@@ -213,7 +239,7 @@ export class DetailEntityComponent {
       .pipe(first())
       .subscribe(
         data => {
-          this.toster.showSuccess(this.getResourceValue("DetailEntityAddedSuccessfully"));              
+          this.toster.showSuccess(this.globalResourceService.saveSuccessMessage("detailentity_displayname"));              
         },
         error => {
           console.log(error);
@@ -238,6 +264,7 @@ export class DetailEntityComponent {
 
 
   getResourceValue(key) {
+    key=key.replace('.', '_');
     return this.globalResourceService.getResourceValueByKey(key);
   }
 }

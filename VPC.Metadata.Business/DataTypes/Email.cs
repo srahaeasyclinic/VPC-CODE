@@ -24,6 +24,8 @@ namespace VPC.Metadata.Business.DataTypes
                      @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
 
             this.AddValidator(emailformatvalidator);
+             var defaultValueValidattor = new DefaultValueValidator (ControlType);
+            this.AddValidator (defaultValueValidattor);
         }
 
         public override string Value { get; set; }

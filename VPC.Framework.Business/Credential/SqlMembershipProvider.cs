@@ -121,6 +121,31 @@ namespace VPC.Framework.Business.Credential
 
             return null;
         }
+
+
+
+        public Claim[] RevokeAuthorization(Guid tenantId, Guid userId)
+        {
+            IManagerRole roleManager = new ManagerRole();
+
+            var userDetails = roleManager.GetUserDetails(tenantId, userId);
+
+            if (userDetails != null)
+            {
+                var claims = new[] {
+                new Claim ("UserId", userDetails.Id.ToString ()),
+                new Claim ("UserName", userDetails.Name),
+                new Claim ("TenantId", tenantId.ToString ()),
+                new Claim ("IsSuperAdmin", userDetails.IsSuperadmin.ToString ()),
+                new Claim ("IsSystemAdmin", userDetails.IsSystemAdmin.ToString ()),
+                new Claim ("Jti", Guid.NewGuid ().ToString ())
+                };
+
+                return claims;
+            }
+
+            return null;
+        }
         public bool IsChangedPassEnabled(LoginInfo login)
         {
             IManagerCredential crd = new ManagerCredential();
@@ -176,7 +201,7 @@ namespace VPC.Framework.Business.Credential
 
         }
 
-        private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        internal static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             if (password == null) throw new ArgumentNullException("password");
             if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
@@ -266,7 +291,7 @@ namespace VPC.Framework.Business.Credential
                     PasswordSalt = Convert.ToBase64String(passwordSalt),
                     IsNew = isnew
                 });
-                var returnVal = DataUtility.SaveEmail(tenantId, userDetails.Id, emailTemplate, usercredentialinfo.UserName.ToString());
+                var returnVal = DataUtility.SaveEmail(tenantId, userDetails.Id, emailTemplate, usercredentialinfo.UserName.ToString(), "ForgetPassword", InfoType.User);
                 // SendMail(pass.ToString(),emailTemplate,jdata[0],tenantId,userDetails.Id);
             }
             else
@@ -277,51 +302,6 @@ namespace VPC.Framework.Business.Credential
             return true;
         }
 
-        public bool ResetPassword(Guid tenantId, Guid userId)
-        {
-            IManagerCredential crd = new ManagerCredential();
-            var queryFilter = new List<QueryFilter>();
-            queryFilter.Add(new QueryFilter { FieldName = "TenantId", Operator = "Equal", Value = tenantId.ToString() });
-            queryFilter.Add(new QueryFilter { FieldName = "InternalId", Operator = "Equal", Value = userId.ToString() });
-            var queryContext = new QueryContext { Fields = "FirstName,LastName,MiddleName,UserCredential.Username", Filters = queryFilter, PageSize = 100, PageIndex = 1, MaxResult = 1 };
-
-            byte[] passwordHash, passwordSalt;
-            Random random = new Random();
-            int pass = random.Next(1000000);
-            // pass=1234;
-            CreatePasswordHash(pass.ToString(), out passwordHash, out passwordSalt);
-            IEntityResourceManager _iEntityResourceManager = new VPC.Framework.Business.EntityResourceManager.Contracts.EntityResourceManager();
-            DataTable dataTableUser = _iEntityResourceManager.GetResultById(tenantId, "user", userId, queryContext);
-            User userEntity = EntityMapper<VPC.Entities.EntityCore.Metadata.User>.Mapper(dataTableUser);
-
-            if (Guid.Parse(userEntity.InternalId.Value) == Guid.Empty)
-                return false;
-            CredentialInfo credentialData = crd.GetCredential(tenantId, Guid.Parse(userEntity.InternalId.Value));
-            var jObject = DataUtility.ConvertToJObjectList(dataTableUser);
-            jObject[0].Add(new JProperty("UserCredential.Username", credentialData.UserName.ToString()));
-            jObject[0].Add(new JProperty("UserCredential.Password", pass.ToString()));            
-            var emailTemplate = _iEntityResourceManager.GetWellKnownTemplate(tenantId, "emailtemplate", "user", (int)ContextTypeEnum.Forgotpassword, jObject[0]);
-            if (emailTemplate != null && emailTemplate.Body != null)
-            {
-                CredentialInfo usercredentialinfo = crd.GetCredential(tenantId, userId);
-                bool isnew = CheckResetOnFirstLogin(tenantId);
-                crd.Update(tenantId, new CredentialInfo
-                {
-                    CredentialId = credentialData.CredentialId,
-                    ParentId = Guid.Parse(userEntity.InternalId.Value),
-                    PasswordHash = Convert.ToBase64String(passwordHash),
-                    PasswordSalt = Convert.ToBase64String(passwordSalt),
-                    IsNew = isnew
-                });
-                var returnVal = DataUtility.SaveEmail(tenantId, Guid.Parse(userEntity.InternalId.Value), emailTemplate, credentialData.UserName.ToString());
-            }
-            else
-            {
-                return false;
-            }
-
-            return true;
-        }
 
         // public  bool ChangePasswordSetIsNewAfterLogin(LoginInfo login)
         // {
@@ -497,7 +477,7 @@ namespace VPC.Framework.Business.Credential
             }
             return passwordpolicy;
         }
-        public bool CheckResetOnFirstLogin(Guid TenantCode)
+        internal bool CheckResetOnFirstLogin(Guid TenantCode)
         {
             PasswordPolicy passwordpolicy = getPasswordPolicy(TenantCode, true);
             var isnew = false;
@@ -569,7 +549,7 @@ namespace VPC.Framework.Business.Credential
             User userInfo = UserInfo(changepassword);
             string pass = changepassword.NewPassword;
             List<String> error = new List<String>();
-          
+
             if (userInfo != null && passwordpolicy.AllowFirstLastName != null)
             {
                 if (!string.IsNullOrEmpty(userInfo.FirstName.Value) || !string.IsNullOrEmpty(userInfo.LastName.Value))

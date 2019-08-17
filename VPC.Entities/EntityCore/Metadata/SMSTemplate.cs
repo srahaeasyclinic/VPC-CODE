@@ -22,6 +22,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         //[AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         //
         public InternalId TenantId { get; set; }
@@ -31,16 +32,21 @@ namespace VPC.Entities.EntityCore.Metadata
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [DefaultValue(InfoType.SMStemplate)]
+         [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.SMStemplate);
 
         [AccessibleLayout((int)LayoutType.List)]
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+        [DisplayName("Sub types")]
 
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
@@ -53,6 +59,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [SimpleSearch]
         [ColumnName("[Title]")]
         [NotNull]
+        [DisplayName("Title")]
         public MediumText Title { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
@@ -63,12 +70,14 @@ namespace VPC.Entities.EntityCore.Metadata
         [ColumnName("[Context]")]
         [NotNull]
         [DefaultValue("#ENTCAST")] //This is fixed and unique default value to be used to get Entitycontext Type
+        [DisplayName("Context")]
         public MetadataPicklist Context { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [Receiver("Context", MessageQueuingType.EntityRichTextBox)]
         [ColumnName("[Body]")]
         [NotNull]
+        [DisplayName("Body")]
         public RichText Body { get; set; }
 
 
@@ -77,6 +86,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [SimpleSearch]
         [IsReadonly]
         [ColumnName("[ContextType]")]
+        [DisplayName("Context type")]
         public PickList<CommunicationContextType> CommunicationContextType { get; set; }
 
         //[FreeTextSearch]

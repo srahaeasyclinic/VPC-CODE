@@ -18,7 +18,7 @@ export class TaskoperationComponent implements OnInit {
   public gridData: any = this.entity;
   public operationList = [];
   public resource: Resource;
-  private name: string;
+  public name: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -148,7 +148,7 @@ export class TaskoperationComponent implements OnInit {
 
   addOperationProcess(operationInfo) {
     const modalRef = this.modalService.open(ModalOperationProcessComponent, { size: 'lg' });
-    modalRef.componentInstance.title = this.getResourceValue("Workflow_ProcessConfiguration");
+    modalRef.componentInstance.title = this.getResourceValue("metadata_workflow_processconfiguration");
     modalRef.componentInstance.entityName = this.name;
     modalRef.componentInstance.operationName = operationInfo.name;
     modalRef.componentInstance.operationType = operationInfo.operationType;

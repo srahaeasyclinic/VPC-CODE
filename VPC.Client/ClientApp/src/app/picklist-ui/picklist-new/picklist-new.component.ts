@@ -10,6 +10,7 @@ import {CommonService} from 'src/app/services/common.service';
 import { first } from "rxjs/operators";
 import { GlobalResourceService } from '../../global-resource/global-resource.service';
 import { Resource } from '../../model/resource';
+import { MenuService, MenuType } from 'src/app/services/menu.service';
 
 @Component({
   selector: 'app-picklist-new',
@@ -39,23 +40,28 @@ export class PicklistNewComponent implements OnInit {
     private toster: TosterService,   
     private commonService: CommonService,
     private globalResourceService: GlobalResourceService,
+    private menuService: MenuService
   ) { }
 
   ngOnInit() {
+let result=this.menuService.getMenuconext();
+      this.entityName = result.param_name;
+    if (result && result.menuType == MenuType.Picklist) {
 
-    // this.getResource();    
-    this.resource = this.globalResourceService.getGlobalResources();
-    this.activatedRoute.parent.params.subscribe((urlPath) => {
-      this.entityName = urlPath["name"]; 
+     
+      // this.getResource();    
+      this.resource = this.globalResourceService.getGlobalResources();
+      this.activatedRoute.parent.params.subscribe((urlPath) => {
+        // this.entityName = urlPath["name"]; 
 
   
-      if (this.entityName) {
-        this.getDefaultLayout(this.entityName);
-      } else {
-        this.toster.showWarning(this.getResourceValue("UrlTemperedorNoEntityNameoridFoundorEntityNotYetDecorated"));
-      }
-    });
-   
+        if (this.entityName) {
+          this.getDefaultLayout(this.entityName);
+        } else {
+          this.toster.showWarning(this.getResourceValue("metadata_operation_alert_warning_message"));
+        }
+      });
+    }
     //this.getDefaultLayout(this.entityName);
   }
 
@@ -93,7 +99,7 @@ export class PicklistNewComponent implements OnInit {
       .subscribe(
         data => {
      
-          this.toster.showSuccess(this.entityName + this.getResourceValue("SavedSuccessfully"));
+          this.toster.showSuccess(this.entityName + this.getResourceValue(this.entityName.toLowerCase()+"_operation_saved_message"));
          // this.router.navigate(['picklist/ui/' + this.entityName.toLowerCase()]);
           this.router.navigate(["../"], { relativeTo: this.activatedRoute });
         },

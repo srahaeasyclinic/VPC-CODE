@@ -13,7 +13,7 @@
               <tbody>
                 <tr  *ngFor="let workFlowStep of workFlowSteps">
                   <td>
-                      <a class="text-less-important" (click)="addInnerStep(workFlowStep)">{{workFlowStep.value}}</a>
+                      <a class="text-less-important" (click)="addInnerStep(workFlowStep)">{{getResourceValue(entityName+'_workflow_tran_'+workFlowStep.value.toLowerCase())}}</a>
                   </td>
                 </tr>
               </tbody>

@@ -9,6 +9,11 @@ namespace VPC.Framework.Business.Menu.API
     {
         List<MenuItem> GetMenu(Guid tenantId, string groupName, int pageIndex, int pageSize);
         MenuItem GetMenuById(Guid tenantId, Guid id);
+
+        List<MenuItem> GetMenuBytenant(Guid tenantId);
+
+        void Menuinitilization(Guid rootTenantid, Guid InitTenantid);
+        void ApplicationMenuinitilization(Guid rootTenantid, Guid InitTenantid, Guid userid,short PicklistId);
     }
 
     internal class MenuReview : IMenuReview
@@ -25,11 +30,25 @@ namespace VPC.Framework.Business.Menu.API
             return _data.GetMenuById(tenantId, id);
         }
 
+        List<MenuItem> IMenuReview.GetMenuBytenant(Guid tenantId)
+        {
+            return _data.GetMenuByTenant(tenantId);
+        }
+
+
+        void IMenuReview.Menuinitilization(Guid rootTenantid, Guid InitTenantid)
+        {
+            _data.InitializeMenu(rootTenantid, InitTenantid);
+        }
+        void IMenuReview.ApplicationMenuinitilization(Guid rootTenantid, Guid InitTenantid, Guid userid, short PicklistId)
+        {
+            _data.InitializeApplicationMenu(rootTenantid, InitTenantid, userid, PicklistId);
+        }
         // List<MenuItem> IMenuReview.GetMenuByGroupName(Guid tenantId, string groupName)
         // {
         //     List<MenuItem> menus = new List<MenuItem>();
         //     //menus = _data.GetMenuByGroupName(tenantId, groupName).OrderBy(x => x.Name).ToList();
-          
+
         //     return menus;
         // }
     }

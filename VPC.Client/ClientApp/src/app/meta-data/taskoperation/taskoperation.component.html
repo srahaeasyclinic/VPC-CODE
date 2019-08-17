@@ -6,12 +6,12 @@
             [filterable]="true"
             
             [height]="510">
-  <kendo-grid-column field="name" title="{{getResourceValue('Name')}}" [width]="140">
+  <kendo-grid-column field="name" title="{{getResourceValue('metadata_field_name')}}" [width]="140">
     <ng-template kendoGridCellTemplate let-gridData>
-      {{getResourceValue(gridData.name)}}
+      {{gridData.name}}
     </ng-template>
   </kendo-grid-column>
-  <kendo-grid-column field="type" title="{{getResourceValue('Type')}}" [width]="120"></kendo-grid-column>
+  <kendo-grid-column field="type" title="{{getResourceValue('metadata_field_type')}}" [width]="120"></kendo-grid-column>
 
   <kendo-grid-column [width]="120" [style]="{'overflow': 'visible'}">
     <ng-template kendoGridCellTemplate let-gridData>
@@ -27,7 +27,7 @@
         </mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <a class="dropdown-item" (click)="addOperationProcess(gridData)">{{getResourceValue("Workflow_ProcessConfiguration")}}</a>
+        <a class="dropdown-item" (click)="addOperationProcess(gridData)">{{getResourceValue("metadata_workflow_processconfiguration")}}</a>
       </mat-menu>
     </ng-template>
   </kendo-grid-column>

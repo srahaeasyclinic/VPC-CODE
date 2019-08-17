@@ -25,6 +25,7 @@ export class LayoutDetailViewActionComponent implements OnInit {
   private isdatamainlist: boolean = false;
   public layoutInfo: LayoutModel = new LayoutModel();
   public resource: Resource;
+  public searchText : string = '';
 
   constructor(
     private layoutService: LayoutService,
@@ -221,6 +222,14 @@ export class LayoutDetailViewActionComponent implements OnInit {
       item.sequence = a;
       a++;
     });
+  }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
   }
 
 }

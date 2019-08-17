@@ -5,8 +5,10 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NLog;
 using VPC.Entities.EntityCore.Model.Storage;
+using VPC.Framework.Business.DuplicateRecordsManager;
 using VPC.Framework.Business.MetadataManager.Contracts;
 using VPC.WebApi.Utility;
 
@@ -20,6 +22,7 @@ namespace VPC.WebApi.AttributesHandler
         private readonly IValidationService _IValidationService;
         private readonly ILayoutManager _iILayoutManager;
         private readonly IMetadataManager _iMetadataManager;
+        private readonly IDuplicateRecordsManager _IduplicateRecordsManager;
 
         //Guid tenentId
         public ValidateEntityJsonObjData()
@@ -28,6 +31,7 @@ namespace VPC.WebApi.AttributesHandler
             this._iILayoutManager = new LayoutManager();
             this._iMetadataManager = new MetadataManager();
             this._IValidationService = new ValidationService();
+            this._IduplicateRecordsManager = new DuplcateRecordsManager();
         }
         #endregion
 
@@ -39,6 +43,7 @@ namespace VPC.WebApi.AttributesHandler
 
             var baseApiController = ((BaseApiController)context.Controller);
             Guid tenentId = Guid.Empty;
+            bool IsduplicateRecords = false;
             string methodType = context.HttpContext.Request.Method;
             if (baseApiController != null)
             {
@@ -58,6 +63,7 @@ namespace VPC.WebApi.AttributesHandler
                 context.ActionArguments.TryGetValue("value", out object jobjectvalue);
                 context.ActionArguments.TryGetValue("entityName", out object entityName);
                 context.ActionArguments.TryGetValue("subType", out object subType);
+                
 
                 if (jobjectvalue == null || string.IsNullOrEmpty(Convert.ToString(entityName)) || string.IsNullOrEmpty(Convert.ToString(subType)))
                 {
@@ -66,14 +72,31 @@ namespace VPC.WebApi.AttributesHandler
                     context.Result = baseApiController.StatusCode(520, "Bad request!");
                     return;
                 }
-
-                var objsondict = JsonConvert.DeserializeObject<Dictionary<string, object>>(jobjectvalue.ToString());
+                //------------
+                JObject payload = JObject.FromObject(jobjectvalue);
+                var filterPayload = payload.Children ().FirstOrDefault (t => t.Path.ToLower ().Equals (entityName.ToString().ToLower()));
+                var targetObj = filterPayload.First ().ToObject<JObject> ();
+                //-------------
+                var objsondict = JsonConvert.DeserializeObject<Dictionary<string, object>>(targetObj.ToString());
                 if (objsondict == null || objsondict.Count == 0)
                 {
                     context.ModelState.AddModelError("ValidateJsonObjData", string.Format("Jobject value is null in Validation Attributes filter!"));
                     context.Result = baseApiController.StatusCode(520, "Empty data is not acceptable.");
                     return;
                 }
+                #region Duplicate Recods
+
+                if (methodType.ToUpper().Equals("POST"))
+                {
+                    IsduplicateRecords = _IduplicateRecordsManager.CheckDuplicatesData(tenentId, Convert.ToString(entityName), payload, Guid.Empty);
+                }
+                if (methodType.ToUpper().Equals("PUT"))
+                {
+                    context.ActionArguments.TryGetValue("id", out object UpdateId);
+                    IsduplicateRecords = _IduplicateRecordsManager.CheckDuplicatesData(tenentId, Convert.ToString(entityName), payload, (Guid)UpdateId);
+                }
+
+                #endregion
 
                 #region EntityFields Validation
                 string errors1 = string.Empty;

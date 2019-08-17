@@ -63,36 +63,36 @@ namespace IHostedServiceAsAService
     }
 
    
-List<BatchTypeInfo> allTasks=new List<BatchTypeInfo>();
+List<BatchType> allTasks=new List<BatchType>();
 
     public void BatchInfinityProcess()
     {
-        List<KeyValuePair<Guid,BatchTypeInfo>>  allBatches=_securityCacheManager.BatchTypesCache();  
-        foreach (var allBatche in allBatches)
+        var  allBatches=_managerbatchType.GetEnabledBatchType();  
+        foreach (var batch in allBatches)
         {          
            //Check already added  
-           var checkAddedd=(from allTask in allTasks where  DataUtility.Compare<BatchTypeInfo>(allTask, allBatche.Value) select allTask).ToList();
+           var checkAddedd=(from allTask in allTasks where  CompareObject.AreObjectsEqual(allTask, batch) select allTask).ToList();
             if(checkAddedd.Count==0)
                 {                   
-                    var task = new Task(() => AssignTaskForProcessing(allBatche.Key,allBatche.Value), TaskCreationOptions.LongRunning);
+                    var task = new Task(() => AssignTaskForProcessing(batch), TaskCreationOptions.LongRunning);
                     task.Start();  
-                     allTasks.Add(allBatche.Value);
+                     allTasks.Add(batch);
                 }
         }
 
         //Check to delete
-        foreach(var allTask in allTasks)
+        foreach(var task in allTasks)
         {
-            var checkExistance=(from allBatche in allBatches where  DataUtility.Compare<BatchTypeInfo>(allTask, allBatche.Value) select allBatche).ToList();
+            var checkExistance=(from batche in allBatches where  CompareObject.AreObjectsEqual(task, batche) select batche).ToList();
             if(checkExistance.Count==0)
             {
-              allTasks.Remove(allTask); 
+              allTasks.Remove(task); 
             }
             
         }
     }
 
-     void AssignTaskForProcessing(Guid tenantId,BatchTypeInfo type)
+     void AssignTaskForProcessing(BatchType type)
         {
             var shouldRun = true;
             while (true)
@@ -103,27 +103,27 @@ List<BatchTypeInfo> allTasks=new List<BatchTypeInfo>();
                     {
                         shouldRun = false;
                         //Check Is Batch settinmgs Changes                    
-                        var allBatchTypes=_securityCacheManager.BatchTypesCache();                       
+                        var allBatchTypes=_managerbatchType.GetEnabledBatchType();                       
                         if(allBatchTypes.Count>0)
                         {
-                           var itsBatchType=(from allBatchType in allBatchTypes where allBatchType.Key==tenantId && allBatchType.Value.BatchTypeId==type.BatchTypeId select allBatchType.Value ).FirstOrDefault();
+                           var itsBatchType=(from batchType in allBatchTypes where Guid.Parse(batchType.TenantId.Value)==Guid.Parse(type.TenantId.Value) 
+                                                &&  Guid.Parse(batchType.InternalId.Value)==Guid.Parse(type.InternalId.Value) select batchType).FirstOrDefault();
                             if(itsBatchType==null)
                                 {                            
                                     break;                   
                                 }
 
-                            var isExists= DataUtility.Compare<BatchTypeInfo>(type, itsBatchType);
+                            var isExists= CompareObject.AreObjectsEqual(type, itsBatchType);
                             if(!isExists)
                             {
                                 break;                     
                             }
 
-                        }
-                        
+                        }                        
 
                         //check scheduler
                         var batchtype = typeof(IBatchTypes);
-                        var myType = DataUtility.GetBatchTypeByContext(type.Context);
+                        var myType = DataUtility.GetBatchTypeByContext((BatchTypeContextEnum)(Convert.ToInt16(type.Context.Value)));
                         if (myType !=null)
                         {                            
                                 var myObject = Activator.CreateInstance(myType);
@@ -132,19 +132,18 @@ List<BatchTypeInfo> allTasks=new List<BatchTypeInfo>();
                                 //PostProcess
                                 // Invoke the method on the instance we created above
                                 var arrayList = new ArrayList
-                                {
-                                    tenantId,
+                                {                               
                                     type
                                 };
                                 var result = (BatchTypeReturnMessage)preMethodInfo.Invoke(myObject,  new object[] { arrayList });
 
                             shouldRun = true;
-                            Thread.Sleep(type.IdleTime.HasValue ? type.IdleTime.Value : 10000);
+                             Thread.Sleep(!string.IsNullOrEmpty(type.IdleTime.Value) ? Convert.ToInt32(type.IdleTime.Value) :  10000);
                         }
                         else
                         {
                             shouldRun = true;
-                            Thread.Sleep(type.IdleTime.HasValue ? type.IdleTime.Value :  10000);
+                            Thread.Sleep(!string.IsNullOrEmpty(type.IdleTime.Value) ? Convert.ToInt32(type.IdleTime.Value) :  10000);
                         } 
                     }
                     catch (ThreadAbortException)

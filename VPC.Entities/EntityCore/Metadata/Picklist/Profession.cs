@@ -37,18 +37,24 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
+
         public override Name Name { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[Key]")]
         [FreeTextSearch]
         [NotNull]
+        [DisplayName("Key")]
+
         public SmallText Key { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[Text]")]
         [FreeTextSearch]
         [NotNull]
+        [DisplayName("Text")]
+
         public MediumText Text { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -57,6 +63,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [InverseProperty("[Id]")]
         [ColumnName("[UpdatedBy]")]
         [NotNull]
+        [DisplayName("Updated by")]
+
         public Lookup<User> UpdatedBy { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -64,6 +72,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NonQueryable]
         [ColumnName("[UpdatedDate]")]
         [NotNull]
+        [DisplayName("Updated date")]
+
         public DateTime UpdatedDate { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -71,18 +81,24 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [ColumnName("[Active]")]
         [NotNull]
         [SimpleSearch]
+        [DisplayName("Active")]
+
         public LocalPickList<Active> Active { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [DefaultValue("0")]
         [ColumnName("[IsDeletetd]")]
         [NotNull]
+        [DisplayName("Is deleted")]
+
         public BooleanType IsDeletetd { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [DefaultValue("0")]
         [ColumnName("[Flagged]")]
         [NotNull]
+        [DisplayName("Flagged")]
+
         public BooleanType Flagged { get; set; }
     }
 }

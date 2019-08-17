@@ -26,6 +26,7 @@ import { TextBoxComponent } from './atoms/textbox';
 import { TextAreaComponent } from './atoms/textarea';
 import { CalanderComponent } from './atoms/calander';
 import { DropDownComponent } from './atoms/dropdown';
+import {LinkComponent} from './atoms/link';
 import { FileComponent } from './atoms/file';
 import { CheckBoxComponent } from './atoms/checkbox';
 import { RadioComponent } from './atoms/radio';
@@ -47,7 +48,8 @@ import { Broadcaster } from "./messaging/broadcaster";
 import { MessageEvent } from "./messaging/message.event";
 import { RichtextboxComponent } from './atoms/richtextbox//richtextbox.component';
 import { HierarchyDropDownComponent} from './atoms/hierarchy-dropdown';
-
+import { OrderModule } from 'ngx-order-pipe';
+import { SharedTreeService } from "./service/sharedtree.service";
 
 @NgModule({
 	imports: [
@@ -68,7 +70,8 @@ import { HierarchyDropDownComponent} from './atoms/hierarchy-dropdown';
 		UtilityTopBarModule,
 		GeneralUiListModule,
 		MatInputModule,
-		MatDatepickerModule
+		MatDatepickerModule,
+		OrderModule,
 	],
 	exports: [
 		TreeComponent,
@@ -82,6 +85,7 @@ import { HierarchyDropDownComponent} from './atoms/hierarchy-dropdown';
 		TextAreaComponent,
 		CalanderComponent,
 		DropDownComponent,
+		LinkComponent,
 		MultiSelectDropDownComponent,
 		CheckBoxComponent,
 		FileComponent,
@@ -94,6 +98,7 @@ import { HierarchyDropDownComponent} from './atoms/hierarchy-dropdown';
 	],
 	providers: [
 		TreeService,
+		SharedTreeService,
 		Broadcaster,
 		MessageEvent
 	]

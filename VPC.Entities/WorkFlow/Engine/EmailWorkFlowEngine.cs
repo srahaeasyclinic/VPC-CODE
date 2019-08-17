@@ -14,7 +14,7 @@ namespace VPC.Entities.WorkFlow.Engine
         public const string _emailName = "Email";
 
 
-        [WorkFlowModel(Name = _emailName, Context = _email, Key = "Draft", Status="ReadyToSend", Description = "EmailReadyToSendDesc")]
+        [WorkFlowModel(Name = _emailName, Context = _email, Key = "Draft", Status="ReadyToSend", Description = "EmailReadyToSendDesc",TransitionResourceValue="Draft",StatusResourceValue ="Ready to send")]
         public static Guid Draft
         {
             get
@@ -23,7 +23,7 @@ namespace VPC.Entities.WorkFlow.Engine
             }
         }
 
-        [WorkFlowModel(Name = _emailName, Context = _email, Key = "Send", Status="Sent" ,Description = "EmailSentDesc")]
+        [WorkFlowModel(Name = _emailName, Context = _email, Key = "Send", Status="Sent" ,Description = "EmailSentDesc",TransitionResourceValue="Send",StatusResourceValue ="Sent")]
         public static Guid Sent
         {
             get
@@ -32,7 +32,7 @@ namespace VPC.Entities.WorkFlow.Engine
             }
         }  
         
-        [WorkFlowModel(Name = _emailName, Context = _email, Key = "Failure", Status="Failed" , Description = "EmailFailureDesc")]
+        [WorkFlowModel(Name = _emailName, Context = _email, Key = "Failure", Status="Failed" , Description = "EmailFailureDesc",TransitionResourceValue="Failure",StatusResourceValue ="Failed")]
         public static Guid Fail
         {
             get
@@ -42,7 +42,7 @@ namespace VPC.Entities.WorkFlow.Engine
         }
         
          
-        [WorkFlowModel(Name = _emailName, Context = _email, Key = "Cancel", Status="Cancelled" , Description = "EmailCancelDesc")]
+        [WorkFlowModel(Name = _emailName, Context = _email, Key = "Cancel", Status="Cancelled" , Description = "EmailCancelDesc",TransitionResourceValue="Cancel",StatusResourceValue ="Cancelled")]
         public static Guid Cancel
         {
             get

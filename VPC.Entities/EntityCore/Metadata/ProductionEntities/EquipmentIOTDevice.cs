@@ -24,28 +24,35 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
     
     public class EquipmentIOTDevice : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.EquipmentIOTDevice);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20005-ST01", "Standard"}
         };
 
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
-        [Tagable]
 
+        [Tagable]
+        [DisplayName("Equipment code")]
         public XSmallText EquipmentCode { get; set; }
-        [Tagable]
 
+        [Tagable]
+        [DisplayName("IOT device Id")]
         public PickList<IOTDevice> IOTDeviceId { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,5 +7,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Script00001 - Initial script.sql"></EmbeddedResource>
     <EmbeddedResource Include="Scripts\Script00002 - Resource related changes.sql"></EmbeddedResource>
+    <EmbeddedResource Include="Scripts\Script00003 - Layout.sql"></EmbeddedResource>
+    <EmbeddedResource Include="Scripts\Script00003 - Tenant_GetDefaultLanguageKeyTextBy_TenantId.sql"></EmbeddedResource>
+    <EmbeddedResource Include="Scripts\Script00005 - Resources changes.sql"></EmbeddedResource>
+    <EmbeddedResource Include="Scripts\Script00006-Resource_Reset.sql"></EmbeddedResource>
   </ItemGroup>
 </Project>

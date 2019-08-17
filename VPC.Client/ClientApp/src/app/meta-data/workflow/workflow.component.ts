@@ -13,6 +13,8 @@ import { MetadataService } from '../metadata.service';
 import { ModalWorkflowprocessComponent } from './modal-workflowprocess/modal-workflowprocess.component';
 import { Resource } from 'src/app/model/resource';
 import { GlobalResourceService } from 'src/app/global-resource/global-resource.service';
+import swal from 'sweetalert2';
+import { MenuService } from '../../services/menu.service';
 
 @Component({
   selector: 'app-workflow',
@@ -37,7 +39,8 @@ export class WorkFlowComponent implements OnInit {
     private workFlowService: WorkFlowService, 
     private modalService: NgbModal,
     private metadataService: MetadataService,
-    public globalResourceService: GlobalResourceService
+    public globalResourceService: GlobalResourceService,
+    private menuService: MenuService
     ) { }
 
  
@@ -46,6 +49,8 @@ export class WorkFlowComponent implements OnInit {
     this.activatedRoute.parent.params.subscribe((params: Params) => {
       this.entityName = params['entityName'];
     });
+    // let result=this.menuService.getMenuconext();
+    //   this.entityName = result.param_name;
     this.getMetadataFieldsByName(this.entityName)
     this.resource = this.globalResourceService.getGlobalResources();     
   }
@@ -135,7 +140,7 @@ export class WorkFlowComponent implements OnInit {
     };
 
     const modalRef = this.modalService.open(ModalInnerStepComponent, ngbModalOptions);
-    modalRef.componentInstance.title = this.getResourceValue("addTransition");
+    modalRef.componentInstance.title = this.getResourceValue("workflow_metadata_addtransition");
     modalRef.componentInstance.innerstep = this;
     modalRef.componentInstance.entityName = this.entityName;
     modalRef.componentInstance.transactionType = mainStep.transitionType.id;   
@@ -180,16 +185,66 @@ export class WorkFlowComponent implements OnInit {
 
   deleteWorkFlowInnerStep(workFlowInnerStep,innerSteps)
   {
-    this.workFlowService.deleteWorkFlowInnerStep(workFlowInnerStep.innerStepId).pipe(first()).subscribe(
-      data => {
-        const index: number = innerSteps.indexOf(workFlowInnerStep);
-        if (index !== -1) {
-          innerSteps.splice(index, 1);
-        }      
-      },
-      error => {
-        console.log(error);
-      });
+
+    //if (actionName.toLowerCase() == 'Delete'.toLowerCase()) {
+
+      this.globalResourceService.openDeleteModal.emit()
+
+      this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+        this.workFlowService.deleteWorkFlowInnerStep(workFlowInnerStep.innerStepId).pipe(first()).subscribe(
+          data => {
+            const index: number = innerSteps.indexOf(workFlowInnerStep);
+            if (index !== -1) {
+              innerSteps.splice(index, 1);
+            }      
+          },
+          error => {
+            console.log(error);
+          });
+         
+        })
+
+
+      // swal({
+      //   title: this.getResourceValue("common_message_areyousure"),
+      //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+      //   type: 'warning',
+      //   showCancelButton: true,
+      //   confirmButtonColor: '#3085d6',
+      //   cancelButtonColor: '#d33',
+      //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+      //   showLoaderOnConfirm: true,
+      // })
+      //   .then((willDelete) => {
+      //     if (willDelete.value) {
+      //       this.workFlowService.deleteWorkFlowInnerStep(workFlowInnerStep.innerStepId).pipe(first()).subscribe(
+      //         data => {
+      //           const index: number = innerSteps.indexOf(workFlowInnerStep);
+      //           if (index !== -1) {
+      //             innerSteps.splice(index, 1);
+      //           }      
+      //         },
+      //         error => {
+      //           console.log(error);
+      //         });
+
+      //     } else {
+      //       //write the code for cancel click
+      //     }
+
+      //   });
+    //}
+
+    // this.workFlowService.deleteWorkFlowInnerStep(workFlowInnerStep.innerStepId).pipe(first()).subscribe(
+    //   data => {
+    //     const index: number = innerSteps.indexOf(workFlowInnerStep);
+    //     if (index !== -1) {
+    //       innerSteps.splice(index, 1);
+    //     }      
+    //   },
+    //   error => {
+    //     console.log(error);
+    //   });
   }
 
   moveDown_Step(allSteps, index) {
@@ -249,7 +304,7 @@ export class WorkFlowComponent implements OnInit {
   addProcess(mainStep,innerStep)
   {
     const modalRef = this.modalService.open(ModalWorkflowprocessComponent, { size: 'lg' });
-    modalRef.componentInstance.title = this.getResourceValue("Workflow_ProcessConfiguration");
+    modalRef.componentInstance.title = this.getResourceValue("metadata_workflow_processconfiguration");
     modalRef.componentInstance.innerSteps = innerStep;
     modalRef.componentInstance.entityName = this.entityName;
     modalRef.componentInstance.fromStepId = mainStep.transitionType.id;

@@ -14,7 +14,8 @@ namespace VPC.Framework.Business.Rule.APIs
     {
         List<RuleInfo> GetAllRules(Guid tenantId, string entityId = null);
         RuleInfo GetRuleById(Guid tenantId, Guid ruleId, string entityId = null);
-                
+        RuleInfo GetuniquefieldsRules(Guid tenantId, string entityId);
+
     }
 
 
@@ -30,6 +31,11 @@ namespace VPC.Framework.Business.Rule.APIs
         RuleInfo IRuleReview.GetRuleById(Guid tenantId, Guid ruleId, string entityId)
         {
             return dataRule.GetById(tenantId, ruleId, entityId);
+        }
+
+        RuleInfo IRuleReview.GetuniquefieldsRules(Guid tenantId, string entityId)
+        {
+            return dataRule.GetUniquefieldsRulesByEntity(tenantId, entityId);
         }
     }
 }

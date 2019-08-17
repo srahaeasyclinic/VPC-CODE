@@ -48,7 +48,13 @@ namespace VPC.WebApi.Controllers.WorkFlow
         public IActionResult Get([FromRoute] string entityname)
         {
             try
-            {               
+            {  
+
+              var details = iMetadataManager.GetVersionControlName(entityname);
+                if(!string.IsNullOrEmpty(details))
+                    entityname=details;
+                
+                             
                 var stopwatch = StopwatchLogger.Start(_log);              
                 _log.Info("Called WorkFlowController Get all by entity name {0}=", JsonConvert.SerializeObject(entityname));                 
                 
@@ -69,6 +75,10 @@ namespace VPC.WebApi.Controllers.WorkFlow
         {
             try
             {               
+                // var details = iMetadataManager.GetEntitityByName(entityname);
+                // if(details!=null && details.VersionControl !=null )
+                // entityname=details.VersionControl.Name;
+
                 var stopwatch = StopwatchLogger.Start(_log);              
                 _log.Info("Called WorkFlowController Get all by entity name {0}=", JsonConvert.SerializeObject(entityname));                 
                 var workFlows=SecurityCache.WorkFlow;
@@ -146,6 +156,10 @@ namespace VPC.WebApi.Controllers.WorkFlow
         {
             try
              {  
+                //  var details = iMetadataManager.GetEntitityByName(wapper.EntityName);
+                //      if(details!=null && details.VersionControl !=null )
+                //          wapper.EntityName=details.VersionControl.Name;
+
                  wapper.UserId=UserId;
                  var retVal = _managerWorkFlow.ManageTransition(TenantCode,wapper,IsSuperAdmin);              
                  return Ok(retVal);

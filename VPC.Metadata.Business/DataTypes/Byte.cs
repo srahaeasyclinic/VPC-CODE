@@ -16,8 +16,7 @@ namespace VPC.Metadata.Business.DataTypes
 
             var lengthValidator = new LengthValidator();
             AddValidator(lengthValidator);
-
-
+        
         }
         public override string Value { get; set; }
 

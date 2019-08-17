@@ -18,7 +18,7 @@ export class RelationsComponent implements OnInit {
   private relation: Relation;
   public view: Observable<GridDataResult>;
   public gridData: any = this.relation;
-  private name: string;
+  public name: string;
   public resource: Resource;
   public relationSource: any;
 
@@ -124,7 +124,7 @@ export class RelationsComponent implements OnInit {
   }
 
   private getResource() {
-    this.resource = this.globalResourceService.getGlobalResources();
+    //this.resource = this.globalResourceService.getGlobalResources();
     this.getMetadataFieldsByName(this.name);
 
   }

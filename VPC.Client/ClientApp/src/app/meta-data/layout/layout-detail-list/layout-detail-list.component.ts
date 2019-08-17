@@ -8,6 +8,7 @@ import { Observable } from 'rxjs/Observable';
 import { TosterService } from '../../../services/toster.service';
 import { GlobalResourceService } from 'src/app/global-resource/global-resource.service';
 import { Resource } from 'src/app/model/resource';
+import { MenuService } from '../../../services/menu.service';
 
 @Component({
   selector: 'app-layout-detail-list',
@@ -25,9 +26,9 @@ export class LayoutDetailListComponent implements OnInit {
   public resource: Resource;
   navLinks = [
     { path: 'fields', label: 'Fields' },
-    { path: 'textsearch', label: 'Free text search' },
-    { path: 'simplesearch', label: 'Simple search' },
-    { path: 'advancesearch', label: 'Advance search' },
+    { path: 'textsearch', label: 'Freetextsearch' },
+    { path: 'simplesearch', label: 'Simplesearch' },
+    { path: 'advancesearch', label: 'Advancesearch' },
     { path: 'toolbar', label: 'Toolbar' },
     { path: 'action', label: 'Actions' }
   ];
@@ -37,11 +38,13 @@ export class LayoutDetailListComponent implements OnInit {
     private layoutService: LayoutService,
     private metadataService: MetadataService,
     private toster: TosterService,
-    public globalResourceService: GlobalResourceService
+    public globalResourceService: GlobalResourceService,
+    private menuService: MenuService
   ) {
  }
  entityname: string;
   ngOnInit() {
+    //debugger;
     this.resource = this.globalResourceService.getGlobalResources();
     this.layoutInfo = this.activatedRoute.snapshot.data['layoutDetails'];
 
@@ -55,7 +58,10 @@ export class LayoutDetailListComponent implements OnInit {
 	  
 		  this.activatedRoute.parent.parent.params.subscribe((params: Params) => {
 			this.entityname = params['entityName'];
-		  });  
+      });  
+    // let result=this.menuService.getMenuconext();
+    // this.entityname = result.param_name;
+    
     if(this.layoutInfo)
     {
       this.defaultLayout = this.layoutInfo.defaultLayout;
@@ -80,7 +86,7 @@ export class LayoutDetailListComponent implements OnInit {
 
   updateLayoutDetails() {
     this.layoutService.updateLayout(this.entityname, this.id, this.layoutInfo).subscribe(result => {
-      this.toster.showSuccess(this.getResourceValue("LayoutSavedSuccessfully"));  
+      this.toster.showSuccess(this.getResourceValue("metadata_operation_save_success_message"));  
     });
   }
 

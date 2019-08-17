@@ -12,7 +12,7 @@ namespace VPC.Entities.EntityCore
         public const string Location = "EN10006";
         public const string Room = "EN10007";
         public const string TenantIpRange = "EN10008";
-        public const string Subscription = "EN10009";
+      //  public const string Subscription = "EN10009";
         //public const string TenantServiceStatus = "EN10010";
         public const string Menu = "EN10011";
         //EN10012
@@ -151,15 +151,20 @@ namespace VPC.Entities.EntityCore
 
         public const string ProcurementRule = "EN20057";
 
+        public const string ProductVersion = "EN20058";        
+
         //test purpose (added by @tad)
         public const string RoleTest = "RLT00001";
-
-
         public const string TenantSubscriptions = "EN20059";
-        //   public const string Email = "EN20060";
+        public const string BatchType = "EN20060";
 
+        public const string PriceList = "EN20061";
+ public const string PriceListValue = "EN20062";
 
         #endregion
 
+
+        public const string T_Product = "EN2002100";
+        public const string T_ProductVersion = "EN2002101";
     }
 }

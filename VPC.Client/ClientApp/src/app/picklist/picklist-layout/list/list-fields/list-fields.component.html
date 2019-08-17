@@ -1,14 +1,14 @@
 <div class="component-layout">
   <div class="pnl-block">
     <div class="pnl-block-header">
-      <label>{{getResourceValue("AvailableFields")}}</label>
-      <div class="c-search">
-        <div class="c-search-wrapper">
-          <span class="icon"><i class="fa fa-search"></i></span>
-          <!-- <input type="search" id="search" placeholder="Search..." [(ngModel)]="searchText" (ngModelChange)="onFieldSearch($event)"  /> -->
-          <input type="search" id="search" placeholder="{{getResourceValue('Search')}}" [(ngModel)]="searchText" />
+      <label>{{getResourceValue("metadata_availablefields")}}</label>
+      <div class="list-search-block">
+        <div class="margin-right-10">
+            <input type="text" class="list-search" [(ngModel)]="searchText" />
         </div>
-      </div>
+        <div class="search-filter"></div> 
+        <div class="reset-filter" *ngIf="(searchText!='' && searchText!=undefined) " (click)="resetAvailableFilter()"></div>    
+      </div> 
     </div>
     <div class="pnl-block-body">
       <div class="tableStyle">
@@ -35,13 +35,20 @@
   </div>
   <div class="pnl-block">
     <div class="pnl-block-header">
-      <label>{{getResourceValue("SelectedFields")}}</label>
+      <label>{{getResourceValue("metadata_selectedfields")}}</label>
+      <div class="list-search-block">
+        <div class="margin-right-10">
+            <input type="text" class="list-search" [(ngModel)]="addedItemToMainList.name" />
+        </div>
+        <div class="search-filter"></div> 
+        <div class="reset-filter" *ngIf="(addedItemToMainList.name!='' && addedItemToMainList.name!=undefined)" (click)="resetItemFilter()"></div>    
+      </div>
     </div>
     <div class="pnl-block-body">
       <div class="tableStyle">
         <table class="table withoutborder">
           <tbody>
-            <tr *ngFor="let item of addedItemToMainList">
+            <tr *ngFor="let item of addedItemToMainList | filter : addedItemToMainList.name">
               <td (click)="slectedFieldClick(item)" [className]="item.isRowSelected ? 'rowSelected' : ''">
                 <div class="text-less-important">{{item.name}}</div>
               </td>
@@ -61,18 +68,18 @@
   </div>
   <div class="pnl-block" *ngIf="isShowFieldConfiguration">
     <div class="pnl-block-header">
-      <label>{{getResourceValue("FieldConfiguration")}}</label>
+      <label>{{getResourceValue("metadata_fieldconfiguration")}}</label>
     </div>
     <div class="pnl-block-body">
       <div class="margin-left-5">
         <label class="control control--checkbox">
-         <span>{{getResourceValue("HideFields")}}</span>
+         <span>{{getResourceValue("metadata_hidefield")}}</span>
           <input type="checkbox" [(ngModel)]="isChecked" (change)="onChangeEvent($event)">
           <span class="control__indicator"></span>
         </label>
       </div>      
       <div *ngIf="displaySimpleDetailsItem" class="margin-top-15">
-        <label class="text-less-important margin-left-5">{{getResourceValue("Options")}}</label>
+        <label class="text-less-important margin-left-5">{{getResourceValue("metadata_options")}}</label>
         <div class="tableStyle">
           <table class="table withoutborder margin-bottom-0">
             <tbody>
@@ -88,17 +95,17 @@
                     </button>
                     <mat-menu #menu="matMenu">
                         <a class="dropdown-item" (click)="setFieldColor(item, 'blue-color-block')"><span
-                          class="blue-color-block margin-right-10"></span>{{getResourceValue("Blue")}}</a>
+                          class="blue-color-block margin-right-10"></span>{{getResourceValue("metadata_colour_blue")}}</a>
                       <a class="dropdown-item" (click)="setFieldColor(item, 'green-color-block')"><span
-                          class="green-color-block margin-right-10"></span>{{getResourceValue("Green")}}</a>
+                          class="green-color-block margin-right-10"></span>{{getResourceValue("metadata_colour_green")}}</a>
                       <a class="dropdown-item" (click)="setFieldColor(item, 'red-color-block')"><span
-                          class="red-color-block margin-right-10"></span>{{getResourceValue("Red")}}</a>
+                          class="red-color-block margin-right-10"></span>{{getResourceValue("metadata_colour_red")}}</a>
                       <a class="dropdown-item" (click)="setFieldColor(item, 'gray-color-block')"><span
-                          class="gray-color-block margin-right-10"></span>{{getResourceValue("Gray")}}</a>
+                          class="gray-color-block margin-right-10"></span>{{getResourceValue("metadata_colour_gray")}}</a>
                       <a class="dropdown-item" (click)="setFieldColor(item, 'yellow-color-block')"><span
-                          class="yellow-color-block margin-right-10"></span>{{getResourceValue("Yellow")}}</a>
+                          class="yellow-color-block margin-right-10"></span>{{getResourceValue("metadata_colour_yellow")}}</a>
                       <a class="dropdown-item" (click)="setFieldColor(item, 'orange-color-block')"><span
-                          class="orange-color-block margin-right-10"></span>{{getResourceValue("Orange")}}</a>
+                          class="orange-color-block margin-right-10"></span>{{getResourceValue("metadata_colour_orange")}}</a>
                     </mat-menu>
                 </td>
               </tr>
@@ -131,7 +138,7 @@
 
 <div class="component-fields">
   <div>
-    <label>{{getResourceValue("SortColumn")}}</label>
+    <label>{{getResourceValue("metadata_sortcolumn")}}</label>
     <select class="input-control" [(ngModel)]="layoutInfo.listLayoutDetails.defaultSortOrder.name">
       <option value=""></option>
       <option *ngFor="let item of addedItemToMainList" value={{item.name}}>
@@ -140,29 +147,30 @@
     </select>
   </div>
   <div>
-    <label>{{getResourceValue("SortDirection")}}</label>
+    <label>{{getResourceValue("metadata_sortdirection")}}</label>
     <select class="input-control" [(ngModel)]="this.layoutInfo.listLayoutDetails.defaultSortOrder.value">
       <option value=""></option>
-      <option value="Desc">{{getResourceValue("Desc")}}</option>
-      <option value="Asc">{{getResourceValue("Asc")}}</option>
+      <option value="Desc">Desc</option>
+      <option value="Asc">Asc</option>
     </select>
   </div>
   <div>
-    <label>{{getResourceValue("MaxResult")}}</label>
+    <label>{{getResourceValue("metadata_maximumresults")}}</label>
     <input type="text" [(ngModel)]="layoutInfo.listLayoutDetails.maxResult" class="input-control" />
   </div>
   <div>
-    <label>{{getResourceValue("GroupBy")}}</label>
+    <label>{{getResourceValue("metadata_groupby")}}</label>
     <select class="input-control" [(ngModel)]="layoutInfo.listLayoutDetails.defaultGroupBy">
       <option value=""></option>
       <option class='item' *ngFor='let item of addedItemToMainList' [value]="item.name">{{item.name}}</option>
     </select>
   </div>
   <div>
-    <label>{{getResourceValue("ClickableColumn")}}</label>
+    <label>{{getResourceValue("metadata_clickablecolumn")}}</label>
     <select class="input-control" [(ngModel)]="clickableColumn" (change)="onChangeClickable($event)">
       <option value=""></option>
-      <option class='item' *ngFor='let item of addedItemToMainList' [value]="item.name">{{item.name}}</option>
+      <!-- <option class='item' *ngFor='let item of addedItemToMainList' [value]="item.name">{{item.name}}</option> -->
+      <option class='item' *ngFor='let item of clickableList' [value]="item.name">{{item.name}}</option>
     </select>
   </div>
 </div>

@@ -30,6 +30,7 @@ export class ListSimpleSearchComponent implements OnInit {
   private isdataexistsvalues: boolean = false;
   private isdatamainlist: boolean = false;
   public resource: Resource;
+  public searchText: string ='';
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -334,6 +335,14 @@ export class ListSimpleSearchComponent implements OnInit {
       item.sequence = a;
       a++;
     });
+  }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
   }
  
 }

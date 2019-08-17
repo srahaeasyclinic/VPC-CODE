@@ -1,7 +1,7 @@
 import { Component, OnInit, EventEmitter, ChangeDetectionStrategy, Input, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
-import { PageChangeEvent, GridDataResult, DataStateChangeEvent, SelectableSettings } from '@progress/kendo-angular-grid';
+import { PageChangeEvent, GridComponent, GridDataResult, DataStateChangeEvent, SelectableSettings } from '@progress/kendo-angular-grid';
 import { Router, ActivatedRoute, NavigationExtras, Params, NavigationEnd } from '@angular/router';
-import { SortDescriptor, GroupDescriptor, process } from '@progress/kendo-data-query';
+import { State, SortDescriptor, GroupDescriptor, process } from '@progress/kendo-data-query';
 import { Observable, Subject } from 'rxjs';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import * as moment from 'moment';
@@ -12,15 +12,16 @@ import { CommonService } from '../services/common.service';
 import { first } from 'rxjs/operators';
 import { LayoutService } from '../meta-data/layout/layout.service';
 import { NgOnChangesFeature } from '@angular/core/src/render3';
-
+import { MenuService, editableColumnname } from '../services/menu.service';
+import { BreadcrumbsService } from '../bread-crumb/BreadcrumbsService';
 
 
 @Component({
   selector: 'common-grid-data',
   templateUrl: './common-grid-data.component.html',
   styleUrls: ['./common-grid-data.component.css'],
-  inputs: ["gridData", "totalRecords", "resources", "defaultLayout", "defaultSortOrder", "currentPage", "dataSkip", "groupBy", "abc", "mode"],
-  outputs: ["rowColumnClickEvent:columnClick", "actionClickEvent:onActionClick", "gridChangeEvent:onGridChangeEvent","actionWorkFlowClick:onActionWorkFlowClick"],
+  inputs: ["gridData", "totalRecords", "resources", "defaultLayout", "defaultSortOrder", "currentPage", "dataSkip", "groupBy", "abc", "mode", "pageSize"],
+  outputs: ["rowColumnClickEvent:columnClick", "actionClickEvent:onActionClick", "gridChangeEvent:onGridChangeEvent", "actionWorkFlowClick:onActionWorkFlowClick"],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CommonGridDataComponent implements OnInit, OnChanges {
@@ -50,11 +51,11 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
   private dateFormat = this.commonService.defaultDateformat();
   public skip = 0;
   private pageindex: number = 1;
-  private pageSize: number = 10;
+  public pageSize = this.commonService.defaultPageSize();
   public selectableSettings: SelectableSettings;
 
 
-  constructor(private commonService: CommonService, private router: Router,private globalResourceService:GlobalResourceService) {
+  constructor(private menuService: MenuService,private breadcrumsService: BreadcrumbsService,private commonService: CommonService, private router: ActivatedRoute, private globalResourceService: GlobalResourceService) {
     this.gridData = null;
     this.resources = null;
     this.rowColumnClickEvent = new EventEmitter();
@@ -98,8 +99,8 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
   public selectedFields: string = '';
   private totalNumber: number;
 
-  private kendoSearch= [];
-
+  private kendoSearch = [];
+  private grid: GridComponent;
 
   ngOnChanges(changes: SimpleChanges) {
     //console.log('\n\n\n\n changes ', JSON.stringify(changes))
@@ -142,17 +143,14 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
       //console.log('SimpleChanges',this.groups)
     }
 
-    if(total)
-    {
+    if (total) {
       this.totalNumber = total;
     }
-    if (this.defaultLayout && this.defaultLayout.listLayoutDetails && totalData && this.totalNumber > -1) 
-    {
+    if (this.defaultLayout && this.defaultLayout.listLayoutDetails && totalData && this.totalNumber > -1) {
       //console.log('if ', JSON.stringify(totalData));
       this.generateColumns(totalData, this.defaultLayout.listLayoutDetails.fields, this.defaultLayout.listLayoutDetails.actions, this.groups, this.totalNumber);
     }
-    else if(this.defaultLayout && this.defaultLayout.viewLayoutDetails && totalData && this.totalNumber > -1)
-    {
+    else if (this.defaultLayout && this.defaultLayout.viewLayoutDetails && totalData && this.totalNumber > -1) {
       //console.log('else ', JSON.stringify(totalData));
       this.generateColumns(totalData, this.defaultLayout.viewLayoutDetails.fields, this.defaultLayout.viewLayoutDetails.actions, this.groups, this.totalNumber);
     }
@@ -160,15 +158,13 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-
-
+    this.getMenuparameterName();
   }
 
-
   private generateColumns(results: Array<any>, fields: any, actions: Array<any>, group: GroupDescriptor[], totalRecord: number): void {
-   //console.log('results '+JSON.stringify(results));
-   // console.log('fields ' + JSON.stringify(fields));
-    //debugger;
+    //console.log('results '+JSON.stringify(results));
+    // console.log('fields ' + JSON.stringify(fields));
+
     let isActionsAvailable: boolean = false;
     fields.forEach((field, index) => {
 
@@ -186,49 +182,64 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
         });
       }
 
+
+      // //for css colur
+      // if (field && field.dataType == 'PickList') {
+
+      //   console.log("css values", field);
+      // }
+
       //Status type picklist
-       //Status type picklist
+      //Status type picklist
       //&& field.name.toLocaleLowerCase() !== 'active'
+
+
+      //------------------ CLINT SIDE HACK ------------------------------------------------- NEED TO CHANGE THIS PORTION ---------------------------------
       if (field && field.dataType == 'PickList' && field.name.toLocaleLowerCase() == 'active') {
         //console.log('picklist'+JSON.stringify(field));
         results.forEach((result, index) => {
           if (field.name.toLocaleLowerCase() in result) {
-            if (result.active === true) {
-              result.active = 'Enable';
-              if (field.values && field.values.length > 0) {
-                result.css = field.values.filter(x => x.id == '1')[0].value;
+            if (result.active != null) {
+              var i = 0;
+              if (result.active.toString().toLowerCase() == "true") {
+                result.active = "Enable";
+                i = 1;
+              } else {
+                result.active = "Disable";
               }
-            } else if (result.active === false) 
-            {
-              result.active = 'Disable';
-              if (field.values && field.values.length > 0) {
-                result.css = field.values.filter(x => x.id == '0')[0].value;
-              }
+              // if (field.values && field.values.length > 0) {
+              //   console.log("css values", field.values);
+              //   //result.PickListcss = field.values.filter(x => x.id == i.toString())[0].value;
+              // }
             }
-          }
 
+          }
         });
       }
-      if (field && field.dataType == 'PickList' && field.name.toLocaleLowerCase() != 'active') 
-      {
-       //console.log('PickList && field.name.toLocaleLowerCase() !== active '+JSON.stringify(results));
-        //console.log('picklist'+JSON.stringify(field));
-   
-        results.forEach((r, index) => {
-           let fieldname = this.commonService.camelize(field.name);
-          if (fieldname in r) {
-             
-            if (field.values && field.values.length > 0) {
-              r.PickListvalue = r[fieldname];
-              let dd=field.values.filter(x => x.id == r.PickListvalue);
-              r.PickListcss = field.values.filter(x => x.id == r.PickListvalue).value;
-            }
-           
-          }
+      //------------------ CLINT SIDE HACK ------------------------------------------------- NEED TO CHANGE THIS PORTION ---------------------------------
 
-                });
-        
-        }
+
+
+      
+      // if (field && field.dataType == 'PickList' && field.name.toLocaleLowerCase() != 'active') {
+      //   //console.log('PickList && field.name.toLocaleLowerCase() !== active '+JSON.stringify(results));
+      //   //console.log('picklist'+JSON.stringify(field));
+
+      //   // results.forEach((r, index) => {
+      //   //   let fieldname = this.commonService.camelize(field.name);
+      //   //   if (fieldname in r) {
+
+      //   //     if (field.values && field.values.length > 0) {
+      //   //       r.PickListvalue = r[fieldname];
+      //   //       let dd = field.values.filter(x => x.id == r.PickListvalue);
+      //   //       r.PickListcss = field.values.filter(x => x.id == r.PickListvalue).value;
+      //   //     }
+
+      //   //   }
+
+      //   // });
+
+      // }
 
       //check whether the data contains any date objects and check the datetime values;
       if (field.dataType == 'DateTime') {
@@ -265,13 +276,11 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
       this.actions = actions;
       //console.log(this.actions);
     }
-    else
-    {
+    else {
       results.forEach((result, index) => {
-        if(result.currentWorkFlowStep !== null && result.currentWorkFlowStep !== undefined && result.innerSteps !== null && result.innerSteps !== undefined && result.innerSteps.length > 0)
-        {
+        if (result.currentWorkFlowStep !== null && result.currentWorkFlowStep !== undefined && result.innerSteps !== null && result.innerSteps !== undefined && result.innerSteps.length > 0) {
           isActionsAvailable = true;
-        }        
+        }
       });
     }
 
@@ -291,34 +300,37 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
         let isPicklisttype: boolean = false;
 
         //isFieldAvailable = fields.filter(x => x.name.toLowerCase().includes(key.toLowerCase()) && !x.values && !x.hidden).length > 0 ? true : false;
-        isFieldAvailable = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && !x.values && !x.hidden).length > 0 ? true : false;
-        isStatusField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'PickList'.toLocaleLowerCase() && !x.hidden && x.values && x.values.length > 0 && x.name.toLowerCase()=='active').length > 0 ? true : false;
+
+        // isFieldAvailable = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && !x.values && !x.hidden).length > 0 ? true : false;
+
+        isFieldAvailable = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && !x.hidden).length > 0 ? true : false;
+        isStatusField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'PickList'.toLocaleLowerCase() && !x.hidden && x.values && x.values.length > 0 && x.name.toLowerCase() == 'active').length > 0 ? true : false;
         isClickableField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.clickable == true && !x.hidden).length > 0 ? true : false;
         isDateField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'DateTime'.toLocaleLowerCase() && !x.hidden).length > 0 ? true : false;
         isBooleanField = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'Bool'.toLocaleLowerCase() && !x.hidden).length > 0 ? true : false;
-        isPicklisttype=fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'PickList'.toLocaleLowerCase() && !x.hidden && x.values && x.values.length > 0 && x.name.toLowerCase()!='active').length > 0 ? true : false;
+        isPicklisttype = fields.filter(x => x.name.toLowerCase() === key.toLowerCase() && x.dataType.toLocaleLowerCase() == 'PickList'.toLocaleLowerCase() && !x.hidden && x.values && x.values.length > 0 && x.name.toLowerCase() != 'active').length > 0 ? true : false;
         let widthValue: number = 40;
         if (isStatusField) {
           widthValue = 20;
         }
 
-        let columnObj = { field: '', title: '', width: widthValue, isVisible: isFieldAvailable, isStatus: isStatusField, position: 0, isClickable: isClickableField, isAction: false, isDateField: isDateField, isBooleanField: isBooleanField,isPicklisttype:isPicklisttype };
+        let columnObj = { field: '', title: '', width: widthValue, isVisible: isFieldAvailable, isStatus: isStatusField, position: 0, isClickable: isClickableField, isAction: false, isDateField: isDateField, isBooleanField: isBooleanField, isPicklisttype: isPicklisttype };
 
         let columnTitle: string = '';
 
         if (isFieldAvailable) {
-          columnTitle = that.getResourceValue(fields.filter(x => x.name.toLowerCase().includes(key.toLowerCase()) && !x.values && !x.hidden)[0].name);
+          columnTitle = that.getResourceValue(that.entityName.toLowerCase() + '_field_' + (fields.filter(x => x.name.toLowerCase().includes(key.toLowerCase()) && !x.hidden)[0].name).replace('.', '_').toLowerCase());
         }
         if (isPicklisttype) {
-     
-          columnTitle = that.getResourceValue(key);
+
+          columnTitle = that.getResourceValue(that.entityName.toLowerCase() + '_field_' + key.replace('.', '_').toLowerCase());
         }
 
         columnObj.field = key.replace('.', '_');
         columnObj.title = columnTitle;
         columnObj.position = i;
 
-        if (columnObj.isVisible || columnObj.isStatus||isPicklisttype) {
+        if (columnObj.isVisible || columnObj.isStatus || isPicklisttype) {
           that.columns.push(columnObj);
         }
       });
@@ -328,7 +340,7 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
     //console.table(that.columns);
 
     if (isActionsAvailable) {
-      let actionColumnObj = { field: actions.length > 1 ? 'Actions' : 'Action', title: actions.length > 1 ? 'Actions' : 'Action', width: 20, isVisible: true, isStatus: false, position: 0, isAction: true, isDateField: false };
+      let actionColumnObj = { field: actions.length > 1 ? 'Actions' : 'Action', title: actions.length > 1 ? that.getResourceValue('metadata_actions') : that.getResourceValue('metadata_action'), width: 20, isVisible: true, isStatus: false, position: 0, isAction: true, isDateField: false };
       that.columns.push(actionColumnObj);
     }
 
@@ -382,21 +394,33 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
 
   //Events
   //First editable column click in grid
-  private rowEditableColumnClick(id: string): void {
+  private rowEditableColumnClick(id: string, fieldvalue: string, coulmnname: string): void {
+    
+    this.setbreadcrums(fieldvalue, coulmnname);
+    
     this.rowColumnClickEvent.emit({ internalId: id });
   }
 
   //Action click
-  private onActionClick(id: string, name: string): void {
-    this.actionClickEvent.emit({ internalId: id, actionName: name })
+  private onActionClick(id, action): void {
+    this.actionClickEvent.emit({ internalId: id, action: action })
     //console.log(id +"  name  ::  "+name);
   }
 
-  private onActionWorkFlowClick(internalId ,entityName,entitySubTypeName,currentWorkFlowTransitionId,nextTransitioinStepId,innerStep): void {
-    this.actionWorkFlowClick.emit({ refId:internalId,entityName:entityName,subTypeName:entitySubTypeName,currentTransitionType:currentWorkFlowTransitionId,nextTransitionType:nextTransitioinStepId,innerStep:innerStep });  
+  private onActionWorkFlowClick(internalId, entityName, entitySubTypeName, currentWorkFlowTransitionId, nextTransitioinStepId, innerStep): void {
+    this.actionWorkFlowClick.emit({ refId: internalId, entityName: entityName, subTypeName: entitySubTypeName, currentTransitionType: currentWorkFlowTransitionId, nextTransitionType: nextTransitioinStepId, innerStep: innerStep });
   }
 
+  public checkActiveVesion(info)
+  {
+    if(info.activeVersion !=undefined)
+    {
+      return info.activeVersion;
+    }
+   return info.internalId;
+  }
 
+  
 
   //Sorting
   public sortChange(sort: SortDescriptor[]): void {
@@ -433,7 +457,7 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
       var targetFields = null;
       if (this.defaultLayout && this.defaultLayout.listLayoutDetails && this.defaultLayout.listLayoutDetails.fields) {
         targetFields = this.defaultLayout.listLayoutDetails.fields;
-      }else if(this.defaultLayout && this.defaultLayout.viewLayoutDetails && this.defaultLayout.viewLayoutDetails.fields){
+      } else if (this.defaultLayout && this.defaultLayout.viewLayoutDetails && this.defaultLayout.viewLayoutDetails.fields) {
         targetFields = this.defaultLayout.viewLayoutDetails.fields;
       }
       if (state.sort[0].field.includes("_")) {
@@ -462,32 +486,28 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
     let validation = this.validateExist(state);
     let index = validation["position"];
     let reset = validation["isExist"];
-    if(reset)
-    {
+    if (reset) {
       this.kendoSearch[index] = state.filter.filters[0];
     }
-    else
-    {
+    else {
       this.kendoSearch.push(state.filter.filters[0]);
     }
     console.log('this.kendoSearch 2 ', this.kendoSearch);
   }
 
-  private validateExist(argState)
-  {
+  private validateExist(argState) {
     let isExist = false;
     if (this.kendoSearch.length > 0) {
-      for(let i=0; i<this.kendoSearch.length; i++)
-      {
-          //console.log('this.kendoSearch[i]["field"] ', this.kendoSearch[i]["field"]);
-          //console.log('state.filter.filters[0]["field"] ', argState.filter.filters[0]["field"]);
-          if (this.kendoSearch[i]["field"] === argState.filter.filters[0]["field"]) {
-            isExist = true;
-            return {"isExist": isExist, "position": i};
-          }
+      for (let i = 0; i < this.kendoSearch.length; i++) {
+        //console.log('this.kendoSearch[i]["field"] ', this.kendoSearch[i]["field"]);
+        //console.log('state.filter.filters[0]["field"] ', argState.filter.filters[0]["field"]);
+        if (this.kendoSearch[i]["field"] === argState.filter.filters[0]["field"]) {
+          isExist = true;
+          return { "isExist": isExist, "position": i };
+        }
       }
     }
-    return {"isExist": isExist, "position": null};
+    return { "isExist": isExist, "position": null };
   }
 
 
@@ -532,7 +552,21 @@ export class CommonGridDataComponent implements OnInit, OnChanges {
   //   this.router.navigate(["ui/" + this.entityName + "/edit/" + obj.internalId], { queryParams: { subType: subType } });
   // }
 
-
+// BreadCrums
+  setbreadcrums(fieldvalue:string,coulmnname:string)
+  {
+     let objeditableColumnname=new editableColumnname();
+    objeditableColumnname.name = fieldvalue;
+    objeditableColumnname.columnname = coulmnname;
+    localStorage.setItem("editableColumnname", JSON.stringify(objeditableColumnname));
+    this.breadcrumsService.setchildMenuBreadcums([{ elementName: "preview", 'elementURL': "" ,'isGroup':false}, { elementName: fieldvalue, 'elementURL': "",'isGroup':false }]);
+  }
+  //MenuContext
+  getMenuparameterName()
+  {
+      let result=this.menuService.getMenuconext();
+      this.entityName = result.param_name;
+  }
 
 
 }

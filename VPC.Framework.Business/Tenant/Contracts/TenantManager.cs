@@ -7,13 +7,12 @@ using VPC.Framework.Business.MetadataManager.Contracts;
 using VPC.Framework.Business.Rule;
 using VPC.Framework.Business.Rule.APIs;
 
-namespace VPC.Framework.Business.Rule.Contracts
+//namespace VPC.Framework.Business.Rule.Contracts updated by Soma as per request to change from Tanmay
+namespace VPC.Framework.Business.Tenant.Contracts
 {
     public interface IManageTenant
     {
-        List<TenantInfo> GetTenantInfo(Guid tenantId);
-
-
+        TenantLanguageInfo GetTenantLanguageInfo(Guid tenantId);
     }
     public class TenantManager : IManageTenant
     {
@@ -21,9 +20,10 @@ namespace VPC.Framework.Business.Rule.Contracts
         private readonly ITenantInfoReview tenantReview = new TenantReview();
 
 
-        List<TenantInfo> IManageTenant.GetTenantInfo(Guid tenantId)
+
+        TenantLanguageInfo IManageTenant.GetTenantLanguageInfo(Guid tenantId)
         {
-            return tenantReview.GetTenantInfo(tenantId);
+            return tenantReview.GetTenantLanguageInfo(tenantId);
         }
 
     }

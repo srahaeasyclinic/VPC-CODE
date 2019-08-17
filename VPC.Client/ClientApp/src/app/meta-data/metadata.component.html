@@ -1,18 +1,23 @@
 
-<div class="text-header">{{getResourceValue('MetaDataList')}}</div>
+<div class="text-header">{{getResourceValue('metadata_metadatalist')}}</div>
 <div class="page-content">
-  <kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true"
-    [groupable]="true" [resizable]="true" [style.maxHeight.px]="750" [sortable]="true">
-    <kendo-grid-column field="name" title="{{getResourceValue('EntityName')}}" [width]="140">
+  <kendo-grid [kendoGridBinding]="gridData" 
+              [pageSize]="pageSize" 
+              [pageable]="true" 
+              [sortable]="true" 
+              [filterable]="true"
+              [groupable]="true"
+              [style.height.%]="100">
+    <kendo-grid-column field="name" title="{{getResourceValue('metadata_entityname')}}" [width]="140">
       <ng-template kendoGridCellTemplate let-gridData>
         <!-- <a class="gridLink" [routerLink]="[gridData.name]" (click)="goToMetaDataDetails(gridData.name)">{{resource[generateResourceName(gridData.name)]}}</a> -->
         <a class="gridLink" [routerLink]="[gridData.name]"
           (click)="goToMetaDataDetails(gridData.name)">{{gridData.name}}</a>
       </ng-template>
     </kendo-grid-column>
-    <kendo-grid-column field="displayName" title="{{getResourceValue('DisplayName')}}" [width]="120"></kendo-grid-column>
-    <kendo-grid-column field="pluralName" title="{{getResourceValue('DisplayNamePlural')}}" [width]="100"></kendo-grid-column>
-    <kendo-grid-column field="supportedWorkflow" title="{{getResourceValue('WorkflowSupported')}}" [width]="130">
+    <kendo-grid-column field="displayName" title="{{getResourceValue('metadata_displayname')}}" [width]="120"></kendo-grid-column>
+    <kendo-grid-column field="pluralName" title="{{getResourceValue('metadata_pluralname')}}" [width]="100"></kendo-grid-column>
+    <kendo-grid-column field="supportedWorkflow" title="{{getResourceValue('metadata_workflowsupported')}}" [width]="130">
       <ng-template kendoGridCellTemplate let-dataItem>
         <span *ngIf="dataItem.supportWorkflow===true">
           <i class="fa fa-check"></i>
@@ -24,9 +29,9 @@
       </ng-template>
     </kendo-grid-column>
     <!--<kendo-grid-column field="type" title="Type" [width]="130"></kendo-grid-column>-->
-    <kendo-grid-column field="type" title="{{getResourceValue('EntityType')}}" [width]="130">
+    <kendo-grid-column field="type" title="{{getResourceValue('metadata_type')}}" [width]="130">
       <ng-template kendoGridCellTemplate let-gridData>
-        {{getResourceValue(gridData.type)}}
+        {{gridData.type}}
       </ng-template>
     </kendo-grid-column>
     <!-- 

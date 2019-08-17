@@ -12,7 +12,7 @@ import { FormService } from "./form.service";
 import { MetadataService } from "../../../meta-data/metadata.service";
 import { Entities } from '../../../model/entities';
 import { FieldModel } from '../../../model/fieldmodel';
-import { getTreenodeinstanceWithObject,generateRandomNo } from '../../../model/treeNode';
+import { getTreenodeinstanceWithObject, generateRandomNo } from '../../../model/treeNode';
 
 import { predifinedType } from 'src/app/dynamic-form-builder/helper/utils';
 import { MODALS } from 'src/app/dynamic-form-builder/tree.config'
@@ -65,7 +65,22 @@ export class FormComponent implements OnInit {
 	private toolbarGroup: string;
 	private isRendered: boolean = false;
 	public isSticky: boolean = false;
-	private position: number = 0;
+	private position: number = 0;	
+	config: { allowConfiguration: boolean; displaySortColumn: boolean; direction: boolean; maxResult: boolean; groupBy: boolean; clickableColumn: boolean; };
+	selectedLayout: any = {}
+	pageInfo =
+		{
+			config:
+			{
+				allowConfiguration: false, displaySortColumn: false, direction: false, maxResult: false,
+				groupBy: false, clickableColumn: false
+			}
+			, selectedLayout: {},
+			addedItemToMainList: [],
+			fieldSource: [],
+			type: ""
+		}
+	fieldSource: any=[];
 	// public resourceData: Resource;
 	constructor(
 		private router: Router,
@@ -127,40 +142,40 @@ export class FormComponent implements OnInit {
 		this.selectedTreeNode = null;
 		this.addedItemToMainList = [];
 		this.toolbarSource = [];
-		
+
 		// this.getResource();
 
 		this.layoutInfo = this.activatedRoute.snapshot.data['layoutDetails'];
 		//console.log(this.layoutInfo);
 
-		if (this.layoutInfo != null && this.layoutInfo.formLayoutDetails != null) {
-			this.tree = this.layoutInfo.formLayoutDetails;
-		} else {
-			this.tree = getTreenodeinstanceWithObject({
-				name: " ",
-				value: "",
-				required: true,
-				dataType: "",
-				fields: [],
-				controlType: "section",
-				readOnly: false,
-				decimalPrecision: null,
-				defaultValue: "",
-				properties: "",
-				tabs: [],
-				setting: { columnWidth: 12, showHeader: true },
-				validators: [],
-				selectedView: "",
-				typeOf: "",
-				receivingTypes: [],
-				receiverDataTypes: [],
-				broadcastingTypes: [],
-				refId: '',
-				accessibleLayoutTypes: [],
-				toolbar: [],
-				entityName: ""
-			});
-		}
+		// if (this.layoutInfo != null && this.layoutInfo.formLayoutDetails != null) {
+		// 	this.tree = this.layoutInfo.formLayoutDetails;
+		// } else {
+		// 	this.tree = getTreenodeinstanceWithObject({
+		// 		name: " ",
+		// 		value: "",
+		// 		required: true,
+		// 		dataType: "",
+		// 		fields: [],
+		// 		controlType: "section",
+		// 		readOnly: false,
+		// 		decimalPrecision: null,
+		// 		defaultValue: "",
+		// 		properties: "",
+		// 		tabs: [],
+		// 		setting: { columnWidth: 12, showHeader: true },
+		// 		validators: [],
+		// 		selectedView: "",
+		// 		typeOf: "",
+		// 		receivingTypes: [],
+		// 		receiverDataTypes: [],
+		// 		broadcastingTypes: [],
+		// 		refId: '',
+		// 		accessibleLayoutTypes: [],
+		// 		toolbar: [],
+		// 		entityName: ""
+		// 	});
+		// }
 		// this.activatedRoute.params.subscribe((params: Params) => {
 		// 	this.layoutId = params['id'];
 		// 	this.entityname = params['name'];
@@ -210,7 +225,7 @@ export class FormComponent implements OnInit {
 
 		this.layoutService.updateLayout(this.layoutInfo, this.entityname, this.layoutId).subscribe(result => {
 			//console.log(result);
-			this.toster.showSuccess(this.getResourceValue("LayoutSavedSuccessfully"));
+			this.toster.showSuccess(this.getResourceValue("metadata_operation_save_success_message"));
 		});
 	}
 
@@ -224,11 +239,78 @@ export class FormComponent implements OnInit {
 						//Filter by accessblity attributes 
 						//this.entityDeatils.fields = data.fields.filter(f => (f.accessibleLayoutTypes === undefined||f.accessibleLayoutTypes ===null ) || f.accessibleLayoutTypes.find(e => e === 2));
 
-						this.entityDeatils.fields = data.fields.filter(f => (f.accessibleLayoutTypes && f.accessibleLayoutTypes.find(e => e === 2)));
+						//this.entityDeatils.fields = data.fields.filter(f => (f.accessibleLayoutTypes && f.accessibleLayoutTypes.find(e => e === 2)));
+
+						this.entityDeatils.fields = data.fields.filter(f => (f.accessibleLayoutTypes && f.accessibleLayoutTypes.find(e =>
+							(e.toString().split('').length == 1 && e.toString().split('')[0] === this.layoutInfo.layoutType.toString())
+							||
+							(
+								e.toString().split('').length > 1 && e.toString().split('')[0] === this.layoutInfo.layoutType.toString() && e.toString().split('')[1] === this.layoutInfo.context.toString()
+							)
+						)));
 
 						//end
 
 						this.metadatafield = data;
+
+						if (this.layoutInfo != null && this.layoutInfo.formLayoutDetails != null) {
+							this.tree = this.layoutInfo.formLayoutDetails;
+						} else {
+							this.tree = getTreenodeinstanceWithObject({
+								name: " ",
+								value: "",
+								required: true,
+								dataType: "",
+								fields: [],
+								controlType: "section",
+								readOnly: false,
+								decimalPrecision: null,
+								defaultValue: "",
+								properties: "",
+								tabs: [],
+								setting: { columnWidth: 12, showHeader: true },
+								validators: [],
+								selectedView: "",
+								typeOf: "",
+								receivingTypes: [],
+								receiverDataTypes: [],
+								broadcastingTypes: [],
+								refId: '',
+								accessibleLayoutTypes: [],
+								toolbar: [],
+								entityName: ""
+							});
+
+							// if (this.metadatafield != null) {
+							// 	if (this.metadatafield.fields != undefined) {
+							// 		this.metadatafield.fields.forEach(item => {
+							// 			if (item.controlType.toLocaleLowerCase() !== 'label' && item.required == true && (item.accessibleLayoutTypes === undefined || item.accessibleLayoutTypes.find(x => x === 2))) {
+							// 				this.addMandatoryFieldsAndActivityEntity(item, this.metadatafield.name);
+							// 			}
+							// 		});
+							// 	}
+							// }
+
+							if (this.entityDeatils != null) {
+								if (this.entityDeatils.fields != undefined) {
+									this.entityDeatils.fields.forEach(item => {
+										//if (item.controlType.toLocaleLowerCase() !== 'label' && item.required == true && (item.accessibleLayoutTypes === undefined || item.accessibleLayoutTypes.find(x => x === 2))) {
+										if (item.controlType.toLocaleLowerCase() !== 'label' && item.required == true && (item.accessibleLayoutTypes === undefined || (item.accessibleLayoutTypes && item.accessibleLayoutTypes.find(e =>
+											(e.toString().split('').length == 1 && e.toString().split('')[0] === this.layoutInfo.layoutType.toString())
+											||
+											(
+												e.toString().split('').length > 1 && e.toString().split('')[0] === this.layoutInfo.layoutType.toString() && e.toString().split('')[1] === this.layoutInfo.context.toString()
+											)
+										)))) {
+											this.addMandatoryFieldsAndActivityEntity(item, this.entityDeatils.name);
+										}
+									});
+								}
+							}
+
+							this.updateLayout();
+						}
+
 						//validate whether field is already added
 						this.tree.fields.forEach(item => {
 							// this.entityDeatils.fields.forEach(obj => {
@@ -241,6 +323,18 @@ export class FormComponent implements OnInit {
 						});
 						//console.log(this.entityDeatils);
 						this.setactivityOnMetadataFields();
+
+						// if (this.metadatafield != null) {
+						// 	if (this.metadatafield.fields != undefined) {
+						// 		this.metadatafield.fields.forEach(item => {
+						// 			if (item.controlType.toLocaleLowerCase() !== 'label' && item.required == true && (item.accessibleLayoutTypes === undefined || item.accessibleLayoutTypes.find(x => x === 2))) {
+						// 				this.addMandatoryFieldsAndActivityEntity(item, this.metadatafield.name);
+						// 			}
+						// 		});
+						// 	}
+						// }
+
+						this.setData(data)
 					}
 				},
 				error => {
@@ -248,6 +342,47 @@ export class FormComponent implements OnInit {
 				});
 	}
 
+	setData(data) {
+
+		this.selectedLayout = this.layoutInfo.formLayoutDetails;
+		this.addedItemToMainList = this.selectedLayout.toolbar ? this.selectedLayout.toolbar : [];
+		this.manipulateToolBar(data)
+		this.config = { allowConfiguration: true, displaySortColumn: false, direction: false, maxResult: false, groupBy: false, clickableColumn: false }
+		this.setFieldSourceProperties()
+		this.setPageInfo()
+	}
+	setPageInfo() {
+		this.pageInfo = {
+			config: this.config,
+			selectedLayout: this.selectedLayout,
+			addedItemToMainList: this.addedItemToMainList,
+			fieldSource: this.fieldSource,
+			type: 'toolbar'
+		}
+	}
+	manipulateToolBar(data) {
+		if (data.operations) {
+			for (var k = 0; k < data.operations.length; k++) {
+				this.fieldSource.push(data.operations[k]);
+			}
+		}
+		if (data.tasks) {
+			for (var k = 0; k < data.tasks.length; k++) {
+				this.fieldSource.push(data.tasks[k]);
+			}
+		}
+
+	}
+	setFieldSourceProperties() {
+		for (var i = 0; i < this.addedItemToMainList.length; i++) {
+		  for (var j = 0; j < this.fieldSource.length; j++) {
+			if (this.addedItemToMainList[i].name === this.fieldSource[j].name) {
+			  this.fieldSource[j].isRowSelected = true;
+			  this.fieldSource[j].isAdded = true;
+			}
+		  }
+		}
+	  }
 	public fieldDragStartEvent(field: any) {
 
 		//console.log('ss' + JSON.stringify(field));
@@ -285,7 +420,7 @@ export class FormComponent implements OnInit {
 			accessibleLayoutTypes: field.accessibleLayoutTypes,
 			toolbar: [],
 			entityName: ""
-			
+
 		});
 
 		if (field.controlType == "Tabs") {
@@ -463,7 +598,7 @@ export class FormComponent implements OnInit {
 
 				node.fields.forEach(item => {
 					if (item.name === this.selectedTreeNode.name && this.selectedTreeNode.controlType !== "Section") {
-						errormessage += this.selectedTreeNode.name + this.getResourceValue("FieldIsAlreadyAdded");
+						errormessage += this.selectedTreeNode.name + this.getResourceValue("metadata_operation_alert_message");
 					}
 					this.entityDeatils.fields.forEach(obj => {
 						if (item.name === obj.name) {
@@ -508,26 +643,36 @@ export class FormComponent implements OnInit {
 	}
 
 	private deleteComponent(node: ITreeNode) {
-		swal({
-			title: this.getResourceValue("Areyousure"),
-			text:  this.getResourceValue("Youwntbeabletorevertthis"),
-			type: this.getResourceValue("warning"),
-			showCancelButton: true,
-			confirmButtonColor: '#3085d6',
-			cancelButtonColor: '#d33',
-			confirmButtonText: this.getResourceValue("Yesdeleteit"),
-			showLoaderOnConfirm: true,
-		}).then((willDelete) => {
-			if (willDelete.value) {
-				this.removeData(this.tree.fields, node);
-				//this.cdr.detectChanges();
-				// this.zone.run(() => {
-				// 	this.removeData(this.tree.fields, node);
-				// });
-			} else {
-				//write the code for cancel click
-			}
-		});
+
+		this.globalResourceService.openDeleteModal.emit()
+
+		this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+			this.removeData(this.tree.fields, node);
+		   
+		  })
+
+
+
+		// swal({
+		// 	title: this.getResourceValue("common_message_areyousure"),
+		// 	text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+		// 	type: "warning",
+		// 	showCancelButton: true,
+		// 	confirmButtonColor: '#3085d6',
+		// 	cancelButtonColor: '#d33',
+		// 	confirmButtonText: this.getResourceValue("common_message_yesdeleteit"),
+		// 	showLoaderOnConfirm: true,
+		// }).then((willDelete) => {
+		// 	if (willDelete.value) {
+		// 		this.removeData(this.tree.fields, node);
+		// 		//this.cdr.detectChanges();
+		// 		// this.zone.run(() => {
+		// 		// 	this.removeData(this.tree.fields, node);
+		// 		// });
+		// 	} else {
+		// 		//write the code for cancel click
+		// 	}
+		// });
 	}
 
 	private configureSettings(node: ITreeNode) {
@@ -551,7 +696,7 @@ export class FormComponent implements OnInit {
 		}
 		else {
 			modalRef.close();
-			this.toster.showWarning('Settings unavailable');
+			this.toster.showWarning(this.getResourceValue('metadata_operation_warning_message'));
 		}
 	}
 
@@ -567,7 +712,7 @@ export class FormComponent implements OnInit {
 			// node.name = receivedEntry.name;
 			// node.settings.showHeader = receivedEntry.settings.showHeader;
 			// node.settings.columnWidth = receivedEntry.settings.columnWidth;
-			var section =getTreenodeinstanceWithObject({
+			var section = getTreenodeinstanceWithObject({
 				name: receivedEntry.name,
 				value: "",
 				required: false,
@@ -593,7 +738,7 @@ export class FormComponent implements OnInit {
 				refId: '',
 				accessibleLayoutTypes: receivedEntry.accessibleLayoutTypes,
 				toolbar: [],
-				entityName:""
+				entityName: ""
 			});
 			node.fields.push(section);
 			modalRef.close();
@@ -694,7 +839,7 @@ export class FormComponent implements OnInit {
 		this.isConfigToggle = !this.isConfigToggle;
 	}
 
-	
+
 	private setidExistingfields(node: ITreeNode) {
 		node.refId = node.refId || generateRandomNo();
 		if (node.fields) {
@@ -898,7 +1043,36 @@ export class FormComponent implements OnInit {
 
 	getResourceValue(key) {
 		return this.globalResourceService.getResourceValueByKey(key);
-	  }
+	}
+
+	private addMandatoryFieldsAndActivityEntity(item, entityName) {
+		var myObj = getTreenodeinstanceWithObject({
+			name: item.name,
+			value: "",
+			required: item.required, //need to change
+			dataType: item.dataType,
+			fields: [],
+			controlType: item.controlType,
+			decimalPrecision: null,
+			defaultValue: item.defaultValue,
+			properties: "",
+			tabs: [],
+			setting: { columnWidth: 12, showHeader: true },
+			validators: item.validators,
+			selectedView: "",
+			typeOf: item.typeOf,
+			receivingTypes: item.receivingTypes,
+			receiverDataTypes: item.receiverDataTypes,
+			broadcastingTypes: item.broadcastingTypes,
+			refId: '',
+			readOnly: item.readOnly,
+			accessibleLayoutTypes: item.accessibleLayoutTypes,
+			toolbar: item.toolbar,
+			entityName: entityName
+		})
+
+		this.tree.fields.push(myObj);
+	}
 
 }
 

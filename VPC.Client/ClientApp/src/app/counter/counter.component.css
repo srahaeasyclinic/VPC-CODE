@@ -10,3 +10,10 @@
 .well-block{
     min-height: 130px;
 }
+
+.k-header{
+    width: 100%;
+}
+.page-content{
+    background-color: #fff;
+}

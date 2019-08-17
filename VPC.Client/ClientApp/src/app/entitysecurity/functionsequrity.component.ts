@@ -100,7 +100,7 @@ export class FunctionSecurityComponent implements OnInit {
           }                      
           });
 
-           this.toster.showSuccess(this.getResourceValue("DataSavedSuccessfully"));  
+           this.toster.showSuccess(this.getResourceValue("metadata_security_operation_save_success_message"));  
           }
           
         },
@@ -113,7 +113,7 @@ export class FunctionSecurityComponent implements OnInit {
     this.functionSecurityService.updateFunctionSecurity(this.entityName,sequrityEntity).pipe(first()).subscribe(
         data => {   
           if (data)   
-          this.toster.showSuccess(this.getResourceValue("DataUpdatedSuccessfully"));  
+          this.toster.showSuccess(this.getResourceValue("metadata_security_operation_update_success_message"));  
         },
         error => {
           console.log(error);

@@ -13,6 +13,7 @@ import { TosterService } from 'src/app/services/toster.service';
 import {WorkFlowRole} from '../model/workflow/workflow-role';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { Resource } from '../model/resource';
+import { MenuService } from '../services/menu.service';
 
 
 @Component({
@@ -46,7 +47,7 @@ export class WorkFlowSecurityComponent implements OnInit {
   
   constructor(private activatedRoute: ActivatedRoute,private router: Router,private metadataService: MetadataService,private workFlowService: WorkFlowService
     , private roleService: RoleService ,private workFlowSecurityService:WorkFlowSecurityService,private toster:TosterService,
-    private globalResourceService: GlobalResourceService  ) {
+    private globalResourceService: GlobalResourceService,private menuService: MenuService  ) {
 
    
      }
@@ -59,7 +60,9 @@ export class WorkFlowSecurityComponent implements OnInit {
     this.entityName = this.entityNameParam;
     this.roleId=this.roleIdParam; 
     if(!this.entityName )
-      {
+    {
+      // let result=this.menuService.getMenuconext();
+      // this.entityName = result.param_name;
         this.activatedRoute.parent.parent.params.subscribe((params: Params) => {
           this.entityName = params['entityName'];
         });
@@ -107,7 +110,7 @@ export class WorkFlowSecurityComponent implements OnInit {
     this.workFlowSecurityService.addWorkFlowRoleSecurity(this.workFlowRole).pipe(first()).subscribe(
       data => {   
         this.workFlowRole.roleAssignmetId=data;
-        this.toster.showSuccess(this.resource[this.getResourceValue("DataSavedSuccessfully")]);           
+        this.toster.showSuccess(this.resource[this.getResourceValue("metadata_operation_workflow_save_success_message")]);           
       
       },
       error => {
@@ -121,7 +124,7 @@ export class WorkFlowSecurityComponent implements OnInit {
     this.workFlowSecurityService.deleteWorkFlowRoleSecurity(workFlowStepId,model.roleId,workFlowId,type).pipe(first()).subscribe(
       data => {   
        // this.workFlowRole.roleAssignmetId=data;
-        this.toster.showSuccess(this.resource[this.getResourceValue("DataDeletedSuccessfully")]);           
+        this.toster.showSuccess(this.resource[this.getResourceValue("metadata_operation_workflow_delete_success_message")]);           
       
       },
       error => {
@@ -134,7 +137,7 @@ export class WorkFlowSecurityComponent implements OnInit {
 
     this.workFlowService.updateWorkFlowStep(step).pipe(first()).subscribe(
       data => {
-        this.toster.showSuccess(this.resource[this.getResourceValue("DataUpdatedSuccessfully")]);
+        this.toster.showSuccess(this.resource[this.getResourceValue("metadata_operation_workflow_update_success_message")]);
       },
       error => {
         console.log(error);

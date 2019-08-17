@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -89,5 +90,28 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
 
             return dt;
         }
+        
+
+        internal static Dictionary<string,dynamic> GetHours()
+        {
+            var list = new Dictionary<string, dynamic>();          
+            for (int i=0;i<=23; i++)
+            {               
+                list.Add(i.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'), i.ToString());
+            }
+            return list;
+
+        }
+        internal static Dictionary<string,dynamic> GetMinute()
+        {
+            var list = new Dictionary<string, dynamic>();          
+            for (int i=1;i<=60; i++)
+            {               
+                list.Add(i.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'), i.ToString());
+            }
+            return list;
+
+        }
+    
     }
 }

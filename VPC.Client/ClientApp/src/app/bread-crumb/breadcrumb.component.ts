@@ -1,9 +1,13 @@
-import { Component, OnInit, Pipe, PipeTransform, OnChanges } from '@angular/core';
+import { Component, OnInit, Pipe, PipeTransform, OnChanges, Input, EventEmitter, Output } from '@angular/core';
 import { Router, UrlTree, UrlSegment, UrlSegmentGroup, PRIMARY_OUTLET, RouterState, ActivatedRoute, NavigationStart, Params } from '@angular/router';
 import { filter, first } from 'rxjs/operators';
-import { BredcrumService } from '../bread-crumb/bredcrum.service';
+import { BreadcrumbsService,Ibreadcrumbs } from './BreadcrumbsService';
 import { CommonService } from '../services/common.service';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
+import { MenuService } from '../services/menu.service';
+import { NewMenuItem } from '../model/menuItem';
+import * as _ from 'lodash';
+import { RoutelocalizationService } from '../services/routelocalization.service';
 
 @Component({
   selector: 'app-breadcrumb',
@@ -11,99 +15,45 @@ import { GlobalResourceService } from '../global-resource/global-resource.servic
   styleUrls: ['./breadcrumb.component.css']
 })
 export class BreadcrumbComponent implements OnInit, OnChanges {
-  objectkeys = Object.keys;
-  url = '';
-  tree: UrlTree;
-  fragment = '';
-  queryParams = {};
-  // primary outlet
-  primary: UrlSegmentGroup;
-  // secondary outlet
-  sidebar: UrlSegmentGroup;
-  public segmenttree: any[];
-  private lastActive: string;
+
+  @Input() segmenttree: Ibreadcrumbs[];
+  @Output() groupClickEvent: EventEmitter<any> = new EventEmitter();
+
   private breadcrumbComplete: boolean = false;
   public resource: any;
+  public firstElement: NewMenuItem;
   constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private breadcrumService: BredcrumService,
+    private breadcrumService: BreadcrumbsService,
     public commonService: CommonService,
-    private globalResourceService: GlobalResourceService) { }
+    private globalResourceService: GlobalResourceService,
+    private menuService: MenuService,
+    private localization:RoutelocalizationService,
+  ) { }
 
   ngOnInit() {
-    this.resource=this.globalResourceService.getGlobalResources();
-    //console.log('ngOnInit called');
-    this.processUrl(this.router.url);
-    this.router.events.pipe(filter(value => value instanceof NavigationStart)).subscribe((value: any) => {
-      this.processUrl(value.url);
-    });
+    
   }
 
   ngOnChanges() {
+    
     //console.log('onChange');
     //console.log('this.commonService.getDisplayName4Breadcrumb() ', this.commonService.getDisplayName4Breadcrumb());
   }
-
-  processUrl(url: string) {
-    this.segmenttree = [];
-    this.tree = this.router.parseUrl(url);
-    if (this.tree.root.numberOfChildren > 0) {
-      this.primary = this.tree.root.children[PRIMARY_OUTLET];
-      this.primary.segments.forEach(element => {
-        this.segmenttree.push({
-          labelName: element.path, //nedd to place a getNameFunction;
-          url: url.split(element.path)[0] + element.path,
-          itemName: null
-        });
-        //console.log('url ', url);
-        //console.log('element.path ', element.path);
-      });
-      this.segmenttree[0].labelName = 'Home';
-      this.segmenttree[0].url = '/home';
-      this.segmenttree[0].itemName = null;
-    }
-    //console.log('this.segmenttree ', this.segmenttree);
-    this.processBreadcrumb();
-  }
-
-  processBreadcrumb() {
-    this.activatedRoute.params.subscribe((urlPath) => {
-      this.lastActive = urlPath['name'];
-    });
-    if (this.lastActive) {
-      //console.log('this.lastActive ', this.lastActive);
-      let lastIndex = this.segmenttree.findIndex(t => (t.labelName === this.lastActive));
-      //console.log('lastIndex ', lastIndex);
-
-      if (lastIndex > 0) {
-        var spliced = this.segmenttree.splice((lastIndex + 1), (this.segmenttree.length - lastIndex));
-      }
-      if (spliced && spliced.length > 0) {
-        let lastElement = spliced.find(t => t.labelName === this.lastActive);
-
-        if (lastElement) {
-          this.segmenttree.push(lastElement);
-          if (spliced.length > 1) {
-            this.segmenttree[this.segmenttree.length - 1].isActive = true;
-          }
-        }
-        else {
-          this.segmenttree[this.segmenttree.length - 1].isActive = true;
-        }
-
-        //console.log('this.commonService.getDisplayName4Breadcrumb() ', this.commonService.getDisplayName4Breadcrumb());
-        //this.segmenttree[this.segmenttree-1].itemName = this.commonService.getDisplayName4Breadcrumb();
-      }
-      //console.log('spliced ', spliced);
-      //console.log('this.segmenttree ', this.segmenttree);
-    }
-  }
-
-
   openPageWithBreadcrumb(value: any) {
     //console.log(value);
-    this.router.navigate([value.url]);
+    if (this.menuService.isGUID(value.elementURL))
+    {
+      this.getFirstelementfromGroup(value.elementURL);
+      this.groupClickEvent.emit(this.firstElement);
+      
+    } else {
+       let url = this.localization.getlocalizeUrl(value.elementURL);
+      this.breadcrumService.splicebreadcrums(value);
+      //this.groupClickEvent.emit(null);
+      this.router.navigate([url]);
+    }
+   
   }
 
   getResourceByKey(key: any) {
@@ -117,6 +67,18 @@ export class BreadcrumbComponent implements OnInit, OnChanges {
   {
      if (!word) return word;
      return word[0].toLowerCase() + word.substr(1);
-   }
-
+  }
+  
+  getFirstelementfromGroup(group:any)
+  {
+    if (group == undefined && group == null) return null;
+    
+    let subgroup = this.menuService.getCacheMenus().filter(d => d.parentId == group && d.isMenuGroup==true);
+    let firystelemnt=_.sortBy(subgroup, 'sortItem');
+    if (firystelemnt!=undefined && firystelemnt!=null) {
+      this.firstElement=firystelemnt[0];
+    } else {
+      return this.firstElement=group;
+    }
+  }
 }

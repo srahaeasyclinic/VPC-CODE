@@ -46,7 +46,7 @@ export class CommunicationService {
   }
 
   public GetTagsByEntityname(entityname: string): Observable<any>{
-  
+    
     var entitytagsUrl = `${environment.apiUrl}/api/metadata/` + entityname;
     return this.http.get<any>(entitytagsUrl);
 }

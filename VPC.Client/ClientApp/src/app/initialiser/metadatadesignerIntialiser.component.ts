@@ -16,6 +16,8 @@ import { Type } from '@angular/compiler';
 import { BaseIntialiser } from './baseintialiser.component';
 import { CommonService } from '../services/common.service';
 import{GlobalResourceService} from '../global-resource/global-resource.service'
+import { BreadcrumbsService } from '../bread-crumb/BreadcrumbsService';
+import { RoutelocalizationService } from '../services/routelocalization.service';
 
 @Component({
     selector: 'metadata-designer-init',
@@ -42,9 +44,11 @@ export class MetadataDesignerIntialiser extends BaseIntialiser implements OnInit
         public menuService: MenuService,
         public serializer: UrlSerializer,
         public commonService:CommonService,
-        public globalResource:GlobalResourceService,
+        public globalResource: GlobalResourceService,
+        public breadcrumsService: BreadcrumbsService,
+     public localization:RoutelocalizationService,
     ) {
-        super(router, activatedRoute, menuService, serializer, commonService,globalResource);
+        super(router, activatedRoute, menuService, serializer, commonService,globalResource,breadcrumsService,localization);
     }
 
     ngOnInit() {

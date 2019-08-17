@@ -1,19 +1,19 @@
-<div class="text-header">{{getResourceValue("Counter_Name")}}</div>
+<div class="text-header">{{getResourceValue("counter_displayname")}}</div>
 <div class="detailsMenu">
     <div class="msg-tips-left">
-        <div class="msg-entrance" ngbTooltip="{{editUpdate}}" (click)="saveOrUpdate()" container="body">
-            <i class="fa fa-save"></i>{{getResourceValue("Save")}}
-        </div>
+      <div class="msg-entrance" ngbTooltip="{{editUpdate}}" (click)="saveOrUpdate()" container="body">
+        <i class="fa fa-save"></i>{{getResourceValue("counter_operation_update")}}
+      </div>
     </div>
 </div>
 <div class="page-content">
-    <div class="tab-block">
+    <div class="">
         <div class="row">
             <div class="col-md-3">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label>{{getResourceValue("Counter_Field_Entity")}}</label>
+                          <label>{{getResourceValue("counter_field_entity")}}</label>
                             <label class="text-mandatory margin-left-3">*</label>
                             <kendo-dropdownlist #list [data]="metaDataList" [filterable]="true" textField="displayName"
                                 valueField="name" (valueChange)="onKendoDropdownChange($event)"
@@ -26,7 +26,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="description">{{getResourceValue("Counter_Field_Description")}}</label><label
+                          <label for="description">{{getResourceValue("counter_field_description")}}</label><label
                                 class="text-mandatory margin-left-3">*</label>
                             <input type="text" name="description" [(ngModel)]="counterObj.description"
                                 class="input-control" #description="ngModel" maxlength="225">
@@ -36,7 +36,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="text">{{getResourceValue("Counter_Field_Format")}}</label><label
+                          <label for="text">{{getResourceValue("counter_field_format")}}</label><label
                                 class="text-mandatory margin-left-3">*</label>
                             <input type="text" name="text" [(ngModel)]="counterObj.text"
                                 style="text-transform:uppercase" autocomplete="off" (keyup)="getFormatedText()"
@@ -48,8 +48,8 @@
             </div>
             <div class="col-md-3">
                 <div class="well-block text-center">
-                    <label for="formatedText"
-                        class="text-less-important">{{getResourceValue("Counter_Field_Preview")}}</label>
+                  <label for="formatedText"
+                         class="text-less-important">{{getResourceValue("counter_field_preview")}}</label>
                     <div for="formatedTextValue" class="text-large" [ngClass]="ftext==''?'validationMsg':''">
                         {{ftext==''?validationMsg:ftext.toUpperCase()}}
                     </div>
@@ -64,7 +64,7 @@
                     <div class="col-md-6">
                         <div class="row">
                             <div class="col-md-12 form-group">
-                                <label for="counterN">{{getResourceValue("Counter_Field_CounterN")}} </label><label
+                              <label for="counterN">{{getResourceValue("counter_field_countern")}} </label><label
                                     class="text-mandatory margin-left-3">*</label>
                                 <input type="number" name="counterN" [(ngModel)]="counterObj.counterN"
                                     (keyup)="getFormatedText()" class="input-control"  min="1"
@@ -72,14 +72,14 @@
                                     maxlength="225">
                             </div>
                             <div class="col-md-12 form-group">
-                                <label for="counterO">{{getResourceValue("Counter_Field_CounterO")}} </label><label
+                              <label for="counterO">{{getResourceValue("counter_field_countero")}} </label><label
                                     class="text-mandatory margin-left-3">*</label>
                                 <input type="number" name="counterO" [(ngModel)]="counterObj.counterO"
                                     (keyup)="getFormatedText()" (keypress)="keyPress($event)" class="input-control" #counterO="ngModel"
                                     maxlength="225">
                             </div>
                             <div class="col-md-12 form-group">
-                              <label for="counterP">{{getResourceValue("Counter_Field_CounterP")}} </label><label
+                              <label for="counterP">{{getResourceValue("counter_field_counterp")}} </label><label
                                     class="text-mandatory margin-left-3">*</label>
                                 <input type="number" name="counterP" [(ngModel)]="counterObj.counterP"
                                     (keyup)="getFormatedText()" (keypress)="keyPress($event)" class="input-control"  #counterP="ngModel"
@@ -90,7 +90,7 @@
                     <div class="col-md-6">
                         <div class="row">
                             <div class="col-md-12 form-group">
-                                <label for="resetCounterN">{{getResourceValue("Counter_Field_Reset")}}</label><label
+                              <label for="resetCounterN">{{getResourceValue("counter_field_reset")}}</label><label
                                     class="text-mandatory margin-left-3">*</label>
                                 <select name="resetCounterN" class="input-control"
                                     [(ngModel)]="counterObj.resetCounterN" #resetCounterN="ngModel">
@@ -98,7 +98,7 @@
                                 </select>
                             </div>
                             <div class="col-md-12 form-group">
-                                <label for="resetCounterO">{{getResourceValue("Counter_Field_Reset")}}</label><label
+                              <label for="resetCounterO">{{getResourceValue("counter_field_reset")}}</label><label
                                     class="text-mandatory margin-left-3">*</label>
                                 <select name="resetCounterO" class="input-control"
                                     [(ngModel)]="counterObj.resetCounterO" #resetCounterO="ngModel">
@@ -106,7 +106,7 @@
                                 </select>
                             </div>
                             <div class="col-md-12 form-group static">
-                                <label for="resetCounterP">{{getResourceValue("Counter_Field_Reset")}}</label><label
+                              <label for="resetCounterP">{{getResourceValue("counter_field_reset")}}</label><label
                                     class="text-mandatory margin-left-3">*</label>
                                 <select name="resetCounterP" class="input-control"
                                     [(ngModel)]="counterObj.resetCounterP" #resetCounterP="ngModel">

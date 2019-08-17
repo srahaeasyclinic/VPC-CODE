@@ -24,6 +24,7 @@ using Ninject.Activation;
 using Ninject.Infrastructure.Disposal;
 using Swashbuckle.AspNetCore.Swagger;
 using VPC.Entities.BatchType;
+using VPC.Framework.Business.BatchItems.APIs;
 using VPC.Framework.Business.BatchType.Contracts;
 using VPC.Framework.Business.Counter.Contracts;
 using VPC.Framework.Business.DynamicQueryManager.Contracts;
@@ -44,11 +45,15 @@ using VPC.Framework.Business.SchedulerConfiguration.SchedulerMonthly.Contracts;
 using VPC.Framework.Business.SchedulerConfiguration.SchedulerWeekly.Contracts;
 using VPC.Framework.Business.SchedulerConfiguration.SchedulerYearly.Contracts;
 using VPC.Framework.Business.SettingsManager.Contracts;
+using VPC.Framework.Business.Task.Contracts;
+using VPC.Framework.Business.Task.UserTask;
+using VPC.Framework.Business.Tenant.Contracts;
 using VPC.Framework.Business.TenantSubscription.Contracts;
 using VPC.Framework.Business.WorkFlow.Contracts;
 using VPC.WebApi.Attribute;
 using VPC.WebApi.Ninject;
 using VPC.WebApi.Utility;
+
 
 namespace VPC.WebApi
 {
@@ -274,7 +279,7 @@ namespace VPC.WebApi
             kernel.Bind<IManagerTenantSubscriptionEntityDetail>().To<ManagerTenantSubscriptionEntityDetail>().InTransientScope();
             kernel.Bind<ISettingManager>().To<SettingManager>().InTransientScope();
 
-            kernel.Bind<IManagerConfigureScheduler>().To<ManagerConfigureScheduler>().InTransientScope();
+           // kernel.Bind<IManagerConfigureScheduler>().To<ManagerConfigureScheduler>().InTransientScope();
             kernel.Bind<IManagerScheduler>().To<ManagerScheduler>().InTransientScope();
             kernel.Bind<IManagerSchedulerDaily>().To<ManagerSchedulerDaily>().InTransientScope();
             kernel.Bind<IManagerSchedulerMonthly>().To<ManagerSchedulerMonthly>().InTransientScope();
@@ -284,11 +289,11 @@ namespace VPC.WebApi
             kernel.Bind<IManageRule>().To<RuleManager>().InTransientScope();
             kernel.Bind<IManageTenant>().To<TenantManager>().InTransientScope();
             kernel.Bind<IManagerCounter>().To<ManagerCounter>().InTransientScope();
-
+            kernel.Bind<IManagerBatchItem>().To<ManagerBatchItem>().InTransientScope();
             kernel.Bind<IMatcher>().To<Matcher>().InTransientScope();
             kernel.Bind<IInsertHelper>().To<InsertHelper>().InTransientScope();
-            
-
+            kernel.Bind<IUserTaskManager>().To<UserTaskManager>().InTransientScope();           
+kernel.Bind<ITaskManager>().To<TaskManager>().InTransientScope();    
             kernel.BindToMethod(app.GetRequestService<IViewBufferScope>);
 
             return kernel;

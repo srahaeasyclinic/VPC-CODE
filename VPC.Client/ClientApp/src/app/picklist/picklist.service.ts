@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -19,6 +19,7 @@ export class PicklistService {
   private resources: string = '/api/resources';
 
   query: string = '?&pagingParameter.pageNumber=1' + '&pagingParameter.pageSize=10';
+  showToolbar=  new EventEmitter();
   constructor(private http: HttpClient) { }
 
   private picklistApi: string = '/api/picklists';

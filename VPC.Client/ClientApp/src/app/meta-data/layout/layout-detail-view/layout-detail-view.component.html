@@ -1,16 +1,16 @@
 <div class="page-content">
   <div class="card-block">
     <div class="card-row">
-      <label>{{getResourceValue('LayoutName')}}</label>
+      <label>{{getResourceValue('metadata_field_layoutname')}}</label>
       <input type="text" [(ngModel)]="layoutInfo.name" class="input-control" />
     </div>
     <div class="card-row">
-      <div class="text-less-important">{{getResourceValue('LayoutType')}}</div>
+      <div class="text-less-important">{{getResourceValue('metadata_field_layouttype')}}</div>
       <div class="text-important margin-top-10">{{layoutInfo.layoutTypeName}}</div>
     </div>
   </div>
-  <div class="tab-block">
-    <div class="margin-top-10" *ngIf="layoutInfo.name!=''">
+  <div class="">
+    <div class="margin-top-10 tab-child-item" *ngIf="layoutInfo.name!=''">
       <nav mat-tab-nav-bar>
         <a mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" routerLinkActive #rla="routerLinkActive"
           [active]="rla.isActive">
@@ -21,8 +21,8 @@
     </div>
   </div>
   <div>
-    <a class="btn-float" ngbTooltip="{{getResourceValue('Save')}}" container="body" (click)="updateLayoutDetails()">
-        <i class="fa fa-floppy-o"></i>{{getResourceValue('Save')}}
+    <a class="btn-float" ngbTooltip="{{getResourceValue('metadata_operation_save')}}" container="body" (click)="updateLayoutDetails()">
+        <i class="fa fa-floppy-o"></i>{{getResourceValue('metadata_operation_save')}}
   </a>
     <!-- <a class="btn-float margin-right-75" ngbTooltip="Preview" container="body" (click)="listPreviewPage()">
         <i class="fa fa-eye my-float"></i>

@@ -101,7 +101,7 @@ namespace VPC.Framework.Business.SchedulerConfiguration.SchedulerYearly.Data
     #region Review
       internal SchedulerYearlyInfo GetSchedulerYearly(Guid tenantId,Guid schedulerId )
         {
-            SchedulerYearlyInfo info =null;
+            SchedulerYearlyInfo info =new SchedulerYearlyInfo();
             try
             {
                 var cmd = CreateProcedureCommand("dbo.SchedulerYearly_GetBy_SchedulerId");

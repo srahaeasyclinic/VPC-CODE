@@ -9,11 +9,13 @@ import * as moment from 'moment';
 import { GridDataResult, DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { SortDescriptor, GroupDescriptor, DataResult, process } from '@progress/kendo-data-query';
 import { LayoutService } from '../../meta-data/layout/layout.service';
-import { NgbModal,NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { TosterService } from '../../services/toster.service';
 import { MODALS } from '../tree.config';
 import { Router, ActivatedRoute, Params } from '@angular/router';
+import { GlobalResourceService } from '../../global-resource/global-resource.service';
 import swal from 'sweetalert2';
+import { MenuService } from 'src/app/services/menu.service';
 
 // text,email,tel,textarea,password, 
 @Component({
@@ -43,7 +45,7 @@ export class CustomComponent implements OnInit {
   private userid: string = "";
   private entityName: string = "";
   private subType: string = "";
-  
+
   // (columnClick)="edit($event)" 
   // (onActionClick)="onActionClick($event)"
   // (onGridChangeEvent)="onGridChangeEvent($event)"
@@ -52,15 +54,16 @@ export class CustomComponent implements OnInit {
   layoutDetails: any | null;
   public gridData: any | null;
   constructor(
-    private treeService: TreeService, 
+    private treeService: TreeService,
     private layoutService: LayoutService,
     private modalService: NgbModal,
     private activatedRoute: ActivatedRoute,
-    private toster: TosterService
-    ) {
+    private globalResourceService: GlobalResourceService,
+    private toster: TosterService,
+    private menuService: MenuService) {
 
   }
-  public onSearchQueryEvent(event:any){
+  public onSearchQueryEvent(event: any) {
 
   }
   ngOnInit(): void {
@@ -70,20 +73,21 @@ export class CustomComponent implements OnInit {
       this.userid = params['id'];
       //this.userid = this.userid.substring(0, 36);
       //this.entityName = params['name']
-    }); 
-
-    //Get the entity name from URL route 
-    this.activatedRoute.parent.params.subscribe((urlPath) => {
-      this.entityName = urlPath["name"];      
     });
 
+    //Get the entity name from URL route 
+    // this.activatedRoute.parent.params.subscribe((urlPath) => {
+    //   this.entityName = urlPath["name"];      
+    // });
+    let result = this.menuService.getMenuconext();
+    this.entityName = result.param_name;
     this.subType = this.activatedRoute.snapshot.queryParams["subType"];
 
-    if(this.mode==1){
-     
-     // this.loadLayout();
+    if (this.mode == 1) {
+
+      // this.loadLayout();
     }
-    
+
   }
 
   loadLayout(): void {
@@ -117,11 +121,11 @@ export class CustomComponent implements OnInit {
             //       }         
             //   });
             // }
-//action checking required.
-            if(this.layoutDetails && this.layoutDetails.viewLayoutDetails && this.layoutDetails.viewLayoutDetails.fields){
+            //action checking required.
+            if (this.layoutDetails && this.layoutDetails.viewLayoutDetails && this.layoutDetails.viewLayoutDetails.fields) {
               this.generateColumns(this.field.value, this.layoutDetails.viewLayoutDetails.fields, this.layoutDetails.viewLayoutDetails.actions, 10);
             }
-            
+
           }
         },
         error => {
@@ -271,7 +275,7 @@ export class CustomComponent implements OnInit {
 
   }
 
-  public addDetailEntity(){
+  public addDetailEntity() {
     var id = '';
     this.openDetailsEntityCreatePopup(id);
     //this.getDefaultLayout(this.field.name, "Form", "EN10003-ST01", "New");
@@ -291,62 +295,82 @@ export class CustomComponent implements OnInit {
   //       });   
   // }
   openDetailsEntityCreatePopup(id) {
-    var modalName = this.field.controlType+"_detailEntity";
+    var modalName = this.field.controlType + "_detailEntity";
     let ngbModalOptions: NgbModalOptions = {
-      backdrop : 'static',
-      keyboard : false
+      backdrop: 'static',
+      keyboard: false
     };
-    const modalRef = this.modalService.open(MODALS[modalName],ngbModalOptions);
-		// let nodeObj = JSON.parse(JSON.stringify(node))
+    const modalRef = this.modalService.open(MODALS[modalName], ngbModalOptions);
+    // let nodeObj = JSON.parse(JSON.stringify(node))
     //modalRef.componentInstance.node = nodeObj;
     modalRef.componentInstance.entityName = this.entityName;
     modalRef.componentInstance.userid = this.userid;
     modalRef.componentInstance.detailEntityName = this.field.name;
     modalRef.componentInstance.id = id;
     modalRef.componentInstance.subType = this.subType;
+    modalRef.componentInstance.field = this.field;
 
-		modalRef.componentInstance.saveEvent.subscribe((receivedEntry) => {
-      console.log("saveEvent.subscribe", receivedEntry);  
+    modalRef.componentInstance.saveEvent.subscribe((receivedEntry) => {
+      console.log("saveEvent.subscribe", receivedEntry);
       modalRef.close();
-      
-      if(this.mode==1){     
+
+      if (this.mode == 1) {
         this.loadLayout();
       }
-		});
+    });
   }
 
   onActionClick(id, event) {
 
     if (event.toLowerCase() == 'delete') {
-      swal({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!',
-        showLoaderOnConfirm: true,
-      })
-        .then((willDelete) => {
-          if (willDelete.value) {
-            this.layoutService.deleteUserValues(this.field.name, id).subscribe(result => {
-              if (result) {
-                if(this.mode==1){     
-                  this.loadLayout();
-                }
-              }
-            });
-
-          } else {
-            //write the code for cancel click
+   this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+       this.layoutService.deleteUserValues(this.field.name, id).subscribe(result => {
+          if (result) {
+            if (this.mode == 1) {
+              this.loadLayout();
+            }
           }
 
+
         });
+      });
+
+
+
+
+
+
+
+
+      // swal({
+      //   title: this.getResourceValue("common_message_areyousure"),
+      //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+      //   type: 'warning',
+      //   showCancelButton: true,
+      //   confirmButtonColor: '#3085d6',
+      //   cancelButtonColor: '#d33',
+      //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+      //   showLoaderOnConfirm: true,
+      // })
+      //   .then((willDelete) => {
+      //     if (willDelete.value) {
+      //       this.layoutService.deleteUserValues(this.field.name, id).subscribe(result => {
+      //         if (result) {
+      //           if(this.mode==1){     
+      //             this.loadLayout();
+      //           }
+      //         }
+      //       });
+
+      //     } else {
+      //       //write the code for cancel click
+      //     }
+
+      //   });
     }
 
     if (event.toLowerCase() == 'UpdateStatus'.toLowerCase()) {
-      this.toster.showWarning('Method not implemented !');
+      this.toster.showWarning(this.getResourceValue('metadata_method_notimplement_message'));
     }
 
   }
@@ -354,4 +378,9 @@ export class CustomComponent implements OnInit {
   public edit(id): void {
     this.openDetailsEntityCreatePopup(id);
   }
+
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
+  }
+
 }

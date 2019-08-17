@@ -46,6 +46,7 @@ export class ModalInnerStepComponent {
     //  this.activatedRoute.parent.params.subscribe((params: Params) => {
     //    this.entityName = params['name'];
     //  });
+    
      this.getInnerStep();
    } 
  
@@ -89,5 +90,8 @@ export class ModalInnerStepComponent {
   //     if (!word) return word;
   //     return word[0].toLowerCase() + word.substr(1);
   //   }
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
+  }
  
 }

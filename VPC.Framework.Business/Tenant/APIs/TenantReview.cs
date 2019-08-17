@@ -13,14 +13,15 @@ namespace VPC.Framework.Business.Rule.APIs
 
     public interface ITenantInfoReview
     {
-        List<TenantInfo> GetTenantInfo(Guid tenantId);   
+        TenantLanguageInfo GetTenantLanguageInfo(Guid tenantId);   
     }    
     internal class TenantReview : ITenantInfoReview
     {
         private readonly DataTenant dataTenant = new DataTenant();
-        List<TenantInfo> ITenantInfoReview.GetTenantInfo(Guid tenantId)
+        TenantLanguageInfo ITenantInfoReview.GetTenantLanguageInfo(Guid tenantId)
         {
-            return dataTenant.GetTenantInfo(tenantId);
+            //return dataTenant.GetTenantInfo(tenantId);
+            return dataTenant.GetTenantLanguageInfo(tenantId);
         }
     }
 }

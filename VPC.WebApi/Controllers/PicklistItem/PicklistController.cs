@@ -444,6 +444,26 @@ namespace VPC.WebApi.Controllers.PicklistItem {
             }
         }
 
+        [HttpPost]
+        [Route ("{entityName}/layouts/{id:guid}/clone")]
+        [ProducesResponseType (200)]
+        [ProducesResponseType (500)]
+        [ProducesResponseType (404)]
+        public IActionResult CloneLayout ([FromRoute] string entityName, [FromRoute] Guid id, [FromBody] LayoutModel layoutModel) {
+            try {
+                var stopwatch = StopwatchLogger.Start (_log);
+                _log.Info ("Called PicklistController CloneLayout");
+
+                var retVal = _iLayoutManager.ClonePicklistLayout(entityName, id, layoutModel, UserId, TenantCode);
+
+                stopwatch.StopAndLog ("CloneLayout method of PicklistController");
+                return Ok (retVal);
+            } catch (Exception ex) {
+                _log.Error (ExceptionFormatter.SerializeToString (ex));
+                return StatusCode ((int) HttpStatusCode.InternalServerError, ApiConstant.CustomErrorMessage);
+            }
+        }
+
         #endregion
 
         #region Private helper functions

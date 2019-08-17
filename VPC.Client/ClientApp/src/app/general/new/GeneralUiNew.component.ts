@@ -13,6 +13,7 @@ import { ValidationService } from 'src/app/services/validation.service';
 import { RequiredfieldService } from '../../services/requiredfield.service';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { GlobalResourceService } from '../../global-resource/global-resource.service';
+import { MenuService, MenuType } from 'src/app/services/menu.service';
 
 @Component({
   selector: 'app-generalUi-new',
@@ -30,11 +31,11 @@ export class GeneralUiNewComponent implements OnInit {
   public entityName: string;
   private resource: any;
   private layoutType: string = "Form";//New page 
-  private layoutContext: string = "New";
+  private layoutContext: string = "Add";
   private layoutSubType: string = '';
   public validateMessages: Array<string> = [];
 
-  public displayRule: any;  
+  public displayRule: any;
 
   constructor(private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -47,22 +48,28 @@ export class GeneralUiNewComponent implements OnInit {
     private validateService: ValidationService,
     private requiredfieldService: RequiredfieldService,
     private modalService: NgbModal,
-    private globalResourceService: GlobalResourceService
+    private globalResourceService: GlobalResourceService,
+    private menuService: MenuService
   ) { }
 
-  ngOnInit() {       
-    this.getResource();
-    
+  ngOnInit() {
+    let result = this.menuService.getMenuconext();
+    this.entityName = result.param_name;
+    if (result && result.menuType == MenuType.Entity) {
+      // this.menuService.setchildMenuBreadcums([{ elementName:"new", 'elementURL':""}]);
+      this.getResource();
+    }
+
   }
 
   private getResource(): void {
-            //this.resource = this.resourceService.getResources();
-            this.resource = this.globalResourceService.getGlobalResources();
-            this.processUrl();
-    
+    //this.resource = this.resourceService.getResources();
+    this.resource = this.globalResourceService.getGlobalResources();
+    this.processUrl();
+
   }
 
-  private getRuleList(entityName:string): void {
+  private getRuleList(entityName: string): void {
     this.commonService.getRuleList(entityName)
       .pipe(first())
       .subscribe(
@@ -81,9 +88,11 @@ export class GeneralUiNewComponent implements OnInit {
   }
 
   private processUrl(): void {
+    let result = this.menuService.getMenuconext();
+    this.entityName = result.param_name;
     this.route.parent.params.subscribe((urlPath) => {
-      this.entityName = urlPath["name"]; 
-      
+      // this.entityName = urlPath["name"]; 
+
       this.route.queryParams
         .filter(params => params.subType)
         .subscribe(params => {
@@ -94,11 +103,12 @@ export class GeneralUiNewComponent implements OnInit {
           if (this.entityName && this.layoutSubType) {
             this.getDefaultLayout(this.entityName, this.layoutType, this.layoutSubType, this.layoutContext);
           } else {
-            this.toster.showWarning('Url tempered! or no entity name found!');
+            this.toster.showWarning(this.getResourceValue('metadata_operation_alert_warning_message'));
           }
         });
+      this.getRuleList(this.entityName);
     });
-    this.getRuleList(this.entityName);
+
   }
 
   private getDefaultLayout(name: string, type: string, subtype: string, context: string): void {
@@ -111,53 +121,91 @@ export class GeneralUiNewComponent implements OnInit {
             this.layoutInfo = data;
 
             if (data.formLayoutDetails) {
+              this.mapData1(data.formLayoutDetails.fields);
               this.tree = data.formLayoutDetails;
               this.isTreeReady = true;
             } else {
-              this.toster.showWarning('Default layout template not found !');
+              this.toster.showWarning(this.getResourceValue('metadata_warning_nodefaulttemplate_message'));
             }
           }
         },
         error => {
-           if (error.status===501) 
-        {
+          if (error.status === 501) {
             this.toster.showError(error.message);
-        }
+          }
         });
   }
 
-  public save(content: string): string {
-    this.validateMessages = [];
-    this.validateMessages = this.validateService.validate(this.tree.fields);
-    let ngbModalOptions: NgbModalOptions = {
-      backdrop : 'static',
-      keyboard : false
-    };
-    if (this.validateMessages.length > 0) {
-      this.modalService.open(content, ngbModalOptions);
-      return
-    }
-    let value = {};
-    value = this.commonService.createKeyValue(this.tree.fields, value);
 
-   // console.log('Tree save ' + JSON.stringify(this.tree.fields));
-    // console.log('Tree value '+JSON.stringify(value));
+  private mapData1(fields) {
 
-    this.entityValueService.saveEntityValue(this.entityName, this.layoutSubType, value)
-      .pipe(first())
-      .subscribe(
-        data => {
-          this.toster.showSuccess(this.entityName + ' saved successfully.');
-         // this.router.navigate(['ui/' + this.entityName]);
-         this.router.navigate(["../"], { relativeTo: this.activatedRoute });
-        },
-        error => {
-          if (error.status===501) 
-        {
-            this.toster.showError(error.message);
-        }
+    fields.forEach((item, index) => {
+
+      if (item.supportedQuickAddModes) {
+        item.supportedQuickAddModes.forEach(layoutType => {
+          var types = layoutType.toString().split('');
+          if (types.length > 1) {
+
+            item.isQuickAddSupported = false;
+            if (types[0] == this.layoutInfo.layoutType.toString()) {
+              if (types[1] == this.layoutInfo.context.toString()) {
+                item.isQuickAddSupported = true;
+                return;
+              }
+            }
+          }
         });
+      }
+      
+      if (item.validators) {
+        item.validators.forEach(element => {
+          if (element.name.toLowerCase() == 'defaultvaluevalidator') {
+            item.value=element.options[0].value
+          }
+        });
+      }
+
+      if (item.fields != null && item.fields.length > 0) {
+        this.mapData1(item.fields);
+      }
+      if (item.tabs != null && item.tabs.length > 0) {
+        this.mapData1(item.tabs);
+      }
+    });
   }
+
+  //public save(content: string): string {
+  //  this.validateMessages = [];
+  //  this.validateMessages = this.validateService.validate(this.tree.fields,this.entityName);
+  //  let ngbModalOptions: NgbModalOptions = {
+  //    backdrop : 'static',
+  //    keyboard : false
+  //  };
+  //  if (this.validateMessages.length > 0) {
+  //    this.modalService.open(content, ngbModalOptions);
+  //    return
+  //  }
+  //  let value = {};
+  //  value = this.commonService.createKeyValue(this.tree.fields, value);
+
+  //  // console.log('Tree save ' + JSON.stringify(this.tree.fields));
+  //   // console.log('Tree value '+JSON.stringify(value));
+
+  //   this.entityValueService.saveEntityValue(this.entityName, this.layoutSubType, value)
+  //     .pipe(first())
+  //     .subscribe(
+  //       data => {
+  //         this.toster.showSuccess(this.entityName + ' saved successfully.');
+  //        // this.router.navigate(['ui/' + this.entityName]);
+  //        this.router.navigate(["../"], { relativeTo: this.activatedRoute });
+  //       },
+  //       error => {
+  //         if (error.status===501) 
+  //       {
+  //           this.toster.showError(error.message);
+  //       }
+  //       });
+  // }
 
   generateResourceName(word: string) {
     return this.commonService.generateResourceNameWithHierarchy(word);

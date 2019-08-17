@@ -11,6 +11,7 @@ import { Entities } from '../model/entities';
 import { GridDataResult, DataStateChangeEvent } from '@progress/kendo-angular-grid';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { Resource } from '../model/resource';
+import { CommonService } from '../services/common.service';
 
 @Component({
   selector: 'app-role-detail',
@@ -28,9 +29,11 @@ export class RoleDetailComponent implements OnInit {
   public gridData: any[] = this.entityList;
   panelOpenState = false;
   clickedOnEntity: string;
+  public pageSize: number = this.commonService.defaultPageSize();
 
   constructor(private activatedRoute: ActivatedRoute, private router: Router, private roleService: RoleService, private modalService: NgbModal,
     private toster: TosterService, private metadataService: MetadataService, private globalResourceService: GlobalResourceService,
+    private commonService: CommonService
   )
   {
 
@@ -39,7 +42,7 @@ export class RoleDetailComponent implements OnInit {
   ngOnInit() {
     this.resource = this.globalResourceService.getGlobalResources();
     this.activatedRoute.params.subscribe((params: Params) => {
-      this.roleId = params['roleId'];
+      this.roleId = params['id'];
     });
 
     // this.activatedRoute.queryParams.filter(params => params.order).subscribe(params => { 
@@ -70,7 +73,7 @@ export class RoleDetailComponent implements OnInit {
   updateRole() {
 
     if (this.roleInfo.name == "") {
-      this.toster.showWarning(this.getResourceValue("Validation_Field_Name_Required"));
+      this.toster.showWarning(this.globalResourceService.requiredValidator("role_field_name"));
       return false;
     }
 
@@ -79,7 +82,7 @@ export class RoleDetailComponent implements OnInit {
       .subscribe(
         data => {
           if (data) {
-            this.toster.showSuccess(this.getResourceValue('Operation_Save_Successful_Message'));
+            this.toster.showSuccess(this.globalResourceService.updateSuccessMessage('role_displayname'));
           }
         },
         error => {
@@ -110,7 +113,7 @@ export class RoleDetailComponent implements OnInit {
 
 
   private getEntities() {
-    this.metadataService.getEntities()
+    this.metadataService.getEntities("primaryentity")
       .pipe(first())
       .subscribe(
         data => {

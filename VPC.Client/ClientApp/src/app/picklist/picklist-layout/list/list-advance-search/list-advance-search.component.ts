@@ -164,10 +164,8 @@ export class ListAdvanceSearchComponent implements OnInit {
       });
     }
   }
-  generateResourceName(word)
-  {
-     if (!word) return word;
-     return word[0].toLowerCase() + word.substr(1);
-   }
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
+  }
    
 }

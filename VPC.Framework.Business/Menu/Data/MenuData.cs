@@ -48,6 +48,13 @@ namespace VPC.Framework.Business.Menu.Data
                             menu.ModifiedBy = reader.IsDBNull(9) ? Guid.Empty : reader.GetGuid(9);
                             menu.GroupName = reader.IsDBNull(10) ? String.Empty : reader.GetString(10);
                             menu.WellKnownLink = reader.IsDBNull(11) ? String.Empty : reader.GetString(11);
+
+                            menu.ParentId = reader.IsDBNull(12) ? Guid.Empty : reader.GetGuid(12);
+                            menu.SortItem = reader.IsDBNull(13) ? 0 : reader.GetInt32(13);
+                            menu.MenuIcon = reader.IsDBNull(14) ? String.Empty : reader.GetString(14);
+                            menu.Menucode = reader.IsDBNull(15) ? String.Empty : reader.GetString(15);
+                            menu.IsMenuGroup = reader.IsDBNull(16) ? false : reader.GetBoolean(16);
+
                         }
 
                         menus.Add(menu);
@@ -92,6 +99,11 @@ namespace VPC.Framework.Business.Menu.Data
                         menu.ModifiedDate = reader.IsDBNull(8) ? DateTime.MinValue : reader.GetDateTime(8);
                         menu.ModifiedBy = reader.IsDBNull(9) ? Guid.Empty : reader.GetGuid(9);
                         menu.WellKnownLink = reader.IsDBNull(10) ? String.Empty : reader.GetString(10);
+                        menu.ParentId = reader.IsDBNull(11) ? Guid.Empty : reader.GetGuid(11);
+                        menu.SortItem = reader.IsDBNull(12) ? 0 : reader.GetInt32(12);
+                        menu.MenuIcon = reader.IsDBNull(13) ? String.Empty : reader.GetString(13);
+                        menu.Menucode = reader.IsDBNull(14) ? String.Empty : reader.GetString(14);
+                        menu.IsMenuGroup = reader.IsDBNull(15) ? false : reader.GetBoolean(15);
                     }
                 }
             }
@@ -119,6 +131,14 @@ namespace VPC.Framework.Business.Menu.Data
                 cmd.AppendMediumText("@strWellKnownLink", menuModel.WellKnownLink);
                 cmd.AppendGuid("@guidLayoutId", menuModel.LayoutId);
                 cmd.AppendGuid("@guidUpdatedBy", menuModel.ModifiedBy);
+
+                cmd.AppendGuid("@parentId", menuModel.ParentId);
+                cmd.AppendInt("@sortitem", (int)menuModel.SortItem);
+                cmd.AppendMediumText("@MenuIcon", menuModel.MenuIcon);
+                cmd.AppendLargeText("@MenuCode", menuModel.Menucode);
+                //cmd.AppendBit("@IsMenuGroup", menuModel.IsMenuGroup == null ? false : true);
+                cmd.AppendBit("@IsMenuGroup", menuModel.IsMenuGroup);
+
                 ExecuteCommand(cmd);
             }
             catch (SqlException e)
@@ -143,6 +163,11 @@ namespace VPC.Framework.Business.Menu.Data
                 cmd.AppendMediumText("@strWellKnownLink", menuModel.WellKnownLink);
                 cmd.AppendGuid("@guidLayoutId", menuModel.LayoutId);
                 cmd.AppendGuid("@guidUpdatedBy", menuModel.ModifiedBy);
+                cmd.AppendGuid("@parentId", menuModel.ParentId);
+                cmd.AppendInt("@sortitem", (int)menuModel.SortItem);
+                cmd.AppendMediumText("@MenuIcon", menuModel.MenuIcon);
+                cmd.AppendLargeText("@MenuCode", menuModel.Menucode);
+                cmd.AppendBit("@IsMenuGroup", menuModel.IsMenuGroup);
 
                 ExecuteCommand(cmd);
             }
@@ -166,6 +191,97 @@ namespace VPC.Framework.Business.Menu.Data
             {
                 _log.Error(e);
                 throw ReportAndTranslateException(e, "MenuData::DeleteMenu");
+            }
+        }
+
+        internal List<MenuItem> GetMenuByTenant(Guid tenantId)
+        {
+            var menus = new List<MenuItem>();
+            try
+            {
+                SqlProcedureCommand cmd = CreateProcedureCommand("dbo.Menu_GetAll_NoPaging");
+                cmd.AppendGuid("@guidTenantId", tenantId);
+                using (SqlDataReader reader = ExecuteCommandAndReturnReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        var menu = new MenuItem();
+                        {
+                            menu.TenantId = tenantId;
+                            menu.Id = reader.IsDBNull(0) ? Guid.Empty : reader.GetGuid(0);
+                            menu.GroupId = reader.IsDBNull(1) ? Guid.Empty : reader.GetGuid(1);
+                            menu.Name = reader.IsDBNull(2) ? String.Empty : reader.GetString(2);
+                            menu.MenuTypeId = reader.IsDBNull(3) ? 0 : reader.GetInt32(3);
+
+                            if (menu.MenuTypeId > 0)
+                                menu.MenuTypeName = Enum.GetName(typeof(MenuTypeEnum), menu.MenuTypeId);
+
+                            menu.ReferenceEntityId = reader.IsDBNull(4) ? String.Empty : reader.GetString(4);
+                            menu.ActionTypeId = reader.IsDBNull(5) ? 0 : reader.GetInt32(5);
+
+                            if (menu.ActionTypeId > 0)
+                                menu.ActionTypeName = Enum.GetName(typeof(ActionTypeEnum), menu.ActionTypeId);
+
+                            menu.ModifiedDate = reader.IsDBNull(8) ? DateTime.MinValue : reader.GetDateTime(8);
+                            menu.ModifiedBy = reader.IsDBNull(9) ? Guid.Empty : reader.GetGuid(9);
+                            menu.GroupName = reader.IsDBNull(10) ? String.Empty : reader.GetString(10);
+                            menu.WellKnownLink = reader.IsDBNull(11) ? String.Empty : reader.GetString(11);
+
+                            menu.ParentId = reader.IsDBNull(12) ? Guid.Empty : reader.GetGuid(12);
+                            menu.SortItem = reader.IsDBNull(13) ? 0 : reader.GetInt32(13);
+                            menu.MenuIcon = reader.IsDBNull(14) ? String.Empty : reader.GetString(14);
+                            menu.Menucode = reader.IsDBNull(15) ? String.Empty : reader.GetString(15);
+                            menu.IsMenuGroup = reader.IsDBNull(16) ? false : reader.GetBoolean(16);
+                            menu.GroupIdSort = reader.IsDBNull(17) ? -0 : reader.GetInt32(17);
+
+                        }
+
+                        menus.Add(menu);
+
+
+                    }
+                }
+            }
+            catch (SqlException e)
+            {
+                _log.Error(e);
+                throw ReportAndTranslateException(e, "MenuData::GetMenu");
+            }
+
+            return menus;
+        }
+
+        internal void InitializeMenu(Guid rootTenantCode, Guid initilizedTenantCode)
+        {
+            try
+            {
+                SqlProcedureCommand cmd = CreateProcedureCommand("dbo.Menu_Clone");
+                cmd.AppendGuid("@rootTenantId", rootTenantCode);
+                cmd.AppendGuid("@initilizedTenantId", initilizedTenantCode);
+                ExecuteCommand(cmd);
+            }
+            catch (SqlException e)
+            {
+                _log.Error(e);
+                throw ReportAndTranslateException(e, "InitializeData::Menu_Clone");
+            }
+        }
+
+        internal void InitializeApplicationMenu(Guid rootTenantCode, Guid initilizedTenantCode,Guid userId,short PicklistId)
+        {
+            try
+            {
+                SqlProcedureCommand cmd = CreateProcedureCommand("dbo.ApplicationMenu_PickListValue_Clone");
+                cmd.AppendGuid("@rootTenantId", rootTenantCode);
+                cmd.AppendGuid("@initilizedTenantId", initilizedTenantCode);
+                cmd.AppendSmallInt("@PicklistId", PicklistId);
+                cmd.AppendGuid("@guidUserId", userId);
+                ExecuteCommand(cmd);
+            }
+            catch (SqlException e)
+            {
+                _log.Error(e);
+                throw ReportAndTranslateException(e, "InitializeData::ApplicationMenu_PickListValue_Clone");
             }
         }
     }

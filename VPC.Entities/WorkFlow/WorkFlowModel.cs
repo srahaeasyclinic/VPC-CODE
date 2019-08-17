@@ -8,6 +8,9 @@
         public string Description{get;set;}
         public string Context { get; set; }
         public string TransitionLabelKey { get; set; }
+        public string TransitionResourceValue { get; set; }
+        public string StatusResourceValue { get; set; }
+        
         
     }
 }

@@ -1,4 +1,4 @@
-<div *ngIf=(layoutInfo) class="text-header">{{getResourceValue("New")}} {{layoutInfo.singularName}}</div>
+<div *ngIf=(layoutInfo) class="text-header">{{getResourceValue("metadata_new")}} {{getResourceValue(entityName.toLowerCase()+'_displayname')}}</div>
 
 <div class="detailsMenu" *ngIf="layoutInfo!=null">
   <!-- <div class="msg-tips-left">
@@ -13,7 +13,7 @@
 
 <ng-template #addrolecontent let-modal>
   <div class="modal-header">
-    <label id="modal-title">{{getResourceValue("RequiredFields")}}</label>
+    <label id="modal-title">{{getResourceValue("metadata_required_fields")}}</label>
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -29,7 +29,7 @@
       </div>
     
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Cancel")}}</button>
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("task_cancel")}}</button>
     </div>
   </div>
 </ng-template>
@@ -38,6 +38,6 @@
 
 <div class="page-content">
   <!-- {{tree|json}} -->
-  <my-tree [rootNode]="tree" [mode]="1" [resource]="resource" [displayRule]="displayRule" *ngIf="isTreeReady" class="create-view">
+  <my-tree [rootNode]="tree" [mode]="1" [resource]="resource" [displayRule]="displayRule" [entityName]="entityName" *ngIf="isTreeReady" class="create-view">
   </my-tree>
 </div>

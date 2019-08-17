@@ -17,6 +17,7 @@ import { MenuService } from '../services/menu.service';
 //Added by Tanmoy
 import { MetadataService } from 'src/app/meta-data/metadata.service';
 import { Entities } from '../model/entities';
+import { CommonService } from '../services/common.service';
 //End
 
 export class Language {
@@ -50,7 +51,7 @@ export class ResourceComponent implements OnInit {
   public resourceList: NewResource[];
   public addUpdateLabel: string;
   private pageindex: number = 1;
-  private pageSize: number = 10;
+  public pageSize: number = this.commonService.defaultPageSize();
   private totalRecords: number = 0;
   public gridDataResult: GridDataResult;
   public view: Observable<GridDataResult>;
@@ -65,12 +66,12 @@ export class ResourceComponent implements OnInit {
   private name: string;
   private entityList: Entities[];
   public entityLst: any = this.entityList;
-  public entities: Entities; 
+  public entities: Entities;
   public mode: any;
   //End
 
   constructor(
-   
+    private commonService: CommonService,
     private metadataService: MetadataService, //Added by Tanmoy
     private resourceService: ResourceService,
     private modalService: NgbModal,
@@ -87,20 +88,20 @@ export class ResourceComponent implements OnInit {
     this.sortOrder = 'key'
     this.newlanguage = new Language();
     this.GetTenantLanguage();
-  //Changed and added by Tanmoy
+    //Changed and added by Tanmoy
     //console.log('menuService.getCacheMenu().name ', this.menuService.getCacheMenu().name);    
     this.resetAndLoadEntity();
     this.mode = null;
-  //End   
+    //End   
   }
 
-//Added by Tanmoy
-  private resetAndLoadEntity(){
+  //Added by Tanmoy
+  private resetAndLoadEntity() {
     this.entities = new Entities();
-    this.entityList = null;   
+    this.entityList = null;
     this.getEntities();
   }
-//End
+  //End
 
   private ngbModalOptions: NgbModalOptions = {
     backdrop: 'static',
@@ -124,7 +125,10 @@ export class ResourceComponent implements OnInit {
         data => {
           if (data) {
             //this.gridData=[];
-            this.resources = data.resources;
+            if (data.resources)
+              this.resources = data.resources;
+            else
+              this.resources = data;
             if (this.isLoadFirst) {
               this.getGlobalResource();
             }
@@ -145,11 +149,11 @@ export class ResourceComponent implements OnInit {
       .pipe(first())
       .subscribe(
         data => {
-          if (data && data.retVal && data.retVal[0]) {
-            if (data.retVal[0].key == '') {
-              this.toster.showWarning(this.getResourceValue('Resource_Field_Language_Validation_Message'));
+          if (data) {
+            if (data.key == '') {
+              this.toster.showWarning(this.getResourceValue('resource_validation_message_nodefaultlanguage'));
             }
-            this.defaultLanguage = data.retVal[0];
+            this.defaultLanguage = data;
             //console.log(this.defaultLanguage.key);
             this.getLanguage();
           }
@@ -162,8 +166,8 @@ export class ResourceComponent implements OnInit {
   }
 
   //Added by Tanmoy
-  private getEntities(){
-    this.metadataService.getEntities()
+  private getEntities() {
+    this.metadataService.getEntities("primaryentity")
       .pipe(first())
       .subscribe(
         data => {
@@ -192,26 +196,29 @@ export class ResourceComponent implements OnInit {
         }
       )
   }
-  private getDefaultLanguage(resourceDetails, r: NewResource) {    
+  private getDefaultLanguage(resourceDetails, r: NewResource) {
     this.newlanguage = new Language();
     this.translate = false;
     this.getResourcesByKeyAndOtherThanDefaultLanguage(r.key, this.defaultLanguage.key);
-    this.addUpdateLabel = this.getResourceValue("EditResource");
-    this.editUpdate = this.getResourceValue("Update");
+    this.addUpdateLabel = this.getResourceValue("resource_label_edit");
+    this.editUpdate = this.getResourceValue("resource_operation_update");
     this.resource = { ...this.resources.find(a => a.key == r.key && a.language == this.defaultLanguage.key) };
-//Added by Tanmoy
+    //Added by Tanmoy
     this.mode = "edit";
-    var entityName  = this.resource.key.substr(0, this.resource.key.indexOf('_'));    
-    this.entities ={... this.entityLst.find(e => e.name == entityName)};
-//End
+    if (this.resource.key != null && this.resource.key != "") {
+      var entityName = this.resource.key.substr(0, this.resource.key.indexOf('_'));
+      this.entities = { ... this.entityLst.find(e => e.name == entityName) };
+    }
+
+    //End
     this.newResource = new NewResource();
     const modalRef = this.modalService.open(resourceDetails, this.ngbModalOptions);
   }
 
   public addResource(resourceDetails) {
 
-    this.addUpdateLabel = this.getResourceValue("AddResource");
-    this.editUpdate = this.getResourceValue("Save");
+    this.addUpdateLabel = this.getResourceValue("resource_label_add");
+    this.editUpdate = this.getResourceValue("resource_operation_update");
     this.resource = new NewResource();
     this.resource.language = this.defaultLanguage.key;
     this.resource.languageName = this.defaultLanguage.text;
@@ -246,14 +253,14 @@ export class ResourceComponent implements OnInit {
 
 
     if (this.resource.key === "" || this.resource.key === undefined) {
-      errorMessage += this.getResourceValue("Resource_Field_Key_Required_Message") + "</br>"
+      errorMessage += this.globalResourceService.requiredValidator("resource_field_key") + "</br>"
     }
     if (this.resource.value === "" || this.resource.value === undefined) {
-      errorMessage += this.getResourceValue("Resource_Field_Text_Required_Message") + "</br>"
+      errorMessage += this.globalResourceService.requiredValidator("resource_field_text") + "</br>"
     }
     if ((this.newResource.value != '' && this.newResource.value != undefined)) {
       if (this.newlanguage.key === null || this.newlanguage.key === undefined) {
-        errorMessage += this.getResourceValue("Resource_Field_Language_Required_Message") + "</br>"
+        errorMessage += this.globalResourceService.requiredValidator("resource_field_language") + "</br>"
       }
       // if (this.newResource.value === null || this.newResource.value === undefined  ) {
       //   errorMessage +=this.globalresource[this.generateResourceName("Nameisrequired")]+"</br>"
@@ -264,33 +271,8 @@ export class ResourceComponent implements OnInit {
       this.toster.showError(errorMessage);
       return;
     }
-    
-    //Start format the resource key -- Tanmoy
-    if(this.mode == null || this.mode == undefined)
-    {
-      var tempResourceKey = this.resource.key;
-      var newResourceKey;
-  
-      if(this.entities  != null && this.entities  != undefined )
-      {
-        if(tempResourceKey != null && tempResourceKey != undefined)
-        {
-          if(tempResourceKey.includes('.'))
-          {
-            tempResourceKey = tempResourceKey.replace('.','_');
-          }
-  
-          newResourceKey =  this.entities.name + "_" + "Field" + "_" + tempResourceKey.replace(' ','').trim();
-        }
-      }
-  
-      if(newResourceKey != null && newResourceKey != undefined)
-      {
-        this.resource.key = newResourceKey;
-      }
-    }
-    
-    //End format the resource key
+
+
 
     this.resourceList = [];
     if (this.newResource.value != null) {
@@ -303,7 +285,7 @@ export class ResourceComponent implements OnInit {
     var flag: boolean = false;
     console.log(this.resourceList);
     for (var r of this.resourceList) {
-      if (r.id!='' && r.id!=undefined && (r.value.trim() != '')) {
+      if (r.id != '' && r.id != undefined && (r.value.trim() != '')) {
         //For Update
         await new Promise((resolve, reject) => {
           this.resourceService.updateResource(r)
@@ -324,7 +306,7 @@ export class ResourceComponent implements OnInit {
             );
         });
       }
-      else if ((r.id !=''||r.id !=undefined) && (r.value.trim() == '')) {
+      else if ((r.id != '' || r.id != undefined) && (r.value.trim() == '')) {
         //For Delete
         await new Promise((resolve, reject) => {
           this.resourceService.deleteResource(r.id).subscribe(result => {
@@ -337,7 +319,7 @@ export class ResourceComponent implements OnInit {
           });
         });
       }
-      else if ((r.id == null || r.id =='') && (r.value.trim() != '')) {
+      else if ((r.id == null || r.id == '') && (r.value.trim() != '')) {
         //For Save
         await new Promise((resolve, reject) => {
           this.resourceService.saveResource(r)
@@ -361,7 +343,7 @@ export class ResourceComponent implements OnInit {
       }
     }
     if (flag) {
-      this.toster.showSuccess(this.getResourceValue('Resource_Operation_Save_Success_Message'));
+      this.toster.showSuccess(this.globalResourceService.updateSuccessMessage('resource_displayname'));
     }
     // else{
     //   this.toster.showError('Resource has been saved successfully.');
@@ -371,36 +353,63 @@ export class ResourceComponent implements OnInit {
     const modalRef = this.modalService.dismissAll();
   }
   public deleteResourceByKey(key: string) {
-    swal({
-      title: this.getResourceValue("Areyousure"),
-      text: this.getResourceValue("Youwntbeabletorevertthis"),
-      type: this.getResourceValue('warning'),
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: this.getResourceValue('Yesdeleteit'),
-      showLoaderOnConfirm: true,
-    })
-      .then((willDelete) => {
-        if (willDelete.value) {
-          this.resourceService.deleteResource(key).subscribe(result => {
-            if (result) {
-              this.isLoadFirst = true;
-              this.toster.showSuccess(this.getResourceValue('Resource_Operation_Delete_Success_Message'));
-              this.getResource();
-            }
-          },
-            error => {
-              console.log(error.error.text);
-              this.toster.showError(error.error.text);
-            });
+      this.globalResourceService.openDeleteModal.emit()
+      this.globalResourceService.notifyConfirmationDelete.subscribe(x=>{
 
-        } else {
-          //write the code for cancel click
-        }
-
+        this.resourceService.deleteResource(key).subscribe(result => {
+          if (result) {
+            this.isLoadFirst = true;
+            this.getResource();
+              //this.toster.showSuccess(this.globalResourceService.deleteSuccessMessage('resource_displayname'));
+           
+          }
+        },
+          error => {
+            console.log(error.error.text);
+            this.toster.showError(error.error.text);
+          });
       });
-    
+
+
+
+
+
+
+
+
+
+
+
+    // swal({
+    //   title: this.getResourceValue("common_message_areyousure"),
+    //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+    //   type: ('warning'),
+    //   showCancelButton: true,
+    //   confirmButtonColor: '#3085d6',
+    //   cancelButtonColor: '#d33',
+    //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+    //   showLoaderOnConfirm: true,
+    // })
+    //   .then((willDelete) => {
+    //     if (willDelete.value) {
+    //       this.resourceService.deleteResource(key).subscribe(result => {
+    //         if (result) {
+    //           this.isLoadFirst = true;
+    //           this.toster.showSuccess(this.getResourceValue('resource_operation_delete_success_message'));
+    //           this.getResource();
+    //         }
+    //       },
+    //         error => {
+    //           console.log(error.error.text);
+    //           this.toster.showError(error.error.text);
+    //         });
+
+    //     } else {
+    //       //write the code for cancel click
+    //     }
+
+    //   });
+
   }
 
 
@@ -463,4 +472,75 @@ export class ResourceComponent implements OnInit {
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
   }
+
+
+  public RepairResourcesList() {
+    swal({
+      title: this.getResourceValue("common_message_areyousure"),
+      text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      cancelButtonText:this.getResourceValue('task_cancel'),
+      confirmButtonText: this.getResourceValue('common_task_yes'),
+      showLoaderOnConfirm: true,
+    })
+      .then((willDelete) => {
+        if (willDelete.value) {
+          this.resourceService.RepairResourcesList()
+            .pipe(first())
+            .subscribe(
+              data => {
+                if (data) {
+                  this.isLoadFirst = true;
+                  this.getResource();
+                  this.toster.showSuccess(this.globalResourceService.repairSuccessMessage('resource_displayname'));
+                  //this.getResource()
+                }
+              },
+              error => {
+                console.log(error);
+              });
+        }
+        else {
+          //write the code for cancel click
+        }
+      });
+  }
+
+  public ResetResourcesList() {
+    swal({
+      title: this.getResourceValue("common_message_areyousure"),
+      text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      cancelButtonText:this.getResourceValue('task_cancel'),
+      confirmButtonText: this.getResourceValue('common_task_yes'),
+      showLoaderOnConfirm: true,
+    })
+      .then((willDelete) => {
+        if (willDelete.value) {
+          this.resourceService.ResetResourcesList()
+            .pipe(first())
+            .subscribe(
+              data => {
+                if (data) {
+                  this.isLoadFirst = true;
+                  this.getResource();
+                  this.toster.showSuccess(this.globalResourceService.resetSuccessMessage('resource_displayname'));
+                }
+              },
+              error => {
+                console.log(error);
+              });
+        }
+        else {
+          //write the code for cancel click
+        }
+      });
+  }
+
 }

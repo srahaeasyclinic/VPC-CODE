@@ -29,25 +29,47 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20022-ST01", "Standard"}
         };
 
+         [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
-        public Lookup<Product> ProductCode { get; set; }
+
+         [DisplayName("Product code")]
+        public Lookup<VPC.Entities.EntityCore.Metadata.Product.Entity.Product> ProductCode { get; set; }
+
+         [DisplayName("Quantity")]
         public DecimalType Quantity { get; set; }
+
+         [DisplayName("UOM")]
         public PickList<Uom> UOM { get; set; }
+
+         [DisplayName("Type")]
         public PickList<BomType> Type { get; set; }
+
+         [DisplayName("Category")]
         public PickList<BomCategory> Category { get; set; }
+
+         [DisplayName("Revision")]
         public XSmallText Revision { get; set; }
+
+         [DisplayName("Is default")]
         public BooleanType IsDefault { get; set; }
+
+         [DisplayName("Merge component")]
         public BooleanType MergeComponent { get; set; }
+
+         [DisplayName("Is imported")]
         public BooleanType IsImported { get; set; }
 
     }

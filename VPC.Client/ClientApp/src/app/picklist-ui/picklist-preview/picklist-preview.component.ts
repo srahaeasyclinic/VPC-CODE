@@ -9,6 +9,8 @@ import { ResourceService } from '../../services/resource.service';
 import { ITreeNode } from 'src/app/dynamic-form-builder/tree.module';
 import { Data } from '../../services/storage.data';
 import { GlobalResourceService } from '../../global-resource/global-resource.service';
+import { MenuService, MenuType } from 'src/app/services/menu.service';
+import { BreadcrumbsService } from 'src/app/bread-crumb/BreadcrumbsService';
 
 @Component({
   selector: 'app-picklist-preview',
@@ -21,6 +23,8 @@ export class PicklistPreviewComponent implements OnInit {
     private toster: TosterService, private resourceService: ResourceService,
     private commonService: CommonService, private route: ActivatedRoute, private data: Data,
     private globalResourceService: GlobalResourceService,
+    private menuService: MenuService,
+    private breadcrumsService: BreadcrumbsService
 
   ) {
 
@@ -50,21 +54,27 @@ export class PicklistPreviewComponent implements OnInit {
   private doCheck: boolean;
 
   ngOnInit() {
+    let result=this.menuService.getMenuconext();
+      this.entityName = result.param_name;
+    if (result && result.menuType == MenuType.Picklist) {
 
-    this.resource = this.globalResourceService.getGlobalResources();
+      // this.menuService.setchildMenuBreadcums([{ elementName: "preview", 'elementURL': "" }, { elementName: result.param_name, 'elementURL': "" }]);
+      
+      this.resource = this.globalResourceService.getGlobalResources();
 
-    // this.getResource();
-    // Get the picklist entity name from URL route
+      // this.getResource();
+      // Get the picklist entity name from URL route
 
-    this.route.params.subscribe(params => {
-      this.entityId = params["id"];
-    })
+      this.route.params.subscribe(params => {
+        this.entityId = params["id"];
+      })
 
-    this.route.parent.params.subscribe((urlPath) => {
-      this.entityName = urlPath["name"];
-    });
+      // this.route.parent.params.subscribe((urlPath) => {
+      //   this.entityName = urlPath["name"];
+      // });
 
-    this.getPicklist();
+      this.getPicklist();
+    }
 
   }
 
@@ -109,10 +119,19 @@ export class PicklistPreviewComponent implements OnInit {
 
       let recordNo: number = 0;
       let currentPage: number = 0;
+      let numberOfItems:number = 0;
       currentPage = this.transitObject.pageIndex - 1;
 
+      if (this.transitObject.pageSize) {
+        numberOfItems = this.transitObject.pageSize;
+      }
+      else
+      {
+        numberOfItems = 10;
+      }
+
       if (!this.transitObject.recordNo) {
-        recordNo = (currentPage * 10) + (this.transitObject.itemIndex) + 1;
+        recordNo = (currentPage * numberOfItems) + (this.transitObject.itemIndex) + 1;
         this.transitObject.recordNo = recordNo;
       }
       else {
@@ -127,7 +146,7 @@ export class PicklistPreviewComponent implements OnInit {
       this.getDefaultLayout(this.entityName);
 
     } else {
-      this.toster.showWarning(this.getResourceValue("UrlTemperedorNoEntityNameoridFoundorEntityNotYetDecorated"));
+      this.toster.showWarning(this.getResourceValue("metadata_operation_alert_warning_message"));
     }
   }
 
@@ -174,7 +193,9 @@ export class PicklistPreviewComponent implements OnInit {
                 this.isNexIdAvailable = (this.transitObject && this.transitObject.itemIndex >= 0 && (this.transitObject.recordNo < this.transitObject.totalRecords));
 
                 //this.getDefaultLayout(this.entityName);
-
+                
+                this.setbreadcums(data);
+                
                 this.data.storage = this.transitObject;
                 var currentUrl = this.router.url;
                 //this.router.navigate([currentUrl + "/preview/" + this.entityId]);
@@ -212,7 +233,8 @@ export class PicklistPreviewComponent implements OnInit {
                 this.isNexIdAvailable = (this.transitObject && this.transitObject.itemIndex >= 0 && (this.transitObject.recordNo < this.transitObject.totalRecords));
 
                 //this.getDefaultLayout(this.entityName);
-
+                this.setbreadcums(data);
+                
                 this.data.storage = this.transitObject;
                 var currentUrl = this.router.url;
                 this.doCheck = false;
@@ -337,4 +359,11 @@ export class PicklistPreviewComponent implements OnInit {
 
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
-  }}
+  }
+
+  setbreadcums(data) {
+    let objeidtable: any = JSON.parse(localStorage.getItem("editableColumnname"))
+    this.breadcrumsService.setBreadcums_at_last({ elementName: data.result[0][objeidtable.columnname], 'elementURL': "" ,'isGroup':false}, "");
+  }
+
+}

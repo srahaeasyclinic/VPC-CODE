@@ -25,23 +25,30 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
    
     public class BOMComponentAttributeValue : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("EntityContext")]
         public override EntityContext EntityContext => new EntityContext(InfoType.BOMComponentAttributeValue);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20025-ST01", "Standard"}
         };
 
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+
+        [DisplayName("BOM component attribute Id")]
         public Guid BOMComponentAttributeId { get; set; }
-        public PickList<AttributeValue> AttributeValueCode { get; set; }
+        //public PickList<AttributeValue> AttributeValueCode { get; set; }
     }
 }

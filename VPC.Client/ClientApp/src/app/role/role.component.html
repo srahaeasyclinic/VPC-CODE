@@ -1,8 +1,8 @@
-<div class="text-header">{{getResourceValue("Roles")}}</div>
+<div class="text-header">{{getResourceValue("role_pluralname")}}</div>
 <div class="detailsMenu">
   <div class="msg-tips-left">
-    <div class="msg-entrance" ngbTooltip="{{getResourceValue('Create')}}" container="body" (click)="open(addrolecontent)">
-      <i class="fa fa-plus"></i>{{getResourceValue("Create")}}
+    <div class="msg-entrance" ngbTooltip="{{getResourceValue('role_operation_create')}}" container="body" (click)="open(addrolecontent)">
+      <i class="fa fa-plus"></i>{{getResourceValue("operation_create")}}
     </div>
   </div>
 </div>
@@ -10,13 +10,13 @@
   <div class="r-filter-page">
     <kendo-grid [kendoGridBinding]="gridRoleData" [pageSize]="10" [pageable]="true" [sortable]="true"
       [filterable]="true" [groupable]="true" [style.height.%]="100">
-      <kendo-grid-column field="name" title="{{getResourceValue('Role_Field_Name')}}" [width]="140">
+      <kendo-grid-column field="name" title="{{getResourceValue('role_field_name')}}" [width]="140">
         <ng-template kendoGridCellTemplate let-gridRoleData>
           <a class="gridLink" (click)="goToRoleDetail(gridRoleData)">{{gridRoleData.name}}</a>
         </ng-template>
       </kendo-grid-column>
 
-      <kendo-grid-column field="roleTypeName" title="{{getResourceValue('Role_Field_Type')}}" [width]="40">
+      <kendo-grid-column field="roleTypeName" title="{{getResourceValue('role_field_type')}}" [width]="40">
         <ng-template kendoGridCellTemplate let-gridRoleData>
           {{gridRoleData.roleTypeName}}
         </ng-template>
@@ -31,7 +31,7 @@
 
 <ng-template #addrolecontent let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <label>{{getResourceValue("AddRole")}} </label>
+    <label>{{getResourceValue("role_label_add")}} </label>
     <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -39,11 +39,11 @@
   <div class="modal-body">
     <div class="row">
         <div class="col-md-12 form-group">
-            <label>{{getResourceValue("Role_Field_Name")}}</label>
+            <label>{{getResourceValue("role_field_name")}}</label>
             <input type="text" class="input-control" [(ngModel)]="roleInfo.name" name="name" />
           </div>
           <div class="col-md-12 form-group">
-            <label>{{getResourceValue("Role_Field_Type")}}</label>
+            <label>{{getResourceValue("role_field_type")}}</label>
             <select class="input-control" placeholder="Type" [(ngModel)]="roleInfo.roleType" name="roleType">
               <option *ngFor="let roleType of roleTypes" value={{roleType.id}}>
                 {{roleType.name}}
@@ -52,8 +52,9 @@
           </div>
     </div>    
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="d('Cross click')">{{getResourceValue('Cancel')}}</button>
-        <button type="button" class="btn btn-primary" (click)="addRole()">{{getResourceValue("Role_Operation_Save")}}</button>
+        <button type="button" class="btn btn-primary" (click)="addRole()">{{getResourceValue("operation_update")}}</button>
+      <button type="button" class="btn btn-secondary" (click)="d('Cross click')">{{getResourceValue('task_cancel')}}</button>
+       
       </div>
   </div>
   

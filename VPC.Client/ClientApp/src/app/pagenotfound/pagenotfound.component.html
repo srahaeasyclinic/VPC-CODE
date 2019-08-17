@@ -1,0 +1,12 @@
+<div class="page-wrapper">
+    <div class="no-page-info">
+        <h1>{{model.title}}</h1>
+        <h2>{{model.subtitle}}</h2>
+        <p>{{model.body}} <br>
+           
+           <span *ngIf="!model.isAuthorize">
+                <a [routerLink]="['']">Return to Login</a>
+           </span>
+        </p>
+    </div>
+</div>

@@ -1,6 +1,7 @@
 using System;
 using VPC.Metadata.Business.DataAnnotations;
 using VPC.Metadata.Business.Entity.Configuration;
+using VPC.Metadata.Business.Validator;
 
 namespace VPC.Metadata.Business.DataTypes
 {
@@ -24,6 +25,8 @@ namespace VPC.Metadata.Business.DataTypes
         public DOBDate()
         {
             base.ControlType = ControlType.DateOfBirth;
+             var defaultValueValidattor = new DefaultValueValidator (ControlType);
+            this.AddValidator (defaultValueValidattor);
         }
     }
 }

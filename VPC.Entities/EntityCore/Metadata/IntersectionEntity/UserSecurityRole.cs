@@ -20,13 +20,17 @@ namespace VPC.Entities.EntityCore.Metadata.IntersectionEntity
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public InternalId TenantId { get; set; }
+        [DisplayName("User Id")]
         public Lookup<User> UserId { get; set; }
+        [DisplayName("Role Id")]
         public Lookup<SecurityRole> RoleId { get; set; }
     }
 

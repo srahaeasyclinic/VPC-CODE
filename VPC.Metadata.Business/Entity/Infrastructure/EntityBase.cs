@@ -7,5 +7,6 @@ namespace VPC.Metadata.Business.Entity.Infrastructure
     {      
         public abstract InternalId InternalId { get; set; }
         public abstract EntityContext EntityContext { get; }
+        
     }
 }

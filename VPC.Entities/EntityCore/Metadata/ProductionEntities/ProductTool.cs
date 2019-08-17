@@ -23,26 +23,35 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
    
     public class ProductTool : PrimaryEntity, IItem<Item>
     {
+        [DisplayName ("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.ProductTool);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName ("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName ("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName ("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20041-ST01", "Standard"}
         };
 
+        [DisplayName ("Sub type")]
         public override XSmallText SubType { get; set; }
+
         [Tagable]
+        [DisplayName ("Product code")]
         public XSmallText ProductCode { get; set; }
+
         [Tagable]
+        [DisplayName ("Tool")]
         public PickList<Tool> Tool { get; set; }
     }
 }

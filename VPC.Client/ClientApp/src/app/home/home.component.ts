@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params, Route, UrlTree, UrlSegmentGroup, UrlSegment, UrlSerializer } from '@angular/router';
 import { Spinkit } from 'ng-http-loader';
-import { MenuService } from '../services/menu.service';
+import { MenuService, MenuContextObject } from '../services/menu.service';
 import { MenuItem } from '../model/menuItem';
 import { NewMenuItem } from '../model/menuItem';
 import * as _ from 'lodash';
@@ -17,6 +17,9 @@ import { Type } from '@angular/compiler';
 import { CommonService } from '../services/common.service';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { Resource } from '../model/resource';
+import { forEach } from '@angular/router/src/utils/collection';
+import { element } from '@angular/core/src/render3';
+import { Ibreadcrumbs } from '../bread-crumb/BreadcrumbsService';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -35,10 +38,12 @@ export class HomeComponent implements OnInit {
   public childMenu: any;
   public resource: Resource;
 
-  public groups: Array<NewMenuItem> = [];
+  public groups: NewMenuItem[] = [];
   public menus: Array<NewMenuItem>;
   public currentGroup: NewMenuItem;
   public currentMenu: NewMenuItem;
+  currentmenuId: string;
+  breadcum: Ibreadcrumbs[];
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -49,19 +54,21 @@ export class HomeComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    var cacheMenus = this.menuService.getCacheMenus();
-    if (cacheMenus == null) {
-      this.router.navigate(['']);
-    } else {
-      this.menus = cacheMenus;
-      //console.log('data ', this.menus);
-      //console.log('data ', this.menus);
-      this.groups = _.uniqBy(this.menus, 'groupName');
-    }
+    //debugger;
+    this.setbreadcrums();
+    // var cacheMenus = this.menuService.getCacheMenus();
+    // if (cacheMenus == null) {
+    //   this.loadMenu();
+    // } else {
+    //   this.menus = cacheMenus;
+    //   //console.log('data ', this.menus);
+    //   //console.log('data ', this.menus);
+    //   this.groups = _.uniqBy(this.menus, 'groupName');
+    // }
     // var cacheResource=this.globResource.getGlobalResources();
     // if(cacheResource==null){
     //   this.globResource.getResource();
-      this.resource=this.globResource.getGlobalResources();
+    this.resource = this.globResource.getGlobalResources();
     // }
     // else{
     //   this.resource=cacheResource;
@@ -69,60 +76,74 @@ export class HomeComponent implements OnInit {
     //console.log('Home Resource '+JSON.stringify( this.resource));
 
   }
-  nevigate(objectName: string, groupName: string, menuName: string) {
-    var url = objectName + "/" + groupName + "/" + menuName;
-    this.router.navigate([url]);
-  }
-  private navigateUrl(group: NewMenuItem) {
-    //console.log('group ', group);
-    this.menuService.setCacheGroup(group);
-    var firstMenu = this.firstElementFromGroup(group);
-    var groupName = this.commonService.getTrimStr(group.groupName);
-    var menuName = this.getMenuName(firstMenu);
-    this.menuService.setCacheMenu(firstMenu);
-    var objectName = this.getObjectName(group, firstMenu);
-    this.nevigate(objectName, groupName, menuName);
-  }
+  setbreadcrums()
+  {
+     this.breadcum = [{
+      elementName: 'Dashboard',
+      elementURL: '',
+      isGroup: false
+    }]
 
-  getObjectName(group: NewMenuItem, menu: NewMenuItem): string {
-    var objectManager = this.commonService.getVirtualGroup(group.menuTypeId, menu.actionTypeId);
-    // var objectManager = "";
+  }
+  // public nevigateChildren(menu: NewMenuItem) {
+  //   this.breadcum = []
+  //   this.currentMenu = menu;
+  //   this.currentmenuId = menu.id;
+  //   this.menuService.setCacheMenu(menu);//this.currentGroup.groupName
+  //   let menuNameUpper = this.getMenuName(menu);
+  //   let menuName = this.commonService.getTrimmenuStr(menuNameUpper).toLocaleLowerCase();
+  //   this.menuItem = menu.name;
+  //   let url = this.getchildURL(menu, menuName);
 
-    // if (group.menuTypeId == 1) {
-    //   objectManager = "object-manager";
-    // } else if (group.menuTypeId == 2) {
-    //   objectManager = "picklist-manager";
-    //   //  url =objectManager+"/"+groupName.toLowerCase()+"/"+menuName.toLowerCase();
-    // } else if (group.menuTypeId == 3) {
-    //   if (menu.actionTypeId == 2) {
-    //     objectManager = "entity-designer";
-    //   } else if (menu.actionTypeId == 3) {
-    //     objectManager = "picklist-designer";
-    //   }
-    // } else if (group.menuTypeId == 4) {
-    //   objectManager = "configuration-manager";
-    // }
-    return objectManager;
-  }
+  //   this.breadcum = this.menuService.getbreadcums();
 
-  getMenuName(firstMenu: NewMenuItem): string {
-    var menuName = "";
-    if (firstMenu.actionTypeId == 2 || firstMenu.actionTypeId == 3) {
-      menuName = this.commonService.getTrimStr(firstMenu.name);
-    } else {
-      menuName = (firstMenu.referenceEntityId != "") ? this.commonService.getTrimStr(firstMenu.referenceEntityId) : this.commonService.getTrimStr(firstMenu.wellKnownLink);
-    }
-    return menuName;
-  }
-  firstElementFromGroup(groupName: NewMenuItem): NewMenuItem {
-    var menuName: NewMenuItem = null;
-    this.menus.forEach(element => {
-      if (element.groupName == groupName.groupName) {
-        menuName = element;
-        return;
-      }
-    });
-    return menuName;
-  }
+  //   this.router.navigate([url]);
+  // }
+
+  // getchildURL(menu: NewMenuItem, menuName: string): string {
+  //   if (menu == null && menu == undefined) {
+  //     return "dashboard";
+  //   }
+  //   let groupname = this.menus.find(d => d.groupId == menu.groupId && d.id == menu.parentId);
+
+  //   let url = "";
+  //   var objectManager = this.menuService.getVirtualGroup(this.currentMenu.menuTypeId, this.currentMenu.actionTypeId);
+
+  //   if (menu.menuTypeId == 3) {
+  //     this.setmenuContext(menu, menuName, groupname.name, groupname.id, menu.name, menu.id);
+  //     url = objectManager + "/" + this.commonService.getTrimmenuStr(groupname.name).toLocaleLowerCase() + "/" + this.commonService.getTrimmenuStr(menu.name).toLocaleLowerCase();
+  //   }
+  //   // else if (menu.menuTypeId==4)
+  //   // {
+  //   //    url = objectManager+"/"+this.commonService.getTrimmenuStr(groupname.name).toLocaleLowerCase() + "/" + this.commonService.getTrimmenuStr(menu.name).toLocaleLowerCase()  +"/" + menuName.toLowerCase();
+  //   //   }
+  //   else {
+  //     this.setmenuContext(menu, menuName, groupname.name, groupname.id, menu.name, menu.id);
+  //     url = this.commonService.getTrimmenuStr(groupname.name).toLocaleLowerCase() + "/" + this.commonService.getTrimmenuStr(menu.name).toLocaleLowerCase();
+  //   }
+  //   return url;
+  // }
+  // getUrl(groupName: string, leftgroupName: string, menuName: string): string {
+  //   if (this.currentGroup == null) return;
+  //   let url = "";
+  //   var objectManager = this.menuService.getVirtualGroup(this.currentMenu.menuTypeId, this.currentMenu.actionTypeId);
+  //   if (this.currentMenu.menuTypeId == 3) {
+
+  //     url = objectManager + "/" + groupName.toLowerCase() + "/" + leftgroupName.toLocaleLowerCase();
+  //   }
+  //   // else if (this.currentMenu.menuTypeId==4)
+  //   // {
+  //   //    url = objectManager+"/"+groupName.toLowerCase() + "/" + leftgroupName.toLocaleLowerCase()  +"/" + menuName.toLowerCase();
+  //   //   }
+  //   else {
+  //     url = groupName.toLowerCase() + "/" + leftgroupName.toLocaleLowerCase(); //"/" + menuName.toLowerCase();
+  //   }
+
+  //   return url;
+  // }
+
+ 
+
+ // }
 
 }

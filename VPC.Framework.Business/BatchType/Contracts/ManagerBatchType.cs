@@ -17,16 +17,19 @@ namespace VPC.Framework.Business.BatchType.Contracts
 {
  public interface IManagerBatchType
     {    
-        bool Create(Guid tenantId, BatchTypeInfo info);
-        bool Update(Guid tenantId, BatchTypeInfo info);
-        bool CreateBatchTypes(Guid tenantId, List<BatchTypeInfo> infos);
-        bool Delete(Guid tenantId, Guid batchTypeId);
-        bool UpdateStatus(Guid tenantId, Guid batchTypeId);  
-        List<BatchTypeInfo> GetBatchTypes(Guid tenantId);
-        BatchTypeInfo GetBatchType(Guid tenantId,Guid batchTypeId);
+    //     bool Create(Guid tenantId, BatchTypeInfo info);
+    //     bool Update(Guid tenantId, BatchTypeInfo info);
+    //     bool CreateBatchTypes(Guid tenantId, List<BatchTypeInfo> infos);
+    //     bool Delete(Guid tenantId, Guid batchTypeId);
+    //     bool UpdateStatus(Guid tenantId, Guid batchTypeId);  
+    //     List<BatchTypeInfo> GetBatchTypes(Guid tenantId);
+    //     BatchTypeInfo GetBatchType(Guid tenantId,Guid batchTypeId);
+        
+    //     List<KeyValuePair<Guid,BatchTypeInfo>>  GetEnabledBatchTypes();
+    //    void AssignTaskForProcessing(Guid tenantId,BatchTypeInfo type);
 
-        List<KeyValuePair<Guid,BatchTypeInfo>>  GetEnabledBatchTypes();
-       // void AssignTaskForProcessing(Guid tenantId,BatchTypeInfo type);
+        List<VPC.Entities.BatchType.BatchType>  GetEnabledBatchType();
+        VPC.Entities.BatchType.BatchType GetBatchTypeByContext(Guid tenantId,BatchTypeContextEnum context);
     }
     
     public  class ManagerBatchType : IManagerBatchType
@@ -39,46 +42,48 @@ namespace VPC.Framework.Business.BatchType.Contracts
             {
             }
 
-            bool IManagerBatchType.Create(Guid tenantId, BatchTypeInfo info)
-        {
-            info.BatchTypeId=Guid.NewGuid();
-            return  _adminBatchType.Create(tenantId,info);
-        }
+        // bool IManagerBatchType.Create(Guid tenantId, BatchTypeInfo info)
+        // {
+        //     info.BatchTypeId=Guid.NewGuid();
+        //     return  _adminBatchType.Create(tenantId,info);
+        // }
         
-        bool IManagerBatchType.Update(Guid tenantId, BatchTypeInfo info)
-        {
-            return  _adminBatchType.Update(tenantId,info);
-        }
+        // bool IManagerBatchType.Update(Guid tenantId, BatchTypeInfo info)
+        // {
+        //     return  _adminBatchType.Update(tenantId,info);
+        // }
 
-        bool IManagerBatchType.CreateBatchTypes(Guid tenantId, List<BatchTypeInfo> infos)
-        {
-            return _adminBatchType.CreateBatchTypes(tenantId,infos);
-        }
+        // bool IManagerBatchType.CreateBatchTypes(Guid tenantId, List<BatchTypeInfo> infos)
+        // {
+        //     return _adminBatchType.CreateBatchTypes(tenantId,infos);
+        // }
 
-        bool IManagerBatchType.Delete(Guid tenantId, Guid batchTypeId)
-        {
-            return  _adminBatchType.Delete(tenantId,batchTypeId);
-        }
-        bool IManagerBatchType.UpdateStatus(Guid tenantId, Guid batchTypeId)
-        {
-            return  _adminBatchType.UpdateStatus(tenantId,batchTypeId);
-        }
+        // bool IManagerBatchType.Delete(Guid tenantId, Guid batchTypeId)
+        // {
+        //     return  _adminBatchType.Delete(tenantId,batchTypeId);
+        // }
+        // bool IManagerBatchType.UpdateStatus(Guid tenantId, Guid batchTypeId)
+        // {
+        //     return  _adminBatchType.UpdateStatus(tenantId,batchTypeId);
+        // }
 
-        List<BatchTypeInfo> IManagerBatchType.GetBatchTypes(Guid tenantId)
-        {
-           return  _reviewBatchType.GetBatchTypes(tenantId);
-        }
+        // List<BatchTypeInfo> IManagerBatchType.GetBatchTypes(Guid tenantId)
+        // {
+        //    return  _reviewBatchType.GetBatchTypes(tenantId);
+        // }
 
 
-        BatchTypeInfo IManagerBatchType.GetBatchType(Guid tenantId, Guid batchTypeId)
-        {
-           return  _reviewBatchType.GetBatchType(tenantId,batchTypeId);
-        }
+        // BatchTypeInfo IManagerBatchType.GetBatchType(Guid tenantId, Guid batchTypeId)
+        // {
+        //    return  _reviewBatchType.GetBatchType(tenantId,batchTypeId);
+        // }
 
-        List<KeyValuePair<Guid,BatchTypeInfo>>  IManagerBatchType.GetEnabledBatchTypes()
-        {
-             return  _reviewBatchType.GetEnabledBatchTypes();
-        }
+        // List<KeyValuePair<Guid,BatchTypeInfo>>  IManagerBatchType.GetEnabledBatchTypes()
+        // {
+        //      return  _reviewBatchType.GetEnabledBatchTypes();
+        // }
+
+       
         // void IManagerBatchType.AssignTaskForProcessing(Guid tenantId,BatchTypeInfo type)
         // {
         //     var shouldRun = true;
@@ -106,7 +111,7 @@ namespace VPC.Framework.Business.BatchType.Contracts
         //                     }
 
         //                 }
-                        
+
 
         //                 //check scheduler
         //                 var batchtype = typeof(IBatchTypes);
@@ -146,7 +151,20 @@ namespace VPC.Framework.Business.BatchType.Contracts
         //         }
         //     }
         // }       
-   
-   
+        
+
+        
+        //-----------------------------------------------------------------
+        List<VPC.Entities.BatchType.BatchType>  IManagerBatchType.GetEnabledBatchType()
+        {
+            return  _reviewBatchType.GetEnabledBatchType();
+        }
+
+         VPC.Entities.BatchType.BatchType IManagerBatchType.GetBatchTypeByContext(Guid tenantId, BatchTypeContextEnum context)
+        {
+          return  _reviewBatchType.GetBatchTypeByContext(tenantId,context);
+        }
+
+
     }
 }

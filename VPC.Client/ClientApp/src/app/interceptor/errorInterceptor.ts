@@ -14,6 +14,7 @@ import {
 import { LoginService } from "../login/login.service";
 import { Router } from "@angular/router";
 import { of } from "rxjs/internal/observable/of";
+import { GlobalResourceService } from "src/app/global-resource/global-resource.service";
 
 @Injectable({
   providedIn: "root"
@@ -22,7 +23,8 @@ export class ErrorInterceptor implements HttpInterceptor {
   constructor(
     private loginService: LoginService,
     private router: Router,
-    private toster: TosterService
+    private toster: TosterService,
+    public globalResourceService: GlobalResourceService,
   ) { }
 
   intercept(
@@ -30,36 +32,51 @@ export class ErrorInterceptor implements HttpInterceptor {
     newRequest: HttpHandler
   ): Observable<HttpEvent<any>> {
     return newRequest.handle(request).pipe(
-      catchError(err => {
+      catchError(err => {        
         //console.log('Error Code- ' + err.status);
-        if (err.status === 403) {
-          this.toster.showWarning("Unauthorized.");
-          this.loginService.logout();
-          return Observable.throw(err);
-        } else if (err.status === 501) {
-          return Observable.throw(err);
-        } else if (err.status === 401) {
-          //this.toster.showError(errorreponse); invalid
-          err.message = "Invalid credential!";
-          return Observable.throw(err);
-        } else if (err.status === 208) {
-          this.toster.showError(err.error.text);
-          return Observable.throw(err);
-        }
-        else if (err.status === 404) {
-          this.toster.showError(err.error);
-          return Observable.throw(err);
-        }
-        else if (err.status === 520) {
-          //console.log('520',JSON.stringify(err));
-          this.toster.showError(err.error);
-          return Observable.throw(err);
-        }
-        else {
-          let errorreponse = err.error.message || err.statusText;
+        // if (err.status === 403) {
+        //   this.toster.showWarning("Unauthorized.");
+        //   this.loginService.logout();
+        //   return Observable.throw(err);
+        // } else if (err.status === 501) {
+        //   return Observable.throw(err);
+        // } else if (err.status === 401) {
+        //   //this.toster.showError(errorreponse); invalid
+        //   err.message = "Invalid credential!";
+        //   return Observable.throw(err);
+        // } else if (err.status === 208) {
+        //   this.toster.showError(err.error.text);
+        //   return Observable.throw(err);
+        // }
+        // else if (err.status === 404) {
+        //   this.toster.showError(err.error);
+        //   return Observable.throw(err);
+        // }
+        // else if (err.status === 520) {
+        //   this.toster.showError(err.error);
+        //   return Observable.throw(err);
+        // }
+        // else {
+        //   let errorreponse = err.error.message || err.statusText;
 
-          //console.log(' errorreponse intercept' + errorreponse);
-          //console.log(' err intercept' + JSON.stringify(err));
+
+        //   if (
+        //     errorreponse.includes("Unknown Error") ||
+        //     errorreponse == undefined) {
+        //     errorreponse = globalErrorMessage;
+        //   }
+
+        //   this.toster.showError(errorreponse);
+        //   return Observable.throw(err);
+        // }
+        if(err.status !== null)
+        {
+          this.toster.showError(this.getResourceValue("error_code_" + err.status));
+          return Observable.throw(err);
+        }
+        else 
+        {
+          let errorreponse = err.error.message || err.statusText;
 
           if (
             errorreponse.includes("Unknown Error") ||
@@ -71,25 +88,11 @@ export class ErrorInterceptor implements HttpInterceptor {
           return Observable.throw(err);
         }
 
-        // if (err.status === 403) {
-        //   this.toster.showWarning('Unauthorized.');
-        // }
-
-        // if (err.status===500)
-        // {
-        //   this.toster.showError('Something went wrong, please try again later!');
-        // }
-        // if (err.status===0 || err.status===403)
-        // {
-        //   this.toster.showError('Something went wrong, please login and try again!');
-        // }
-
-        //console.log('Error Code- ' + err.status);
-        //console.log(' err intercept'+JSON.stringify(err));
-        // const error = err.error.message || err.statusText;
-        //console.log('Error intercept'+JSON.stringify(error));
-        // return Observable.throw(err);
       })
     );
+  }
+
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
   }
 }

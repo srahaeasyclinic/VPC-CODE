@@ -10,7 +10,7 @@ import { LayoutService } from '../meta-data/layout/layout.service';
 import { LayoutModel } from '../model/layoutmodel';
 import { ResourceService } from '../services/resource.service';
 import{GlobalResourceService} from '../global-resource/global-resource.service';
-import { MenuService } from '../services/menu.service'
+import { MenuService, MenuType } from '../services/menu.service'
 
 @Component({
   selector: 'general-ui-display',
@@ -41,22 +41,25 @@ export class GeneralUiDisplayComponent implements OnInit {
 
     public globalResourceService:GlobalResourceService,
     private layoutService: LayoutService,
-    public menuService: MenuService) { }
+    private menuService: MenuService) { }
 
   ngOnInit() {
+   // console.log('GeneralUiDisplayComponent');
+
     this.resource = this.globalResourceService.getGlobalResources();
     this.subType = this.activatedRoute.snapshot.queryParams["subType"];
-
-    //Get the entity name from URL route 
-    this.activatedRoute.parent.params.subscribe((urlPath) => {
-      this.entityName = urlPath["name"];
+   let result=this.menuService.getMenuconext();
+      this.entityName = result.param_name;
+      if (result && result.menuType == MenuType.Entity) {
+    //  this.activatedRoute.parent.params.subscribe((urlPath) => {
+      //this.entityName = urlPath["name"];
 
       if (this.activatedRoute.snapshot.url !== null && this.activatedRoute.snapshot.url.length > 0)
         this.pageType = this.activatedRoute.snapshot.url[0].path
 
       if (this.entityName) {
         if (this.pageType !== null && this.pageType !== "" && this.pageType === "new") {
-          this.getDefaultLayout(this.entityName, 'Form', this.subType, 'New');
+          this.getDefaultLayout(this.entityName, 'Form', this.subType, 'Add');
         }
         else if (this.pageType !== null && this.pageType !== "" && this.pageType === "edit") {
           this.getDefaultLayout(this.entityName, 'Form', this.subType, 'Edit');
@@ -68,9 +71,16 @@ export class GeneralUiDisplayComponent implements OnInit {
           this.getDefaultLayout(this.entityName, 'List', '', '');
         }
       } else {
-        this.toster.showWarning(this.getResourceValue('UrlTemperedorNoEntityNameoridFoundorEntityNotYetDecorated'));
+
+        this.toster.showWarning(this.getResourceValue('metadata_operation_alert_warning_message'));
       }
-    });
+    // });
+    }
+
+  
+
+    //Get the entity name from URL route 
+   
   }
 
   // private getlayoutDetails() {

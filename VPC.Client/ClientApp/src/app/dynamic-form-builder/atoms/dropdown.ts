@@ -8,15 +8,18 @@ import { AtomBase } from './atombase';
 import { Broadcaster } from '../messaging/broadcaster';
 import { MessageEvent } from '../messaging/message.event';
 import { Payload } from '../messaging/payload';
+import * as _ from 'lodash';
+import { NgbModalOptions, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { MODALS } from '../tree.config';
 
 
 @Component({
   selector: 'dropdown',
   template: `
-  
   <div *ngIf="mode!==2 && !field.readOnly">
 
   <div *ngIf="(field.dataType.toLowerCase() == 'lookup' || field.dataType.toLowerCase() == 'picklist') && (field.defaultValue==null || (field.defaultValue!=null && field.defaultValue.toLowerCase() != 'parentsgroup'))">
+      <a class="text-link" (click)="configureQuickAddSetting(field)" *ngIf="field.isQuickAddSupported">Quick add</a>
       <select class="input-control" [id]="field.name" [(ngModel)]="field.value" [disabled] = "field.readOnly" (change)="onChange($event)">
         <option *ngFor="let opt of results" [value]="opt.internalId">
             <span *ngIf="field.dataType.toLowerCase() == 'lookup'">{{opt.itemName}}</span>
@@ -31,7 +34,7 @@ import { Payload } from '../messaging/payload';
 
     <div *ngIf="field.dataType.toLowerCase() == 'metadatapicklist'">
      <select class="input-control" [id]="field.name" [(ngModel)]="field.value" (change)="onChange($event)">
-        <option *ngFor="let opt of results" [value]="opt.name">
+        <option *ngFor="let opt of results | orderBy: 'displayName'" [value]="opt.name">
         {{opt.displayName}}
         </option>
       </select>
@@ -85,12 +88,14 @@ export class DropDownComponent implements OnInit, DoCheck {
   public dropdown: any;
   public dropdownValue: string = "";
   private previousNodeName: string;
-
+  public order: string = 'displayName';
+  isQuickAddSupported: boolean = false;
   constructor(
     private refChangedetect: ChangeDetectorRef,
     private treeService: TreeService,
     public broadcaster: Broadcaster,
-    private communicationService: CommunicationService
+    private communicationService: CommunicationService,
+    private modalService: NgbModal
   ) {
     this.changeEmitter = new EventEmitter();
   }
@@ -123,13 +128,22 @@ export class DropDownComponent implements OnInit, DoCheck {
     if (this.field.broadcastingTypes) {
       for (let i = 0; i < this.field.broadcastingTypes.length; i++) {
         //console.log('ded '+this.field.broadcastingTypes[i]);
-        if (this.field.broadcastingTypes.length > 0 && this.field.broadcastingTypes[i] == "EntityRichTextBox")
-        {
-           localStorage.setItem('tagsname', this.field.value);
+        if (this.field.broadcastingTypes.length > 0 && this.field.broadcastingTypes[i] == "EntityRichTextBox") {
+          localStorage.setItem('tagsname', this.field.value);
         }
       }
     }
-///-------------------------------------------------
+    ///-------------------------------------------------
+    //edit==1
+    // if (this.field.supportedQuickAddModes) {
+    //   this.field.supportedQuickAddModes.forEach(mode => {
+    //     if(mode==this.mode){
+    //       this.isQuickAddSupported = true;
+    //       return;
+    //     }
+    //   });
+    // }
+    //---
   }
   onChange(value) {
 
@@ -209,16 +223,11 @@ export class DropDownComponent implements OnInit, DoCheck {
       .subscribe(
         data => {
           if (data) {
-            this.results = data.result;
-
-
-            this.results.forEach(element => {
-              if (element.internalId == fieldObj.value) {
-                this.dropdownValue = element.itemName;
-              }
-            });
-
+            //this.results = data.result;
+            this.results = _.sortBy(data.result, 'itemName');
+            this.mapSelectedField(fieldObj, "entity");
           }
+          this.refChangedetect.detectChanges();
         },
         error => {
           console.log(error);
@@ -232,7 +241,8 @@ export class DropDownComponent implements OnInit, DoCheck {
       .subscribe(
         data => {
           if (data) {
-            this.results = data.result;
+            //this.results = data.result;
+            this.results = _.sortBy(data.result, 'text');
             if (this.results != null) {
               // this.dropdown = this.results.find(a => a.internalId === fieldObj.value);
 
@@ -244,20 +254,19 @@ export class DropDownComponent implements OnInit, DoCheck {
               // console.log(JSON.stringify(this.field));
 
               if (this.field.defaultValue != null && this.field.defaultValue.toLowerCase() == "onlyparents") {
-
                 this.results = data.result.filter(s => s.parentPicklist == null);
-
               }
 
-
-              this.results.forEach(element => {
-                if (element.internalId == fieldObj.value) {
-                  this.dropdownValue = element.text;
-                }
-              });
+              this.mapSelectedField(fieldObj, "picklist");
+              // this.results.forEach(element => {
+              //   if (element.internalId == fieldObj.value) {
+              //     this.dropdownValue = element.text;
+              //   }
+              // });
 
             }
           }
+          this.refChangedetect.detectChanges();
         },
         error => {
           console.log(error);
@@ -265,7 +274,7 @@ export class DropDownComponent implements OnInit, DoCheck {
   }
 
   metadatapicklistValues(url: string, fieldObj: any) {
-    // console.log(url);
+    //console.log(url);
     // console.log("metadatapicklist-");
     var field = fieldObj;
     this.treeService.getMetaDataPicklistValues(url)
@@ -280,6 +289,7 @@ export class DropDownComponent implements OnInit, DoCheck {
               this.dropdownValue = fieldObj.value;
             }
           }
+          this.refChangedetect.detectChanges();
         },
         error => {
           console.log(error);
@@ -300,4 +310,46 @@ export class DropDownComponent implements OnInit, DoCheck {
   // }
 
 
+  configureQuickAddSetting(field: any) {
+    if (this.mode != 1) return;
+    var modalName = "quickadd";
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false
+    };
+    const modalRef = this.modalService.open(MODALS[modalName], ngbModalOptions);
+    modalRef.componentInstance.entityName = field.typeOf;
+    modalRef.componentInstance.saveEvent.subscribe((receivedEntry) => {
+      this.addHiddenPropInDropDown(receivedEntry, field);
+      modalRef.close();
+      // if (this.mode == 1) {
+      //   this.loadLayout();
+      // }
+    });
+  }
+
+  addHiddenPropInDropDown(node: any, whereToAdd: any) {
+    node.fields.forEach(element => {
+      element.entityName = whereToAdd.typeOf;
+      whereToAdd.fields.push(element);
+      if (element.fields) {
+        this.addHiddenPropInDropDown(element, whereToAdd);
+      }
+    });
+  }
+
+  mapSelectedField(fieldObj, propertyName: string) {
+    this.results.forEach(element => {
+      if (element.internalId == fieldObj.value) {
+        this.dropdownValue = (propertyName == "entity") ? element.itemName : element.text;
+      }
+    });
+    if (!this.field.value) {
+      var data = _.find(this.field.validators, function (o) { return o.name!=null && o.name.toLowerCase() === "defaultvaluevalidator"; });
+      if (data != null && data.defaultValue != "") {
+        this.field.value = data.defaultValue;
+        this.refChangedetect.detectChanges();
+      }
+    }
+  }
 }

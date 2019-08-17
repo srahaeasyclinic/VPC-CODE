@@ -28,7 +28,7 @@ export class FormService{
       layout.layoutType = layoutModel.layoutType;
       //layout.Subtype = layoutModel.Subtype;
       layout.subtypeeName = layoutModel.SubtypeeName;
-      layout.Context = layoutModel.Context;
+      layout.context = layoutModel.Context;
       return this.http.post(layoutUrl, layout);
       //return this.http.post(layoutUrl, layout)
       //  .subscribe(

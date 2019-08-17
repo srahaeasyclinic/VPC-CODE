@@ -73,7 +73,7 @@ export class CountryNewComponent implements OnInit {
       .subscribe(
         data => {
           //console.log('data');
-          this.toster.showSuccess(this.resource[this.generateResourceName("CountrySavedSuccessfully")]);
+          this.toster.showSuccess(this.globalResourceService.saveSuccessMessage("country_displayname"));
           this.router.navigate(['country']);
         },
         error => {
@@ -96,5 +96,9 @@ export class CountryNewComponent implements OnInit {
   {
      if (!word) return word;
      return word[0].toLowerCase() + word.substr(1);
+   }
+
+   getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
    }
 }

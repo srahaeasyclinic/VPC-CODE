@@ -1,85 +1,74 @@
-<div class="text-header">{{entityInfo.pluralName}}</div>
-<div class="detailsMenu">
+<div class="text-header">{{getResourceValue(picklistName+"_displayname")}}</div>
+<div class="detailsMenu" *ngIf="showToolbar">
   <div class="msg-tips-left">
-    <!-- <div class="msg-entrance">
-      <span class="fa fa-users fa-fw"></span>
-    </div>
-    <div class="msg-entrance">
-      <span class="fa fa-cloud-upload fa-fw"></span>
-    </div> -->
-  </div>
-  <!-- <div class="msg-tips-wrap">
-    <div class="msg-entrance">
-      <span class="fa fa-th fa-fw"></span>
-    </div>
-    <div class="msg-entrance">
-      <span class="fa fa-th-large fa-fw"></span>
-    </div>
-    <div class="msg-entrance">
-      <span class="fa fa-filter fa-fw"></span>
-    </div>
-    <div class="msg-entrance">
-      <span class="fa fa-star fa-fw"></span>
-    </div>
-    <div class="msg-entrance">
-      <span class="fa fa-info-circle fa-fw"></span>
-    </div>
-  </div> -->
+  </div> 
 </div>
 <div class="page-content" id="page-content-wrapper" [ngClass]="{'sticky' : isSticky}">
-    
+
   <div class="card-wrapper">
     <div class="card-block">
       <div class="card-row">
-        <div class="text-less-important">{{getResourceValue("EntityName")}}</div>
-        <div class="text-label-preview margin-top-15">{{entityInfo.name}}</div>
+        <div class="text-less-important">{{getResourceValue("metadata_picklistname")}}</div>
+        <!-- <div class="text-label-preview margin-top-15">{{entityInfo.name}}</div> -->
+        <span class="text-label-preview margin-left--5" ngbTooltip="{{entityInfo.name?.length>15?entityInfo.name:''}}"
+          container="body">&nbsp;{{entityInfo.name | slice:0:15}}</span>
+        <span *ngIf="entityInfo.name?.length>15">...</span>
       </div>
       <div class="card-row">
-        <div class="text-less-important">{{getResourceValue("DisplayName")}}</div>
-        <div class="text-label-preview margin-top-15">{{entityInfo.displayName}}</div>
+        <div class="text-less-important">{{getResourceValue("metadata_displayname")}}</div>
+          <span class="text-label-preview margin-left--5" ngbTooltip="{{getResourceValue(picklistName+'_displayname').length>15?getResourceValue(picklistName+'_displayname'):''}}"
+            container="body">&nbsp;{{getResourceValue(picklistName+"_displayname") | slice:0:15}}</span>
+          <span *ngIf="getResourceValue(picklistName+'_displayname').length>15">...</span>
       </div>
       <div class="card-row">
-        <div class="text-less-important">{{getResourceValue("DisplayNames")}}</div>
-        <div class="text-label-preview margin-top-15">{{entityInfo.pluralName}}</div>
+        <div class="text-less-important">{{getResourceValue("metadata_displaynames")}}</div>
+        <!-- <div class="text-label-preview margin-top-15">{{getResourceValue(picklistName+"_pluralname")}}</div> -->
+        <span class="text-label-preview margin-left--5" ngbTooltip="{{getResourceValue(picklistName+'_pluralname').length>15?getResourceValue(picklistName+'_pluralname'):''}}"
+          container="body">&nbsp;{{getResourceValue(picklistName+"_pluralname") | slice:0:15}}</span>
+        <span *ngIf="getResourceValue(picklistName+'_pluralname').length>15">...</span>
       </div>
     </div>
 
     <div class="card-block">
-      <div class="card-row">
-        <div class="text-less-important">{{getResourceValue("Workflow")}}</div>
+      <!-- <div class="card-row">
+        <div class="text-less-important">{{getResourceValue("metadata_workflow")}}</div>
         <div class="text-label-preview margin-top-15">
           <span> {{entityInfo.supportWorkflow ? "Yes" : "No"}}</span>
         </div>
-      </div>
+      </div> -->
       <div class="card-row">
-        <div class="text-less-important">{{getResourceValue("Import")}}</div>
-        <div class="text-label-preview margin-top-15">
+        <div class="text-less-important">{{getResourceValue("metadata_import")}}</div>
+        <span class="text-label-preview">
           <span> {{entityInfo.configurations && entityInfo.configurations.allowImpor ? "Yes" : "No"}}</span>
-        </div>
+        </span>
       </div>
       <div class="card-row">
-        <div class="text-less-important">{{getResourceValue("Export")}}</div>
-        <div class="text-label-preview margin-top-15">
+        <div class="text-less-important">{{getResourceValue("metadata_export")}}</div>
+        <span class="text-label-preview">
           <span> {{entityInfo.configurations && entityInfo.configurations.allowExport ? "Yes" : "No"}}</span>
-        </div>
+        </span>
       </div>
     </div>
     <div class="card-block">
       <div class="card-row">
-        <div class="text-less-important">{{getResourceValue("Type")}}</div>
-        <div class="text-label-preview margin-top-15">{{entityInfo.type}}</div>
+        <div class="text-less-important">{{getResourceValue("metadata_type")}}</div>
+        <span class="text-label-preview">{{entityInfo.type}}</span>
       </div>
     </div>
 
 
   </div>
   <div class="tab-block">
-    <nav mat-tab-nav-bar>
-      <a mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" routerLinkActive #rla="routerLinkActive"
-        [active]="rla.isActive">
-        {{link.label}}
-      </a>
-    </nav>
-    <router-outlet></router-outlet>
+    <div class="parent-tab">
+      <nav mat-tab-nav-bar>
+        <a class="mat-tab-item" mat-tab-link *ngFor="let link of navLinks" [routerLink]="link.path" (click)="showToolbar=false" routerLinkActive #rla="routerLinkActive"
+          [active]="rla.isActive">
+          {{getResourceValue('metadata_'+link.label.toLowerCase())}}
+        </a>
+      </nav>
+    </div>
+    <div>
+      <router-outlet></router-outlet>
+    </div>
   </div>
 </div>

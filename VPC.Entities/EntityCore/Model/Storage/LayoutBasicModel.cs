@@ -4,6 +4,9 @@ namespace VPC.Entities.EntityCore.Model.Storage
 {
     public class LayoutBasicModel
     {
+
+ public string TypeId { get; set; }
+
         public Guid Id { get; set; }
         //public Guid Type { get; set; }
         public string EntityId { get; set; }
@@ -24,6 +27,8 @@ namespace VPC.Entities.EntityCore.Model.Storage
         public bool DefaultLayout { get; set; }
         public string ShowDefault { get; set; }
         public LayoutFor LayoutFor { get; set; }
+
+        public string VersionName{get;set;}
     }
 
     public enum LayoutType
@@ -41,8 +46,9 @@ namespace VPC.Entities.EntityCore.Model.Storage
 
     public enum LayoutContext
     {
-        New = 1,
-        Edit = 2
+        Add = 1,
+        Edit = 2,
+        QuickAdd = 3
     }
 
     public enum LayoutFor
@@ -50,4 +56,6 @@ namespace VPC.Entities.EntityCore.Model.Storage
         Metadata = 1,
         Picklist = 2,
     }
+
+
 }

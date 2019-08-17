@@ -1,0 +1,94 @@
+<div class="modal-header">
+    <label>{{header}}</label>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="ruleName">{{getResourceValue("rule_field_name")}}</label>
+                <label class="text-mandatory margin-left-3">*</label>
+                <input type="text" [name]="ruleName" [(ngModel)]="data.ruleName" class="form-control"
+                    #ruleName="ngModel">
+            </div>
+        </div>
+
+
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="ruleTypeName">{{getResourceValue("rule_field_ruletype")}}</label><label
+                    class="text-mandatory margin-left-3">*</label>
+                <select name="ruleTypeName" class="form-control" [(ngModel)]="selectedRuleType"
+                    (ngModelChange)="onRuleTypeChange($event)">
+                    <option *ngFor="let vals of ruleTypes" [ngValue]="vals">{{vals.text}}</option>
+                </select>
+            </div>
+        </div>
+
+        <div *ngIf="data.sourceList!= null" class="col-md-12">
+            <label>{{getResourceValue("rule_field_sources")}}</label><label
+                class="text-mandatory margin-left-3">*</label>
+            <a class="margin-left-10 text-link"
+                (click)="onSourceAddClick()">{{getResourceValue("rule_task_addsources")}}</a>
+            <div class="row" *ngFor="let s of data.sourceList; let i = index">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <select name={{i}} [(ngModel)]="s.selectedItem" class="input-control"
+                            (ngModelChange)="onSourceChange($event, s)">
+                            <option *ngFor="let item of fieldSource" [ngValue]="item">{{item.name}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <my-tree *ngIf="s.selectedItem!=null" [mode]="1" [rootNode]="s.selectedItem" [resource]="resource"
+                        [selectedNode]="s.value" class="tree-role" [entityName]="name">
+                    </my-tree>
+                </div>
+                <div class="col-md-1">
+                    <a class="btn-small-action pull-right margin-top-5" *ngIf="data.sourceList.length>1"
+                        (click)="onSourceRemoveClick(s)" ngbTooltip="{{getResourceValue('rule_operation_delete')}}"
+                        container="body">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <label for="targetName">{{getResourceValue("rule_field_targets")}}</label><label
+                class="text-mandatory margin-left-3">*</label>
+            <a class="margin-left-10 text-link"
+                (click)="onTargetAddClick()">{{getResourceValue("rule_task_addtargets")}}</a>
+        </div>
+        <div class="col-md-12 form-group" *ngFor="let t of data.targetList; let ti = index">
+            <div class="row">
+                <div class="col-md-11">
+                    <select class="form-control" name="{{ti}}" [(ngModel)]="data.targetList[ti].selectedItem"
+                        (ngModelChange)="onTargetChange($event,ti)">
+                        <option *ngFor="let opt of fieldSource" [ngValue]="opt">
+                            {{opt.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <a class="btn-small-action pull-right margin-top-5" *ngIf="data.targetList.length>1"
+                        (click)="onTargetRemoveClick(t)" ngbTooltip="{{getResourceValue('rule_operation_delete')}}"
+                        container="body">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="upsertRule()">{{button}}</button>
+        <button type="button" class="btn btn-secondary"
+            (click)="modal.dismiss('cancel click')">{{getResourceValue("task_cancel")}}</button>
+       
+    </div>
+
+</div>

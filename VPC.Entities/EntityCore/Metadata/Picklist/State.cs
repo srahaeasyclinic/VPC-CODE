@@ -22,6 +22,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public override InternalId TenantId { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -29,6 +30,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [BasicColumn]
@@ -39,6 +41,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         public override PicklistContext PicklistContext => new PicklistContext(PicklistType.State);
 
         [NonQueryable]
+        [DisplayName("Name")]
+
         public override Name Name { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
@@ -46,6 +50,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [ColumnName("[Key]")]
         [FreeTextSearch]
         [NotNull]
+        [DisplayName("Key")]
+
         public SmallText Key { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
@@ -53,6 +59,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [ColumnName("[Text]")]
         [FreeTextSearch]
         [NotNull]
+        [DisplayName("Text")]
+
         public MediumText Text { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -61,6 +69,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [InverseProperty("[Id]")]
         [ColumnName("[UpdatedBy]")]
         [NotNull]
+        [DisplayName("Updated by")]
+
         public Lookup<User> UpdatedBy { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -68,6 +78,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NonQueryable]
         [ColumnName("[UpdatedDate]")]
         [NotNull]
+        [DisplayName("Updated date")]
+
         public DateTime UpdatedDate { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -75,6 +87,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [ColumnName("[Active]")]
         [NotNull]
         [SimpleSearch]
+        [DisplayName("Active")]
+
         //[DynamicPrefix(InfoPrefix.Active_State)]
         public PickList<Active> Active { get; set; }
 
@@ -82,12 +96,16 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [DefaultValue("0")]
         [ColumnName("[IsDeletetd]")]
         [NotNull]
+        [DisplayName("Is deleted")]
+
         public BooleanType IsDeletetd { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [DefaultValue("0")]
         [ColumnName("[Flagged]")]
         [NotNull]
+        [DisplayName("Flagged")]
+
         public BooleanType Flagged { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]

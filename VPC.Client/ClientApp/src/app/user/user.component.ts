@@ -16,6 +16,9 @@ import { TosterService } from '../services/toster.service';
 import { Subject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/internal/operators";
 import swal from 'sweetalert2';
+import { GlobalResourceService } from '../global-resource/global-resource.service';
+import { MenuService } from '../services/menu.service';
+
 
 @Component({
   selector: 'user',
@@ -59,7 +62,9 @@ export class UserComponent implements OnInit {
     private formBuilder: FormBuilder,
     private resourceService: ResourceService,
     private commonService: CommonService,
-    private toster: TosterService
+    private toster: TosterService,
+    private globalResourceService: GlobalResourceService,
+    public menuService: MenuService
   ) {
   }
 
@@ -465,7 +470,7 @@ export class UserComponent implements OnInit {
                 //this.getDefaultLayout(this.entityName);
                 this.getDefaultLayout(this.entityname, "List", "", "");
               } else {
-                this.toster.showWarning(this.resource[this.generateResourceName("UrlTemperedorNoEntityNameoridFoundorEntityNotYetDecorated")]);
+                this.toster.showWarning(this.getResourceValue("metadata_operation_alert_warning_message"));
               }
             });
             
@@ -550,7 +555,7 @@ export class UserComponent implements OnInit {
     if(operationName.toLocaleLowerCase() === 'create')
       this.router.navigate(["/users/new"]);
     else
-      this.toster.showWarning(this.resource[this.generateResourceName("NeedImplementaion")]);
+      this.toster.showWarning(this.getResourceValue("metadata_method_notimplement_message"));
   }
 
   configToggle() {
@@ -558,35 +563,49 @@ export class UserComponent implements OnInit {
   }
 
   onActionClick(event) {
+    if (event.actionName.toLowerCase() == 'delete'){
+    this.globalResourceService.openDeleteModal.emit()
+    this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+      this.layoutService.deleteUserValues(this.entityname, event.id).subscribe(result => {
+        if (result) {
+          this.displayPreview();
+        }
+      });
 
-    if (event.actionName.toLowerCase() == 'delete') {
-      swal({
-        title: this.resource[this.generateResourceName("Areyousure")],
-        text: this.resource[this.generateResourceName("Youwntbeabletorevertthis")],
-        type: this.resource[this.generateResourceName('warning')],
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: this.resource[this.generateResourceName('Yesdeleteit')],
-        showLoaderOnConfirm: true,
-      })
-        .then((willDelete) => {
-          if (willDelete.value) {
-            this.layoutService.deleteUserValues(this.entityname, event.id).subscribe(result => {
-              if (result) {
-                this.displayPreview();
-              }
-            });
+    });
 
-          } else {
-            //write the code for cancel click
-          }
+  }
 
-        });
-    }
+
+
+    // if (event.actionName.toLowerCase() == 'delete') {
+    //   swal({
+    //     title: this.getResourceValue("common_message_areyousure"),
+    //     text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+    //     type: 'warning',
+    //     showCancelButton: true,
+    //     confirmButtonColor: '#3085d6',
+    //     cancelButtonColor: '#d33',
+    //     confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+    //     showLoaderOnConfirm: true,
+    //   })
+    //     .then((willDelete) => {
+    //       if (willDelete.value) {
+    //         this.layoutService.deleteUserValues(this.entityname, event.id).subscribe(result => {
+    //           if (result) {
+    //             this.displayPreview();
+    //           }
+    //         });
+
+    //       } else {
+    //         //write the code for cancel click
+    //       }
+
+    //     });
+    // }
 
     if (event.actionName.toLowerCase() == 'UpdateStatus'.toLowerCase()) {
-      this.toster.showWarning(this.resource[this.generateResourceName("MethodNotimplemented")]);
+      this.toster.showWarning(this.getResourceValue("metadata_method_notimplement_message"));
     }
 
   }
@@ -627,5 +646,8 @@ export class UserComponent implements OnInit {
   //   }
 
   // }
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
+  }
 
 }

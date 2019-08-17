@@ -49,7 +49,7 @@ export class CounterComponent implements OnInit {
   }
   ngOnInit() {
     this.resource = this.globalResourceService.getGlobalResources();
-    this.editUpdate = 'Save';
+    this.editUpdate = this.getResourceValue("metadata_operation_save");
     this.counterObj = new counter();
     this.getEntities();
   }
@@ -81,7 +81,7 @@ export class CounterComponent implements OnInit {
 
   //==for entity list==>
   private getEntities() {
-    this.metadataService.getEntities()
+    this.metadataService.getEntities("primaryentity")
       .pipe(first())
       .subscribe(
         data => {
@@ -167,37 +167,37 @@ export class CounterComponent implements OnInit {
 
     let errorMessage: string = "";
     if (this.entity === null || this.entity === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_Entity_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_entity") + "<br/>";
     }
 
     if (this.counterObj.description === "" || this.counterObj.description === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_Description_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_description") + "<br/>";
     }
 
     if (this.counterObj.text === "" || this.counterObj.text === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_Format_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_format") + "<br/>";
     }
 
     if (this.counterObj.counterN === null || this.counterObj.counterN === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_CounterN_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_counterN") + "<br/>";
     }
     if (this.counterObj.counterO === null || this.counterObj.counterO === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_CounterO_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_counterO") + "<br/>";
     }
 
     if (this.counterObj.counterP === null || this.counterObj.counterP === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_CounterP_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_counterP") + "<br/>";
     }
 
     if (this.counterObj.resetCounterN === null || this.counterObj.resetCounterN === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_ResetN_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_resetN") + "<br/>";
     }
     if (this.counterObj.resetCounterO === null || this.counterObj.resetCounterO === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_ResetO_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_resetO") + "<br/>";
     }
 
     if (this.counterObj.resetCounterP === null || this.counterObj.resetCounterP === undefined) {
-      errorMessage += this.getResourceValue("Counter_Field_ResetP_Required_Message") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("counter_field_resetP") + "<br/>";
     }
 
 
@@ -208,7 +208,7 @@ export class CounterComponent implements OnInit {
     }
 
     if (this.validationMsg != '') {
-      this.tosterService.showError(this.getResourceValue("PleaseEnterCorrectFormat"));
+      this.tosterService.showError(this.getResourceValue("counter_correctformat_warning_message"));
       return;
     }
     if (this.counterObj.counterId != undefined) {
@@ -235,7 +235,7 @@ export class CounterComponent implements OnInit {
         data => {
           if (data) {
             var returnData = data;
-            this.tosterService.showSuccess(this.getResourceValue("Counter_Operation_Save_Success_Message"));
+            this.tosterService.showSuccess(this.globalResourceService.createSuccessMessage("counter_displayname"));
             this.getCounters(this.entity.name);
           }
         },
@@ -254,7 +254,7 @@ export class CounterComponent implements OnInit {
           if (data) {
             var returnData = data;
             const modalRef = this.modalService.dismissAll();
-            this.tosterService.showSuccess(this.getResourceValue("Counter_Operation_Update_Success_Message"));
+            this.tosterService.showSuccess(this.globalResourceService.updateSuccessMessage("counter_displayname"));
             this.getCounters(this.entity.name);
           }
         },
@@ -268,7 +268,7 @@ export class CounterComponent implements OnInit {
       var validation = { isValid: true, message: "" }
 
       if (textArry.some(x => x == "")) {
-        validation = { isValid: false, message: this.getResourceValue("IncorrectFormat") }
+        validation = { isValid: false, message: this.getResourceValue("counter_field_format_invalid_message") }
       }
 
       let substrings: string[] = ['y', 'm', 'd', 'w', 'q', 's', 'p', 'o', 'n', 'r']
@@ -276,26 +276,26 @@ export class CounterComponent implements OnInit {
       {
         if (s.length > 0 && Number(s.substr(1)) >= 100) {
           if (substrings.some(function (v) { return s[0].toUpperCase().indexOf(v.toUpperCase()) >= 0; })) {
-            validation = { isValid: false, message: this.getResourceValue("IncorrectFormat") }
+            validation = { isValid: false, message: this.getResourceValue("counter_field_format_invalid_message") }
             break;
           }
         }
         else if (s.length > 0 && s[s.length - 1] == '-' && Number(s.substr(1, s.length - 2)) >= 100) {
           if (substrings.some(function (v) { return s[0].toUpperCase().indexOf(v.toUpperCase()) >= 0; })) {
-            validation = { isValid: false, message: this.getResourceValue("IncorrectFormat") }
+            validation = { isValid: false, message: this.getResourceValue("counter_field_format_invalid_message") }
             break;
           }
         }
 
         else if (s.length > 0 && s[0] == '-' && Number(s.substr(2, s.length)) >= 100) {
           if (substrings.some(function (v) { return s[1].toUpperCase().indexOf(v.toUpperCase()) >= 0; })) {
-            validation = { isValid: false, message: this.getResourceValue("IncorrectFormat") }
+            validation = { isValid: false, message: this.getResourceValue("counter_field_format_invalid_message") }
             break;
           }
         }
         else if (s.length > 0 && s[0] == '-' && s[s.length - 1] == '-' && Number(s.substr(2, s.length - 3)) >= 100) {
           if (substrings.some(function (v) { return s[1].toUpperCase().indexOf(v.toUpperCase()) >= 0; })) {
-            validation = { isValid: false, message: this.getResourceValue("IncorrectFormat") }
+            validation = { isValid: false, message: this.getResourceValue("counter_field_format_invalid_message") }
             break;
           }
         }
@@ -303,7 +303,7 @@ export class CounterComponent implements OnInit {
       return validation;
     }
     else {
-      return validation = { isValid: false, message: this.getResourceValue("IncorrectFormat") }
+      return validation = { isValid: false, message: this.getResourceValue("counter_field_format_invalid_message") }
     }
   }
 

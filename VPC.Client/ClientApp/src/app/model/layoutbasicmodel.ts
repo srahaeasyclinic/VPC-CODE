@@ -9,8 +9,9 @@ export class LayoutBasicModel {
   layoutTypeName: string;
   Subtype: number;
   subtypeeName: string;
-  Context: number;
+  context: number;
   contextName: string;
+  versionName:string;
 
   //CreatedBy: number;
   //CreatedByName: string;
@@ -20,4 +21,5 @@ export class LayoutBasicModel {
   modifiedDate: Date;
   defaultLayout: boolean;
   ShowDefault: string;
+  
 }

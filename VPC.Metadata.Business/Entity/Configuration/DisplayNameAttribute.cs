@@ -12,4 +12,16 @@ namespace VPC.Metadata.Business.Entity.Configuration
         {
         }
     }
+
+    //[AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
+    //public class DisplayNameAttribute : Attribute
+    //{
+    //    public DisplayNameAttribute(string value)
+    //    {
+    //        DisplayName = value;
+    //    }
+
+    //    public string DisplayName { get; } = string.Empty;
+
+    //}
 }

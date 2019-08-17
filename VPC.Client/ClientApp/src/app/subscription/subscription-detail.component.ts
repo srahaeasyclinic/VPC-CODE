@@ -48,7 +48,7 @@ export class SubscriptionDetailComponent implements OnInit {
   ngOnInit() {  
     // this.resource=this.globalResourceService.getGlobalResources();
     this.activatedRoute.params.subscribe((params: Params) => {
-      this.subscriptionId = params['subscriptionId'];
+      this.subscriptionId = params['id'];
     });
       
     this.getSubscriptions();       
@@ -77,22 +77,22 @@ export class SubscriptionDetailComponent implements OnInit {
     
     if(this.subscriptionInfo.name=="")
     {
-      this.toster.showWarning(this.getResourceValue("Nameisrequired"));
+      this.toster.showWarning(this.globalResourceService.requiredValidator("subscription_field_name"));
       return false;
     }else if(this.subscriptionInfo.group==null)
     {
-      this.toster.showWarning(this.getResourceValue("GroupIsRequired"));
+      this.toster.showWarning(this.globalResourceService.requiredValidator("subscription_field_category"));
       return false;
     }else if(this.subscriptionInfo.group.id=="")
     {
-      this.toster.showWarning(this.getResourceValue("GroupIsRequired"));
+      this.toster.showWarning(this.globalResourceService.requiredValidator("subscription_field_category"));
       return false;
     }
    
     this.subscriptionService.updateSubscription(this.subscriptionInfo).pipe(first()).subscribe(
       data => {   
         if (data) {       
-          this.toster.showSuccess(this.getResourceValue("SubscriptionSavedSuccessfully")); 
+          this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("subscription_displayname")); 
         }
       },
       error => {
@@ -147,7 +147,7 @@ private getGroupTypes()
  {
    if(groupId=="")
    {
-    this.toster.showWarning(this.getResourceValue("GroupIsRequired"));
+     this.toster.showWarning(this.globalResourceService.requiredValidator("subscription_field_category"));
      return false;
    }
   var selectedGroup = this.groupTypes.filter((s) => s.text.toLowerCase().indexOf(groupId.toLowerCase()) !== -1);
@@ -166,7 +166,7 @@ private getGroupTypes()
  }
 
  private getEntities() {
-  this.metadataService.getEntities().pipe(first()).subscribe(
+  this.metadataService.getEntities("primaryentity").pipe(first()).subscribe(
       data => {
         if(data){          
           data.forEach((obj) => {
@@ -220,7 +220,7 @@ entityOnCheck(entity)
       data => {
         if(data){
           entity.subscriptionEntity.tenantSubscriptionEntityId = data;    
-          this.toster.showSuccess(this.getResourceValue("SubscriptionSavedSuccessfully"));  
+          this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("subscription_displayname"));  
           this.currentSubscriptionEntity(entity);   
         }
       },
@@ -233,7 +233,7 @@ entityOnCheck(entity)
               if(data){
                 entity.subscriptionEntity={};
                 entity.subscriptionEntity.entityId=entity.name; 
-                this.toster.showSuccess(this.getResourceValue("SubscriptionSavedSuccessfully"));  
+                this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("subscription_displayname"));  
                 this.clearControlOnEntityUnCheck();   
               }
             },
@@ -298,7 +298,7 @@ updateSubscriptionEntity()
     this.subscriptionDetailService.updateSubscriptionEntity(this.subscriptionEntity).pipe(first()).subscribe(
       data => {
         if(data){
-          this.toster.showSuccess(this.getResourceValue("SubscriptionSavedSuccessfully")); 
+          this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("subscription_displayname")); 
         }
           },
       error => {
@@ -384,7 +384,7 @@ private getEntityDetails(entityName,tenantSubscriptionEntityId)
         data => {
           if(data){
             featureReportDashletInfo.subscriptionEntityDetailId=data;
-            this.toster.showSuccess(this.getResourceValue("SubscriptionSavedSuccessfully")); 
+            this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("subscription_displayname")); 
           }
             },
         error => {
@@ -399,7 +399,7 @@ private getEntityDetails(entityName,tenantSubscriptionEntityId)
             featureReportDashletInfo.recurringDuration=0;
             featureReportDashletInfo.oneTimePrice=null;
             featureReportDashletInfo.oneTimeDuration=0;
-            this.toster.showSuccess(this.getResourceValue("SubscriptionSavedSuccessfully")); 
+            this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("subscription_displayname")); 
           }
             },
         error => {
@@ -428,7 +428,7 @@ private getEntityDetails(entityName,tenantSubscriptionEntityId)
     this.subscriptionDetailService.updateEntityDetail(featureReportDashletInfo).pipe(first()).subscribe(
       data => {
         if(data){   
-          this.toster.showSuccess(this.getResourceValue("SubscriptionSavedSuccessfully")); 
+          this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("subscription_displayname")); 
         }
           },
       error => {

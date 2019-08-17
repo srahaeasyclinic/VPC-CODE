@@ -27,24 +27,29 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
     [PrintTask("Print",TaskType.FrontTask,null)]
     public class Manufacturer : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.Manufacturer);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20007-ST01", "Standard"}
         };
 
         [AccessibleLayout((int)LayoutType.List)]
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
     }
 }

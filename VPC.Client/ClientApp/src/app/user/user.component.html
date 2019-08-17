@@ -12,7 +12,7 @@
     </div>
     <div class="msg-drp" *ngIf="sendtobuttons && sendtobuttons.length > 0">
       <div ngbDropdown class="">
-        <a ngbDropdownToggle>{{resource[generateResourceName("Communication")]}}</a>
+        <a ngbDropdownToggle>{{getResourceValue("Communication")}}</a>
         <div ngbDropdownMenu class="d-text">
           <a (click)="buttonOperation(button.name)" *ngFor="let button of sendtobuttons">{{button.name}}</a>
         </div>
@@ -20,7 +20,7 @@
     </div>
     <div class="msg-drp" *ngIf="printbuttons && printbuttons.length > 0">
       <div ngbDropdown class="">
-        <a ngbDropdownToggle>{{resource[generateResourceName("Print")]}}</a>
+        <a ngbDropdownToggle>{{getResourceValue("Print")}}</a>
         <div ngbDropdownMenu class="d-text">
           <a (click)="buttonOperation(button.name)" *ngFor="let button of printbuttons">{{button.name}}</a>
         </div>
@@ -32,8 +32,8 @@
   <div class="right-config-wrap" [ngClass]="{'right-config-wrap-on':isConfigToggle}">
       <div class="msg-tips-wrap">
           <div class="msg-entrance" (click)="configToggle()">
-            <span class="fa fa-search" *ngIf="!isConfigToggle" ngbTooltip="{{resource[generateResourceName('SearchFilter')]}}" container="body" position="left"></span>
-            <span class="fa fa-chevron-right" *ngIf="isConfigToggle" ngbTooltip="{{resource[generateResourceName('CloseFilter')]}}" container="body"></span>
+            <span class="fa fa-search" *ngIf="!isConfigToggle" ngbTooltip="{{getResourceValue('SearchFilter')}}" container="body" position="left"></span>
+            <span class="fa fa-chevron-right" *ngIf="isConfigToggle" ngbTooltip="{{getResourceValue('CloseFilter')}}" container="body"></span>
           </div>
         </div>
 
@@ -45,11 +45,11 @@
         <div *ngFor="let item of layoutInfo.listLayoutDetails.searchProperties">
           <div *ngIf="item.properties.length > 0">
             <div *ngIf="item.name == 'FreeTextSearch'" class="form-group">
-              <label>{{resource[generateResourceName(item.name)]}}</label>
+              <label>{{getResourceValue(item.name)}}</label>
               <input type="text" class="input-control" [(ngModel)]="freetextsearch" (ngModelChange)="onFieldChange($event)" />
             </div>
             <div *ngIf="item.name == 'SimpleSearch'">
-              <label>{{resource[generateResourceName(item.name)]}}</label>
+              <label>{{getResourceValue(item.name)}}</label>
               <div *ngFor="let prop of item.properties">
                 <div *ngIf="prop.controlType==='TextBox'" class="form-group">
                   <input type="text" class="input-control" [(ngModel)]="prop.value" (change)="onChange()" />
@@ -69,7 +69,7 @@
               </div>
             </div>
             <div *ngIf="item.name == 'AdvanceSearch'">
-              <a class="text-link" (click)="openAdvanceSearch(content)">{{resource[generateResourceName(item.name)]}}</a>
+              <a class="text-link" (click)="openAdvanceSearch(content)">{{getResourceValue(item.name)}}</a>
             </div>
           </div>
         </div>
@@ -125,7 +125,7 @@
 
 <ng-template #content let-modal>
   <div class="modal-header">
-    <label>{{resource[generateResourceName("AdvanceSearch")]}}</label>
+    <label>{{getResourceValue("AdvanceSearch")}}</label>
     <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -135,7 +135,7 @@
       <div *ngFor="let item of layoutInfo.listLayoutDetails.searchProperties">
         <div *ngIf="item.name === 'AdvanceSearch'">
           <div *ngFor="let prop of item.properties">
-            <label>{{resource[generateResourceName(prop.name)]}}</label>
+            <label>{{getResourceValue(prop.name)}}</label>
             <div *ngIf="prop.controlType==='TextBox'" class="form-group">
               <input type="text" class="input-control" [(ngModel)]="prop.value">
             </div>
@@ -168,8 +168,8 @@
         </div>
       </div>
       <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{resource[generateResourceName("Cancel")]}}</button>
-          <button type="button" class="btn btn-primary" (click)="AdvanceSearch()">{{resource[generateResourceName("Submit")]}}</button>
+          <button type="button" class="btn btn-primary" (click)="AdvanceSearch()">{{getResourceValue("operation_submit")}}</button>
+          <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("task_cancel")}}</button>
         </div>
   </div>
   

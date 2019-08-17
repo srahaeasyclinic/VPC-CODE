@@ -9,7 +9,7 @@ import { Resource } from '../../model/resource';
   selector: 'custom-setting',
   template: `
   <div class="modal-header">
-    <label id="modal-title">{{getResourceValue('CustomSettings')}}</label>
+    <label id="modal-title">{{getResourceValue('metadata_label_customsettings')}}</label>
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -21,9 +21,16 @@ import { Resource } from '../../model/resource';
             {{view.name}}
           </option>
         </select> 
+
+        <select [(ngModel)]="node.selectedFormOrList" class="input-control">
+          <option *ngFor="let view of selectedFormOrListsource" value={{view.id}}>
+            {{view.name}}
+          </option>
+        </select> 
+
         <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('Cancel')}}</button>
-        <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('Submit')}}</button>
+        <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('operation_submit')}}</button>
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
       </div>
   </div>
   
@@ -36,6 +43,7 @@ export class CustomSettingComponent implements OnInit {
   @Output() saveEvent: EventEmitter<any> = new EventEmitter();
   private columns = [];
   public listsource: Array<any> = [];
+  public selectedFormOrListsource:Array<any> = [{id:1,name:"Form"},{id:2,name:"List"}];
   public resource: Resource;
   
   constructor(public modal: NgbActiveModal, private layoutService: LayoutService,
@@ -45,7 +53,7 @@ export class CustomSettingComponent implements OnInit {
 
   ngOnInit(): void {
     this.resource = this.globalResourceService.getGlobalResources();
-    this.initData();
+    this.initData(); 
   }
   
   private initData() {
@@ -62,6 +70,7 @@ export class CustomSettingComponent implements OnInit {
           console.log(error);
         });
   }
+
   //save called....
   public saveSattings() {
     this.saveEvent.emit(this.node);

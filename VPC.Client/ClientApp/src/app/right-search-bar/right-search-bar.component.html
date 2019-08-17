@@ -1,33 +1,33 @@
 <div *ngIf = "(checkSearchRequired())" class="right-config-wrap" [ngClass]="{'right-config-wrap-on':isExpanded}">
   <div class="msg-tips-wrap">
     <div class="msg-entrance" (click)="isExpanded = !isExpanded">
-      <span class="fa fa-search" *ngIf="!isExpanded" placement="left" ngbTooltip="Search filter" container="body"></span>
-      <span class="fa fa-th fa-chevron-right" *ngIf="isExpanded" ngbTooltip="Close filter" container="body"></span>
+      <span class="fa fa-search" *ngIf="!isExpanded" placement="left" ngbTooltip="{{getResourceValue('metadata_searchfilter')}}" container="body"></span>
+      <span class="fa fa-th fa-chevron-right" *ngIf="isExpanded" ngbTooltip="{{getResourceValue('metadata_closefilter')}}" container="body"></span>
     </div>
   </div>
   <div *ngIf="defaultLayout.listLayoutDetails">
     <div class="right-filter">
       <div *ngFor="let item of defaultLayout.listLayoutDetails.searchProperties">
         <div *ngIf="item.name == 'FreeTextSearch' && item.properties.length > 0" class="form-group">
-          <label >{{getResourceValue(item.name)}}</label>
+          <label >{{getResourceValue('metadata_'+item.name.toLowerCase())}}</label>
           <input type="text" class="input-control" [(ngModel)]="freetextsearch"
             (ngModelChange)="onFreeTextSearch($event)" />
         </div>
         <div *ngIf="item.name == 'SimpleSearch' && item.properties.length > 0">
           <div *ngFor="let prop of item.properties">            
             <div *ngIf="prop.controlType==='TextBox'" class="form-group">
-              <label >{{getResourceValue(prop.name)}</label>
+              <label >{{getResourceValue(entityName+'_field_'+prop.name.toLowerCase())}}</label>
               <input type="text" class="input-control" [(ngModel)]="prop.value" (change)="onSimpleSearch($event)" />
             </div>
             <div *ngIf="prop.controlType==='Dropdown'" class="form-group">
-              <label >{{getResourceValue(prop.name)}}</label>
+              <label >{{getResourceValue(entityName+'_field_'+prop.name.toLowerCase())}}</label>
               <select class="input-control" [(ngModel)]='prop.value' (change)="onSimpleSearch($event)">
                 <option [ngValue]="null"></option>
                 <option *ngFor="let vals of prop.values" [ngValue]="vals.id">{{vals.value}}</option>
               </select>
             </div>
             <div *ngIf="prop.controlType==='Radio'">
-              <label >{{getResourceValue(prop.name)}}</label>
+              <label >{{getResourceValue(entityName+'_field_'+prop.name.toLowerCase())}}</label>
               <label class="control control--radio" *ngFor="let option of prop.values">
                 <span class="text-important">{{ option.value }}</span>
                 <input type="radio" [(ngModel)]="prop.value" (change)="onSimpleSearch($event)" [value]="option.id">
@@ -37,7 +37,7 @@
           </div>
         </div>
         <div *ngIf="item.name == 'AdvanceSearch' && item.properties.length > 0">
-          <a class="text-link" (click)="openAdvanceSearch(content)">{{getResourceValue(item.name)}}</a>
+          <a class="text-link" (click)="openAdvanceSearch(content)">{{getResourceValue('metadata_'+item.name.toLowerCase())}}</a>
         </div>
       </div>
     </div>
@@ -49,7 +49,7 @@
 
 <ng-template #contentExchange let-modal>
   <div class="modal-header">
-    <label>Select subtype</label>
+    <label>{{getResourceValue('metadata_dropdownoption_subtype')}}</label>
     <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -58,7 +58,7 @@
     <form (ngSubmit)="navigate()">
       
         <div class="form-group">
-          <label for="drpType">Sub type</label>
+          <label for="drpType">{{getResourceValue('metadata_subtype')}}</label>
           <select class="input-control" (change)="onSubTypeChange($event.target.value)">
             <option *ngFor="let subtype of subTypes" value={{subtype.name}}>
               {{subtype.name}}
@@ -67,7 +67,7 @@
         </div>
       
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" (click)="navigate('Save click')">Navigate</button>
+        <button type="button" class="btn btn-primary" (click)="navigate('Save click')">{{getResourceValue('metadata_navigate')}}</button>
       </div>
     </form>
   </div>
@@ -75,7 +75,7 @@
 
 <ng-template #content let-modal>
   <div class="modal-header">
-    <label>Advance search</label>
+    <label>{{getResourceValue('metadata_advancesearch')}}</label>
     <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -85,7 +85,7 @@
       <div *ngFor="let item of defaultLayout.listLayoutDetails.searchProperties">
         <div *ngIf="item.name === 'AdvanceSearch'">
           <div *ngFor="let prop of item.properties">
-            <label>{{getResourceValue(prop.name)}}</label>
+            <label>{{getResourceValue(entityName+'_field_'+prop.name.toLowerCase())}}</label>
             <div *ngIf="prop.controlType==='TextBox'" class="form-group">
               <input type="text" class="input-control" [(ngModel)]="prop.value">
             </div>
@@ -119,8 +119,8 @@
         </div>
       </div>
       <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">Cancel</button>
-          <button type="button" class="btn btn-primary" (click)="AdvanceSearch()">Submit</button>
+          <button type="button" class="btn btn-primary" (click)="AdvanceSearch()">{{getResourceValue('operation_submit')}}</button>
+          <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
         </div>
   </div>
   

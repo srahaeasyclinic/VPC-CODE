@@ -1,14 +1,17 @@
 ﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Serialization;
 using Newtonsoft.Json.Linq;
 using VPC.Entities.BatchType;
 using VPC.Entities.Common;
@@ -18,21 +21,29 @@ using VPC.Entities.Common.Functions;
 using VPC.Entities.Common.Reports;
 using VPC.Entities.Email;
 using VPC.Entities.EntityCore.Metadata;
+using VPC.Entities.EntityCore.Model.Query;
 using VPC.Entities.EntityCore.Model.Setting;
+using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Entities.EntitySecurity;
 using VPC.Entities.Role;
 using VPC.Entities.TenantSubscription;
 using VPC.Entities.WorkFlow;
+using VPC.Entities.WorkFlow.Engine.Email;
+using VPC.Framework.Business.BatchItems.APIs;
 using VPC.Framework.Business.BatchType;
+using VPC.Framework.Business.BatchType.Contracts;
+using VPC.Framework.Business.DynamicQueryManager.Contracts;
 using VPC.Framework.Business.EntityResourceManager.Contracts;
 using VPC.Framework.Business.MetadataManager.Contracts;
+using VPC.Framework.Business.SchedulerConfiguration;
+using VPC.Framework.Business.SchedulerConfiguration.Scheduler.Contracts;
 using VPC.Framework.Business.SettingsManager.Contracts;
 
 namespace VPC.Framework.Business.Common
 {
-    public  static class DataUtility
+    public static class DataUtility
     {
-        
+
         public static string GetXmlForIds(List<Guid> ids)
         {
             var sw = new StringWriter();
@@ -89,7 +100,7 @@ namespace VPC.Framework.Business.Common
 
             return sw.ToString();
         }
-         
+
         // public static string GetXmlForConfigurationRoleAssignment(List<ConfigurationRoleAssignment> roleAssigns)
         // {
         //     var sw = new StringWriter();
@@ -165,7 +176,7 @@ namespace VPC.Framework.Business.Common
         //     return sw.ToString();
         // }
 
-      public static String GetXmlForRoles(List<RoleInfo> infos)
+        public static String GetXmlForRoles(List<RoleInfo> infos)
         {
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
@@ -173,10 +184,10 @@ namespace VPC.Framework.Business.Common
                 writer.WriteStartElement("Roles");
                 foreach (RoleInfo info in infos)
                 {
-                    writer.WriteStartElement("Role");                    
+                    writer.WriteStartElement("Role");
                     writer.WriteAttributeString("RoleId", info.RoleId.ToString());
                     writer.WriteAttributeString("Name", info.Name.ToString());
-                    writer.WriteAttributeString("RoleType", ((int)info.RoleType).ToString());  
+                    writer.WriteAttributeString("RoleType", ((int)info.RoleType).ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -184,26 +195,26 @@ namespace VPC.Framework.Business.Common
             return sw.ToString();
         }
 
-        public static String GetXmlForBatchTypes(List<BatchTypeInfo> infos)
-        {
-            var sw = new StringWriter();
-            using (XmlWriter writer = new XmlTextWriter(sw))
-            {
-                writer.WriteStartElement("BatchTypes");
-                foreach (BatchTypeInfo info in infos)
-                {
-                    writer.WriteStartElement("BatchType");                    
-                    writer.WriteAttributeString("BatchTypeId", info.BatchTypeId.ToString());
-                    writer.WriteAttributeString("Context", info.Context.ToString());
-                    writer.WriteAttributeString("Priority", info.Priority.ToString());
-                    writer.WriteAttributeString("IdleTime", info.IdleTime.ToString());  
-                    writer.WriteAttributeString("bStatus", info.Status.ToString());               
-                    writer.WriteEndElement();
-                }
-                writer.WriteEndElement();
-            }
-            return sw.ToString();
-        }
+        // public static String GetXmlForBatchTypes(List<BatchTypeInfo> infos)
+        // {
+        //     var sw = new StringWriter();
+        //     using (XmlWriter writer = new XmlTextWriter(sw))
+        //     {
+        //         writer.WriteStartElement("BatchTypes");
+        //         foreach (BatchTypeInfo info in infos)
+        //         {
+        //             writer.WriteStartElement("BatchType");                    
+        //             writer.WriteAttributeString("BatchTypeId", info.BatchTypeId.ToString());
+        //             writer.WriteAttributeString("Context", info.Context.ToString());
+        //             writer.WriteAttributeString("Priority", info.Priority.ToString());
+        //             writer.WriteAttributeString("IdleTime", info.IdleTime.ToString());  
+        //             writer.WriteAttributeString("bStatus", info.Status.ToString());               
+        //             writer.WriteEndElement();
+        //         }
+        //         writer.WriteEndElement();
+        //     }
+        //     return sw.ToString();
+        // }
 
         public static String GetXmlForWorkFlows(List<WorkFlowInfo> infos)
         {
@@ -213,11 +224,11 @@ namespace VPC.Framework.Business.Common
                 writer.WriteStartElement("WorkFlows");
                 foreach (WorkFlowInfo info in infos)
                 {
-                    writer.WriteStartElement("WorkFlow");                    
+                    writer.WriteStartElement("WorkFlow");
                     writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());
                     writer.WriteAttributeString("EntityId", info.EntityId.ToString());
-                    writer.WriteAttributeString("Status", info.Status.ToString());                   
-                    writer.WriteAttributeString("SubTypeCode", info.SubTypeCode.ToString()); 
+                    writer.WriteAttributeString("Status", info.Status.ToString());
+                    writer.WriteAttributeString("SubTypeCode", info.SubTypeCode.ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -226,7 +237,7 @@ namespace VPC.Framework.Business.Common
         }
 
         public static String GetXmlSubscriptionEntities(List<TenantSubscriptionEntityInfo> infos)
-        {            
+        {
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
             {
@@ -235,14 +246,14 @@ namespace VPC.Framework.Business.Common
                 {
                     writer.WriteStartElement("SubscriptionEntity");
                     writer.WriteAttributeString("TenantSubscriptionEntityId", info.TenantSubscriptionEntityId.ToString());
-                    writer.WriteAttributeString("TenantSubscriptionId", info.TenantSubscriptionId.ToString());  
+                    writer.WriteAttributeString("TenantSubscriptionId", info.TenantSubscriptionId.ToString());
 
                     writer.WriteAttributeString("EntityId", info.EntityId.ToString());
-                    if(info.LimtNumber.HasValue)
+                    if (info.LimtNumber.HasValue)
                     {
                         writer.WriteAttributeString("LimtNumber", info.LimtNumber.Value.ToString());
                         writer.WriteAttributeString("LimitType", ((int)info.LimitType).ToString());
-                    } 
+                    }
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -251,7 +262,7 @@ namespace VPC.Framework.Business.Common
         }
 
         public static String GetXmlSubscriptionEntityDetails(List<TenantSubscriptionEntityDetailInfo> infos)
-        {            
+        {
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
             {
@@ -260,14 +271,14 @@ namespace VPC.Framework.Business.Common
                 {
                     writer.WriteStartElement("SubscriptionEntityDetail");
                     writer.WriteAttributeString("SubscriptionEntityDetailId", info.SubscriptionEntityDetailId.ToString());
-                    writer.WriteAttributeString("SubscriptionEntityId", info.SubscriptionEntityId.ToString());  
+                    writer.WriteAttributeString("SubscriptionEntityId", info.SubscriptionEntityId.ToString());
                     writer.WriteAttributeString("Context", info.Context.ToString());
-                    if(info.RecurringPrice.HasValue)
+                    if (info.RecurringPrice.HasValue)
                     {
                         writer.WriteAttributeString("RecurringPrice", info.RecurringPrice.Value.ToString());
                         writer.WriteAttributeString("RecurringDuration", ((int)info.RecurringDuration).ToString());
-                    } 
-                    if(info.OneTimePrice.HasValue)
+                    }
+                    if (info.OneTimePrice.HasValue)
                     {
                         writer.WriteAttributeString("OneTimePrice", info.OneTimePrice.Value.ToString());
                         writer.WriteAttributeString("OneTimeDuration", ((int)info.OneTimeDuration).ToString());
@@ -281,7 +292,7 @@ namespace VPC.Framework.Business.Common
 
         public static String GetXmlForWorkFlowStepsSequence(List<WorkFlowStepInfo> infos)
         {
-            var count=1;
+            var count = 1;
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
             {
@@ -290,8 +301,8 @@ namespace VPC.Framework.Business.Common
                 {
                     writer.WriteStartElement("WorkFlowStep");
                     writer.WriteAttributeString("WorkFlowStepId", info.WorkFlowStepId.ToString());
-                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());                   
-                    writer.WriteAttributeString("SequenceNumber", (count++).ToString()); 
+                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());
+                    writer.WriteAttributeString("SequenceNumber", (count++).ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -300,7 +311,7 @@ namespace VPC.Framework.Business.Common
         }
 
         public static String GetXmlForWorkFlowStepsCreate(List<WorkFlowStepInfo> infos)
-        {        
+        {
 
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
@@ -310,14 +321,14 @@ namespace VPC.Framework.Business.Common
                 {
                     writer.WriteStartElement("WorkFlowStep");
                     writer.WriteAttributeString("WorkFlowStepId", info.WorkFlowStepId.ToString());
-                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());                   
-                    writer.WriteAttributeString("TransitionTypeId", info.TransitionType.Id.ToString()); 
-                    writer.WriteAttributeString("SequenceNumber", info.SequenceNumber.ToString()); 
-                    writer.WriteAttributeString("IsAssigmentMandatory", info.IsAssigmentMandatory.ToString()); 
-                    if(info.AllotedTime.HasValue)
-                    writer.WriteAttributeString("AllotedTime", info.AllotedTime.ToString()); 
-                    if(info.CriticalTime.HasValue)
-                     writer.WriteAttributeString("CriticalTime", info.CriticalTime.ToString()); 
+                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());
+                    writer.WriteAttributeString("TransitionTypeId", info.TransitionType.Id.ToString());
+                    writer.WriteAttributeString("SequenceNumber", info.SequenceNumber.ToString());
+                    writer.WriteAttributeString("IsAssigmentMandatory", info.IsAssigmentMandatory.ToString());
+                    if (info.AllotedTime.HasValue)
+                        writer.WriteAttributeString("AllotedTime", info.AllotedTime.ToString());
+                    if (info.CriticalTime.HasValue)
+                        writer.WriteAttributeString("CriticalTime", info.CriticalTime.ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -326,19 +337,19 @@ namespace VPC.Framework.Business.Common
         }
 
         public static String GetXmlForWorkFlowInnerStepsCreate(List<WorkFlowInnerStepInfo> infos)
-        {       
-             var sw = new StringWriter();
+        {
+            var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
             {
                 writer.WriteStartElement("WorkFlowInnerSteps");
                 foreach (WorkFlowInnerStepInfo info in infos)
                 {
                     writer.WriteStartElement("WorkFlowInnerStep");
-                    writer.WriteAttributeString("InnerStepId", info.InnerStepId.ToString()); 
+                    writer.WriteAttributeString("InnerStepId", info.InnerStepId.ToString());
                     writer.WriteAttributeString("WorkFlowStepId", info.WorkFlowStepId.ToString());
-                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString()); 
-                    writer.WriteAttributeString("TransitionTypeId", info.TransitionType.Id.ToString()); 
-                    writer.WriteAttributeString("SequenceNumber", info.SequenceNumber.ToString());                   
+                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());
+                    writer.WriteAttributeString("TransitionTypeId", info.TransitionType.Id.ToString());
+                    writer.WriteAttributeString("SequenceNumber", info.SequenceNumber.ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -347,7 +358,7 @@ namespace VPC.Framework.Business.Common
         }
         public static String GetXmlForWorkFlowInnerStepsSequence(List<WorkFlowInnerStepInfo> infos)
         {
-        var count=1;
+            var count = 1;
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
             {
@@ -355,8 +366,8 @@ namespace VPC.Framework.Business.Common
                 foreach (WorkFlowInnerStepInfo info in infos)
                 {
                     writer.WriteStartElement("WorkFlowInnerStep");
-                    writer.WriteAttributeString("InnerStepId", info.InnerStepId.ToString()); 
-                    writer.WriteAttributeString("SequenceNumber", (count++).ToString());                   
+                    writer.WriteAttributeString("InnerStepId", info.InnerStepId.ToString());
+                    writer.WriteAttributeString("SequenceNumber", (count++).ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -365,7 +376,7 @@ namespace VPC.Framework.Business.Common
         }
 
         public static String GetXmlForWorkFlowRoles(List<WorkFlowRoleInfo> infos)
-        {        
+        {
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
             {
@@ -373,11 +384,11 @@ namespace VPC.Framework.Business.Common
                 foreach (WorkFlowRoleInfo info in infos)
                 {
                     writer.WriteStartElement("WorkFlowRole");
-                    writer.WriteAttributeString("RoleAssignmetId", info.RoleAssignmetId.ToString()); 
-                    writer.WriteAttributeString("WorkFlowStepId", info.WorkFlowStepId.ToString()); 
-                    writer.WriteAttributeString("RoleId", info.RoleId.ToString());  
-                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString()); 
-                    writer.WriteAttributeString("AssignmentOperationType", info.AssignmentOperationType.ToString());                  
+                    writer.WriteAttributeString("RoleAssignmetId", info.RoleAssignmetId.ToString());
+                    writer.WriteAttributeString("WorkFlowStepId", info.WorkFlowStepId.ToString());
+                    writer.WriteAttributeString("RoleId", info.RoleId.ToString());
+                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());
+                    writer.WriteAttributeString("AssignmentOperationType", info.AssignmentOperationType.ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -385,7 +396,7 @@ namespace VPC.Framework.Business.Common
             return sw.ToString();
         }
 
-      public static String GetXmlForWorkFlowProcessTask(List<WorkFlowProcessTaskInfo> infos)
+        public static String GetXmlForWorkFlowProcessTask(List<WorkFlowProcessTaskInfo> infos)
         {
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
@@ -394,11 +405,11 @@ namespace VPC.Framework.Business.Common
                 foreach (WorkFlowProcessTaskInfo info in infos)
                 {
                     writer.WriteStartElement("WorkFlowProcessTask");
-                    writer.WriteAttributeString("WorkFlowProcessTaskId", info.WorkFlowProcessTaskId.ToString()); 
-                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString()); 
-                    writer.WriteAttributeString("WorkFlowProcessId", info.WorkFlowProcessId.ToString());  
-                    writer.WriteAttributeString("ProcessCode", info.ProcessCode.ToString()); 
-                    writer.WriteAttributeString("SequenceCode", info.SequenceCode.ToString());                  
+                    writer.WriteAttributeString("WorkFlowProcessTaskId", info.WorkFlowProcessTaskId.ToString());
+                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());
+                    writer.WriteAttributeString("WorkFlowProcessId", info.WorkFlowProcessId.ToString());
+                    writer.WriteAttributeString("ProcessCode", info.ProcessCode.ToString());
+                    writer.WriteAttributeString("SequenceCode", info.SequenceCode.ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -406,7 +417,7 @@ namespace VPC.Framework.Business.Common
             return sw.ToString();
         }
 
-       public static String GetXmlForWorkFlowOperations(List<WorkFlowOperationInfo> infos)
+        public static String GetXmlForWorkFlowOperations(List<WorkFlowOperationInfo> infos)
         {
             var sw = new StringWriter();
             using (XmlWriter writer = new XmlTextWriter(sw))
@@ -415,10 +426,10 @@ namespace VPC.Framework.Business.Common
                 foreach (WorkFlowOperationInfo info in infos)
                 {
                     writer.WriteStartElement("WorkFlowOperation");
-                    writer.WriteAttributeString("WorkFlowOperationId", info.WorkFlowOperationId.ToString()); 
-                    writer.WriteAttributeString("OperationType",((int)info.OperationType).ToString());  
-                     writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString()); 
-                      writer.WriteAttributeString("IsSync", info.IsSync.ToString());                  
+                    writer.WriteAttributeString("WorkFlowOperationId", info.WorkFlowOperationId.ToString());
+                    writer.WriteAttributeString("OperationType", ((int)info.OperationType).ToString());
+                    writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());
+                    writer.WriteAttributeString("IsSync", info.IsSync.ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -426,7 +437,7 @@ namespace VPC.Framework.Business.Common
             return sw.ToString();
         }
 
-      
+
 
         public static String GetXmlForWorkFlowProcess(List<WorkFlowProcessInfo> infos)
         {
@@ -439,9 +450,9 @@ namespace VPC.Framework.Business.Common
                     writer.WriteStartElement("WorkFlowProces");
                     writer.WriteAttributeString("WorkFlowProcessId", info.WorkFlowProcessId.ToString());
                     writer.WriteAttributeString("WorkFlowId", info.WorkFlowId.ToString());
-                    writer.WriteAttributeString("OperationOrTransactionId", info.OperationOrTransactionId.ToString());  
+                    writer.WriteAttributeString("OperationOrTransactionId", info.OperationOrTransactionId.ToString());
                     writer.WriteAttributeString("OperationOrTransactionType", info.OperationOrTransactionType.ToString());
-                    writer.WriteAttributeString("ProcessType", info.ProcessType.ToString());                                    
+                    writer.WriteAttributeString("ProcessType", info.ProcessType.ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -480,17 +491,20 @@ namespace VPC.Framework.Business.Common
 
         public static List<EntitySecurityInfo> GetFunctionEntityWise(string entityId)
         {
-            var dic = new List<EntitySecurityInfo>();           
+            var dic = new List<EntitySecurityInfo>();
             var fields = new FunctionContext().GetType().GetFields(BindingFlags.Public | BindingFlags.Static);
             foreach (FieldInfo fi in fields)
             {
                 var descriptionObj = fi.GetCustomAttributes(false).OfType<EntityGroup>().SingleOrDefault();
-                if (descriptionObj!=null && !string.IsNullOrEmpty(descriptionObj.GetGroupId() )  && (descriptionObj.GetGroupId()==entityId) )
-                {                    
-                    dic.Add(new EntitySecurityInfo{Name=descriptionObj != null ? descriptionObj.GetGroupName() : fi.Name,
-                                                   FunctionContext=Guid.Parse(fi.GetValue(new Guid()).ToString()) });
+                if (descriptionObj != null && !string.IsNullOrEmpty(descriptionObj.GetGroupId()) && (descriptionObj.GetGroupId() == entityId))
+                {
+                    dic.Add(new EntitySecurityInfo
+                    {
+                        Name = descriptionObj != null ? descriptionObj.GetGroupName() : fi.Name,
+                        FunctionContext = Guid.Parse(fi.GetValue(new Guid()).ToString())
+                    });
                 }
-               
+
             }
             return dic;
         }
@@ -498,66 +512,75 @@ namespace VPC.Framework.Business.Common
 
         public static List<TenantSubscriptionEntityDetailInfo> GetFeatureEntityWise(string entityId)
         {
-            var dic = new List<TenantSubscriptionEntityDetailInfo>();           
+            var dic = new List<TenantSubscriptionEntityDetailInfo>();
             var fields = new FeatureContext().GetType().GetFields(BindingFlags.Public | BindingFlags.Static);
             foreach (FieldInfo fi in fields)
             {
                 var descriptionObj = fi.GetCustomAttributes(false).OfType<EntityGroup>().SingleOrDefault();
-                if (descriptionObj!=null && !string.IsNullOrEmpty(descriptionObj.GetGroupId() )  && (descriptionObj.GetGroupId()==entityId) )
-                {                    
-                    dic.Add(new TenantSubscriptionEntityDetailInfo{Name=descriptionObj != null ? descriptionObj.GetGroupName() : fi.Name,
-                                                   Context=Guid.Parse(fi.GetValue(new Guid()).ToString()) });
+                if (descriptionObj != null && !string.IsNullOrEmpty(descriptionObj.GetGroupId()) && (descriptionObj.GetGroupId() == entityId))
+                {
+                    dic.Add(new TenantSubscriptionEntityDetailInfo
+                    {
+                        Name = descriptionObj != null ? descriptionObj.GetGroupName() : fi.Name,
+                        Context = Guid.Parse(fi.GetValue(new Guid()).ToString())
+                    });
                 }
-               
+
             }
             return dic;
         }
 
         public static List<TenantSubscriptionEntityDetailInfo> GetReportEntityWise(string entityId)
         {
-            var dic = new List<TenantSubscriptionEntityDetailInfo>();           
+            var dic = new List<TenantSubscriptionEntityDetailInfo>();
             var fields = new ReportContext().GetType().GetFields(BindingFlags.Public | BindingFlags.Static);
             foreach (FieldInfo fi in fields)
             {
                 var descriptionObj = fi.GetCustomAttributes(false).OfType<EntityGroup>().SingleOrDefault();
-                if (descriptionObj!=null && !string.IsNullOrEmpty(descriptionObj.GetGroupId() )  && (descriptionObj.GetGroupId()==entityId) )
-                {                    
-                    dic.Add(new TenantSubscriptionEntityDetailInfo{Name=descriptionObj != null ? descriptionObj.GetGroupName() : fi.Name,
-                                                   Context=Guid.Parse(fi.GetValue(new Guid()).ToString()) });
+                if (descriptionObj != null && !string.IsNullOrEmpty(descriptionObj.GetGroupId()) && (descriptionObj.GetGroupId() == entityId))
+                {
+                    dic.Add(new TenantSubscriptionEntityDetailInfo
+                    {
+                        Name = descriptionObj != null ? descriptionObj.GetGroupName() : fi.Name,
+                        Context = Guid.Parse(fi.GetValue(new Guid()).ToString())
+                    });
                 }
-               
+
             }
             return dic;
         }
 
         public static List<TenantSubscriptionEntityDetailInfo> GetDashletEntityWise(string entityId)
         {
-            var dic = new List<TenantSubscriptionEntityDetailInfo>();           
+            var dic = new List<TenantSubscriptionEntityDetailInfo>();
             var fields = new DashletContext().GetType().GetFields(BindingFlags.Public | BindingFlags.Static);
             foreach (FieldInfo fi in fields)
             {
                 var descriptionObj = fi.GetCustomAttributes(false).OfType<EntityGroup>().SingleOrDefault();
-                if (descriptionObj!=null && !string.IsNullOrEmpty(descriptionObj.GetGroupId() )  && (descriptionObj.GetGroupId()==entityId) )
-                {                    
-                    dic.Add(new TenantSubscriptionEntityDetailInfo{Name=descriptionObj != null ? descriptionObj.GetGroupName() : fi.Name,
-                                                   Context=Guid.Parse(fi.GetValue(new Guid()).ToString()) });
+                if (descriptionObj != null && !string.IsNullOrEmpty(descriptionObj.GetGroupId()) && (descriptionObj.GetGroupId() == entityId))
+                {
+                    dic.Add(new TenantSubscriptionEntityDetailInfo
+                    {
+                        Name = descriptionObj != null ? descriptionObj.GetGroupName() : fi.Name,
+                        Context = Guid.Parse(fi.GetValue(new Guid()).ToString())
+                    });
                 }
-               
+
             }
             return dic;
         }
 
-        public static  void CopyPropertiesTo(this object fromObject, object toObject)
+        public static void CopyPropertiesTo(this object fromObject, object toObject)
+        {
+            PropertyInfo[] toObjectProperties = toObject.GetType().GetProperties();
+            foreach (PropertyInfo propTo in toObjectProperties)
             {
-                PropertyInfo[] toObjectProperties = toObject.GetType().GetProperties();
-                foreach (PropertyInfo propTo in toObjectProperties)
-                {
-                    PropertyInfo propFrom = fromObject.GetType().GetProperty(propTo.Name);
-                    if (propFrom!=null && propFrom.CanWrite)
-                        propTo.SetValue(toObject, propFrom.GetValue(fromObject, null), null);
-                }
-            }      
-        
+                PropertyInfo propFrom = fromObject.GetType().GetProperty(propTo.Name);
+                if (propFrom != null && propFrom.CanWrite)
+                    propTo.SetValue(toObject, propFrom.GetValue(fromObject, null), null);
+            }
+        }
+
         public static string GetEnumDescription(Enum value)
         {
             var type = value.GetType();
@@ -581,75 +604,106 @@ namespace VPC.Framework.Business.Common
                 dictionary.Add((int)o, names[i++]);
             return dictionary;
         }
-   
-          public static List<BatchTypeInfo> GetAllBatchTypes()
-        {
-            var batchTypes=new List<BatchTypeInfo>();
-            IEnumerable<Type> types = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.GetInterfaces().Contains(typeof(IBatchTypes)) && t.GetConstructor(Type.EmptyTypes) != null);
-            foreach (Type tType in types)
-            {
-                object[] ss = tType.GetCustomAttributes(true);
-                batchTypes.AddRange(from BatchTypeAttribute o in ss select 
-                new BatchTypeInfo { Name = o.BatchName,Context=o.Context,RunningType=new ItemNameInt{Id= o.BatchType , Name=GetEnumDescription((BatchTypes)o.BatchType) }});
-            }
-            return batchTypes;
-        }
 
-         public static Type GetBatchTypeByContext(string typeContext)
+        //   public static List<VPC.Entities.BatchType.BatchType> GetAllBatchTypes()
+        // {
+        //     var batchTypes=new List<VPC.Entities.BatchType.BatchType>();
+        //     IEnumerable<Type> types = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.GetInterfaces().Contains(typeof(IBatchTypes)) && t.GetConstructor(Type.EmptyTypes) != null);
+        //     foreach (Type tType in types)
+        //     {
+        //         object[] ss = tType.GetCustomAttributes(true);
+        //         batchTypes.AddRange(from BatchTypeAttribute o in ss select 
+        //         new VPC.Entities.BatchType.BatchType { Type.value = o.BatchType});
+        //     }
+        //     return batchTypes;
+        // }
+
+        public static Type GetBatchTypeByContext(BatchTypeContextEnum context)
         {
             var types = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.GetInterfaces().Contains(typeof(IBatchTypes)) && t.GetConstructor(Type.EmptyTypes) != null);
             Type myType = null;
 
-            foreach (var t in from t in types let attr = (BatchTypeAttribute)t.GetCustomAttributes(true).FirstOrDefault() where attr != null where attr.Context == typeContext select t)
+            foreach (var t in from t in types let attr = (BatchTypeAttribute)t.GetCustomAttributes(true).FirstOrDefault() where attr != null where attr.BatchType == (int)context select t)
             {
                 myType = t;
             }
             return myType;
         }
 
-         public static List<JObject> ConvertToJObjectList(DataTable dataTable)
-            {
+        public static List<JObject> ConvertToJObjectList(DataTable dataTable)
+        {
             var list = new List<JObject>();
 
-                foreach (DataRow row in dataTable.Rows)
+            foreach (DataRow row in dataTable.Rows)
+            {
+                var item = new JObject();
+
+                foreach (DataColumn column in dataTable.Columns)
                 {
-                    var item = new JObject();
-
-                    foreach (DataColumn column in dataTable.Columns)
-                    {
-                        item.Add(column.ColumnName, JToken.FromObject(row[column.ColumnName]));
-                    }
-
-                    list.Add(item);
+                    item.Add(column.ColumnName, JToken.FromObject(row[column.ColumnName]));
                 }
 
+                list.Add(item);
+            }
+
             return list;
-            }
-
-        public static Guid SaveEmail(Guid tenantId,Guid userId,EmailTemplate template,string emailId)
-        {
-            if ( template.Body !=null &&  !string.IsNullOrEmpty(template.Body.Value))
-            {    ISettingManager _iSettingManager = new SettingManager();
-                 IEntityResourceManager _iEntityResourceManager = new VPC.Framework.Business.EntityResourceManager.Contracts.EntityResourceManager ();
-                 IMetadataManager _iMetadataManager = new VPC.Framework.Business.MetadataManager.Contracts.MetadataManager ();
-                 var emailSubType = _iMetadataManager.GetSubTypes ("email");
-                 var sendername = _iSettingManager.GetSenderNameByContext(tenantId, SettingContextTypeEnum.EMAIL);
-                            dynamic jsonObject = new JObject ();
-                            jsonObject.Body = template.Body.Value.Replace("'", "''");            
-                            jsonObject.Sender = sendername;
-                            jsonObject.Recipient = emailId;                            
-                            jsonObject.Date = HelperUtility.GetCurrentUTCDate();
-                            jsonObject.Subject = template.Title.Value;
-                            var returnId = _iEntityResourceManager.SaveResult (tenantId,userId, "email", jsonObject, emailSubType[0].Name.ToString ());
-            return returnId;
-            }
-
-            return Guid.Empty;
-           
         }
 
-         public static string GenerateName(int len)
-        { 
+        public static Guid SaveEmail(Guid tenantId, Guid userId, EmailTemplate template, string emailRecipient, string name, string referenceEntity)
+        {
+            IManagerScheduler _schedulerManager = new ManagerScheduler();
+            if (template.Body != null && !string.IsNullOrEmpty(template.Body.Value))
+            {
+                ISettingManager _iSettingManager = new SettingManager();
+                IEntityResourceManager _iEntityResourceManager = new VPC.Framework.Business.EntityResourceManager.Contracts.EntityResourceManager();
+                IMetadataManager _iMetadataManager = new VPC.Framework.Business.MetadataManager.Contracts.MetadataManager();
+                IManagerBatchItem _managerBatchItem = new ManagerBatchItem();
+                IManagerBatchType _managerBatchType = new ManagerBatchType();
+                var emailSubType = _iMetadataManager.GetSubTypes("email");
+                var sendername = _iSettingManager.GetSenderNameByContext(tenantId, SettingContextTypeEnum.EMAIL);
+
+                dynamic jsonObject = new JObject();
+                jsonObject.Body = template.Body.Value.Replace("'", "''");
+                jsonObject.Sender = sendername;
+                jsonObject.Recipient = emailRecipient;
+                jsonObject.Date = HelperUtility.GetCurrentUTCDate();
+                jsonObject.Subject = template.Title.Value;
+                var batchType = _managerBatchType.GetBatchTypeByContext(tenantId, BatchTypeContextEnum.Email);
+                if (batchType != null)
+                {
+                    var myObj = new JObject();
+                    myObj.Add("email", jsonObject);
+                    //Save Email
+                    var returnId = _iEntityResourceManager.SaveResult(tenantId, userId, "email", myObj, emailSubType[0].Name.ToString());
+                    //Save Batch item  
+                    var batchItemId = Guid.NewGuid();
+                    _managerBatchItem.BatchItemCreate(tenantId, (!string.IsNullOrEmpty(batchType.ItemTimeout.Value) ? Convert.ToInt32(batchType.ItemTimeout.Value) : (int?)null)
+                    , new BatchItem
+                    {
+                        BatchItemId = batchItemId,
+                        BatchTypeId = Guid.Parse(batchType.InternalId.Value),
+                        Name = string.Format("{0}-{1}{2}{3}", name, DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day),
+                        Priority = (!string.IsNullOrEmpty(batchType.Priority.Value) ? Convert.ToInt32(batchType.Priority.Value) : (int?)null),
+                        RetryCount = 0,
+                        EntityId = referenceEntity,
+                        ReferenceId = returnId,
+                        Status = EmailEnum.ReadyToSend,
+                        NextRunTime = Convert.ToInt32(batchType.Type.Value) == (int)BatchTypeEnum.Scheduled ? _schedulerManager.GetNextRunDateTime(tenantId, new Guid(batchType.Scheduler.InternalId.Value)) : DateTime.MinValue,
+                        // NextRunTime=   CalCulateNextRunTime(tenantId,new Guid("57AAB7B8-326E-431B-890A-56D099CB429F")),
+                        AuditDetails = new AuditDetail
+                        {
+                            CreatedBy = userId
+                        }
+                    });
+                    return batchItemId;
+                }
+            }
+            return Guid.Empty;
+        }
+
+
+        public static string GenerateName(int len)
+        {
             Random r = new Random();
             string[] consonants = { "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "l", "n", "p", "q", "r", "s", "sh", "zh", "t", "v", "w", "x" };
             string[] vowels = { "a", "e", "i", "o", "u", "ae", "y" };
@@ -669,47 +723,86 @@ namespace VPC.Framework.Business.Common
 
 
         }
+        public static bool Compare<T>(T Object1, T object2)
+        {
+            //Get the type of the object
+            Type type = typeof(T);
 
-     public static bool Compare<T>(T Object1, T object2)
-     {
-          //Get the type of the object
-          Type type = typeof(T);
+            //return false if any of the object is false
+            if (Object1 == null || object2 == null)
+                return false;
 
-          //return false if any of the object is false
-          if (Object1 == null || object2 == null)
-             return false;
-
-         //Loop through each properties inside class and get values for the property from both the objects and compare
-         foreach (System.Reflection.PropertyInfo property in type.GetProperties())
-         {
-              if (property.Name != "ExtensionData")
-              {
-                  string Object1Value = string.Empty;
-                  string Object2Value = string.Empty;
-                  if (type.GetProperty(property.Name).GetValue(Object1, null) != null)
+            //Loop through each properties inside class and get values for the property from both the objects and compare
+            foreach (System.Reflection.PropertyInfo property in type.GetProperties())
+            {
+                if (property.Name != "ExtensionData")
+                {
+                    string Object1Value = string.Empty;
+                    string Object2Value = string.Empty;
+                    if (type.GetProperty(property.Name).GetValue(Object1, null) != null)
+                    {
                         Object1Value = type.GetProperty(property.Name).GetValue(Object1, null).ToString();
-                  if (type.GetProperty(property.Name).GetValue(object2, null) != null)
+                        var Object1Valueqqq = type.GetProperty(Object1Value).GetValue(Object1, null).ToString();
+
+                    }
+
+                    if (type.GetProperty(property.Name).GetValue(object2, null) != null)
                         Object2Value = type.GetProperty(property.Name).GetValue(object2, null).ToString();
-                  if (Object1Value.Trim() != Object2Value.Trim())
-                  {
-                      return false;
-                  }
-              }
-         }
-         return true;
-     }
+                    if (Object1Value.Trim() != Object2Value.Trim())
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
         public static String GetXmlForResourceCreate(Guid tenantId, List<VPC.Entities.EntityCore.Model.Resource.Resource> resources)
         {
             var sw = new StringWriter();
+            int iboolVal = 0;
             using (XmlWriter writer = new XmlTextWriter(sw))
             {
                 writer.WriteStartElement("Resources");
                 foreach (VPC.Entities.EntityCore.Model.Resource.Resource resource in resources)
                 {
+                    iboolVal = Convert.ToInt32(resource.IsStatic);
                     writer.WriteStartElement("Resource");
                     writer.WriteAttributeString("TenantId", tenantId.ToString());
                     writer.WriteAttributeString("Key", resource.Key);
                     writer.WriteAttributeString("Value", resource.Value);
+                    writer.WriteAttributeString("EntityCode", resource.EntityCode);
+                    writer.WriteAttributeString("IsStatic", Convert.ToString(iboolVal));
+                    writer.WriteEndElement();
+                }
+                writer.WriteEndElement();
+            }
+            return sw.ToString();
+        }
+        public static string GetJsonStringFromObject(LayoutModel o)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.SerializeObject(o.FormLayoutDetails);
+            }
+            catch (System.Exception ex)
+            {
+
+                return "";
+            }
+
+        }
+        public static String GetXmlForUpdateLayoutDetails(List<LayoutModel> infos)
+        {
+            var sw = new StringWriter();
+            using (XmlWriter writer = new XmlTextWriter(sw))
+            {
+                writer.WriteStartElement("LayoutDetails");
+                foreach (LayoutModel info in infos)
+                {
+                    writer.WriteStartElement("LayoutDetail");
+                    writer.WriteAttributeString("Id", info.Id.ToString());
+                    writer.WriteAttributeString("EntityId", info.TypeId.ToString());
+                    writer.WriteAttributeString("Layout", GetJsonStringFromObject(info));
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -733,10 +826,11 @@ namespace VPC.Framework.Business.Common
             var fieldIInfo = type.GetField(Enum.GetName(type, value));
             if (fieldIInfo != null)
             {
-              return fieldIInfo.Name;                
+                return fieldIInfo.Name;
             }
-            return string.Empty ;
+            return string.Empty;
         }
+
 
     }
 }

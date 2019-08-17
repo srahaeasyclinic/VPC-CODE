@@ -15,6 +15,7 @@ import { PicklistService } from '../../picklist/picklist.service';
 import { CommonService } from '../../services/common.service'
 import { GlobalResourceService } from '../../global-resource/global-resource.service'
 import { RuleUpsertComponent } from 'src/app/meta-data/rule/ruleupsert.component';
+import { MenuService } from 'src/app/services/menu.service';
 
 
 export class SourceList {
@@ -64,6 +65,7 @@ export class RuleComponent implements OnInit {
     private pickListService: PicklistService,
     private commonService: CommonService,
     public globalResourceService: GlobalResourceService,
+    public menuService: MenuService
   ) {
 
 
@@ -76,10 +78,8 @@ export class RuleComponent implements OnInit {
     //this.getResource();
     //this.resource = this.globalResourceService.getGlobalResources();
     //console.log('Rule : '+JSON.stringify( this.resource));
-    this.buttonLabel = "addRule";
-    this.getRuleTypeList("RuleType");
-    this.saveUpdateLabel = "Create";
-    this.addRuleLabel = "Add Rule";
+    this.buttonLabel = this.getResourceValue('metadata_task_add');
+    this.getRuleTypeList ("RuleType");
     this.activatedRoute.parent.url.subscribe((urlPath) => {
       this.name = urlPath[urlPath.length - 1].path;
       this.getMetadataFieldsByName(this.name);
@@ -114,6 +114,26 @@ export class RuleComponent implements OnInit {
       .subscribe(data => {
         if (data && data) {
           this.ruleTypes = data.result;
+
+          //console.log('data.result ', data.result);
+
+          // let obj:any = {
+          //   active: true,
+          //   flagged: false,
+          //   internalId: "2",
+          //   isDeletetd: false,
+          //   text: "Unique"
+          // }
+          // let obj2:any = {
+          //   active: true,
+          //   flagged: false,
+          //   internalId: "3",
+          //   isDeletetd: false,
+          //   text: "Disable"
+          // }
+          // this.ruleTypes.push(obj);
+          // this.ruleTypes.push(obj2);
+
           this.getRuleList(this.name);
         }
       }
@@ -130,8 +150,18 @@ export class RuleComponent implements OnInit {
 
             //mapper for grid
             this.gridData = data.retVal;
-            this.gridData.map(function (i) { return i["source"] = i.sourceList.map(function (e) { return e.name }).join() });
-            this.gridData.map(function (i) { return i["target"] = i.targetList.map(function (t) { return t.name }).join() });
+            this.gridData.map(function (i) {
+              if (i.sourceList != null && i.sourceList != undefined)
+              {
+                 return i["source"] = i.sourceList.map(function (e) { return e.name }).join()
+              }
+             
+            });
+            this.gridData.map(function (i) {
+              if (i.targetList != null && i.targetList != undefined) {
+                return i["target"] = i.targetList.map(function (t) { return t.name }).join()
+              }
+            });
 
             //-----
             this._rules = data.retVal;
@@ -178,22 +208,22 @@ export class RuleComponent implements OnInit {
     modalRef.componentInstance.resource = this.resource;
     modalRef.componentInstance.ruleTypes = this.ruleTypes;
     modalRef.componentInstance.fieldSource = this.fieldSource;
-    modalRef.componentInstance.name = this.name;
+    modalRef.componentInstance.name = this.name;//resource_operation_update_success_message
     if (data && data.id) {
-      modalRef.componentInstance.header = "EditRule";
-      modalRef.componentInstance.button = "Update";
+      modalRef.componentInstance.header = this.getResourceValue ("metadata_label_editrule");
+      modalRef.componentInstance.button = this.getResourceValue("rule_operation_update");
     } else {
-      modalRef.componentInstance.header = "AddRule";
-      modalRef.componentInstance.button = "Create";
+      modalRef.componentInstance.header = this.getResourceValue("metadata_label_addrule");
+      modalRef.componentInstance.button = this.getResourceValue("rule_operation_create");
     }
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.saveEvent.subscribe((saveData) => {
-      this.toster.showSuccess(this.getResourceValue("RuleSavedSuccessfully"));
+      this.toster.showSuccess(this.globalResourceService.saveSuccessMessage("rule_displayname"));
       modalRef.close();
       this.getRuleList(this.name);
     });
     modalRef.componentInstance.updateEvent.subscribe((updateData) => {
-      this.toster.showSuccess(this.getResourceValue("RuleUpdatedSuccessfully"));
+      this.toster.showSuccess(this.globalResourceService.updateSuccessMessage("rule_displayname"));
       modalRef.close();
       this.getRuleList(this.name);
     });
@@ -272,28 +302,39 @@ export class RuleComponent implements OnInit {
 
 
   private deleteRule(data): void {
-    swal({
-      title: this.getResourceValue("Areyousure"),
-      text: this.getResourceValue("Youwntbeabletorevertthis"),
-      type: this.getResourceValue('warning'),
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: this.getResourceValue('Yesdeleteit'),
-      showLoaderOnConfirm: true,
-    })
-      .then((willDelete) => {
-        if (willDelete.value) {
-          this.metadataService.deleteRule(this.name, data).subscribe(result => {
-            if (result) {
-              this.getRuleList(this.name);
-            }
-          });
 
-        } else {
+    this.globalResourceService.openDeleteModal.emit()
+
+    this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+      this.metadataService.deleteRule(this.name, data).subscribe(result => {
+        if (result) {
+          this.getRuleList(this.name);
         }
-
       });
+
+    });
+    // swal({
+    //   title: this.getResourceValue("common_message_areyousure"),
+    //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+    //   type: 'warning',
+    //   showCancelButton: true,
+    //   confirmButtonColor: '#3085d6',
+    //   cancelButtonColor: '#d33',
+    //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+    //   showLoaderOnConfirm: true,
+    // })
+    //   .then((willDelete) => {
+    //     if (willDelete.value) {
+    //       this.metadataService.deleteRule(this.name, data).subscribe(result => {
+    //         if (result) {
+    //           this.getRuleList(this.name);
+    //         }
+    //       });
+
+    //     } else {
+    //     }
+
+    //   });
   }
 
   getResourceValue(key) {

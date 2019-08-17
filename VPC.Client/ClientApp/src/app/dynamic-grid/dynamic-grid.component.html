@@ -9,7 +9,7 @@
      <!-- Clickable column -->
      <kendo-grid-column *ngIf="column.isClickable" [field]="column.field" [title]="column.title" [width]="column.width">
        <ng-template kendoGridCellTemplate let-results>
-         <a class="gridLink" (click)="rowEditableColumnClick(results.internalId)">{{results.clickable}}</a>
+         <a class="gridLink" (click)="rowEditableColumnClick(results.internalId,results.clickable,column.field)">{{results.clickable}}</a>
        </ng-template>
 
      </kendo-grid-column>
@@ -39,9 +39,9 @@
       </kendo-grid-column>
 
      <!-- Status column -->
-     <kendo-grid-column [width]="column.width" title="Status" *ngIf="column.isStatus">
+     <kendo-grid-column [width]="column.width" title="{{getResourceValue('metadata_label_status')}}" *ngIf="column.isStatus">
        <ng-template kendoGridCellTemplate let-results>
-         <span class="{{results.css}}">{{globalResourceService.getResourceByKey(results.active)}}</span>
+         <span class="{{results.css}}">{{results.active}}</span>
        </ng-template>
      </kendo-grid-column> 
 
@@ -55,7 +55,7 @@
          </button>
          <mat-menu #menu="matMenu">
            <a *ngFor="let action of actions" class="dropdown-item"
-             (click)="onActionClick(results.internalId,action.name)">{{getResourceValue(action.name)}}</a>
+             (click)="onActionClick(results.internalId,action.name)">{{getResourceValue('metadata_operation_'+action.name.toLowerCase())}}</a>
          </mat-menu>
        </ng-template>
      </kendo-grid-column>

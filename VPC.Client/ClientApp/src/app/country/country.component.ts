@@ -30,7 +30,7 @@ export class CountryComponent implements OnInit {
   public defaultLayout: LayoutModel = new LayoutModel();
   private layoutType: number = 3; // List page
   private pageindex: number = 1;
-  private pageSize: number = 10;
+  public pageSize: number = this.commonService.defaultPageSize();
   private totalRecords: number = 0;
   public columns = [];
   public resource: any;
@@ -74,33 +74,49 @@ export class CountryComponent implements OnInit {
 
 
     if (actionName.toLowerCase() == 'Delete'.toLowerCase()) {
-      swal({
-        title: this.resource[this.generateResourceName("Areyousure")],
-        text: this.resource[this.generateResourceName("Youwntbeabletorevertthis")],
-        type: this.resource[this.generateResourceName('warning')],
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: this.resource[this.generateResourceName('Yesdeleteit')],
-        showLoaderOnConfirm: true,
-      })
-        .then((willDelete) => {
-          if (willDelete.value) {
-            this.countryService.deleteCountry('country', id).subscribe(result => {
-              if (result) {
-                this.generateListlayout(this.defaultLayout)
-              }
-            });
 
-          } else {
-            //write the code for cancel click
+      this.globalResourceService.openDeleteModal.emit()
+      this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+        this.countryService.deleteCountry('country', id).subscribe(result => {
+          if (result) {
+            this.generateListlayout(this.defaultLayout)
           }
-
         });
+         
+        })
+
+
+
+
+
+
+      // swal({
+      //   title: this.getResourceValue("common_message_areyousure"),
+      //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+      //   type: 'warning',
+      //   showCancelButton: true,
+      //   confirmButtonColor: '#3085d6',
+      //   cancelButtonColor: '#d33',
+      //   confirmButtonText: this.getResourceValue('common_message_yesdeleteit'),
+      //   showLoaderOnConfirm: true,
+      // })
+      //   .then((willDelete) => {
+      //     if (willDelete.value) {
+      //       this.countryService.deleteCountry('country', id).subscribe(result => {
+      //         if (result) {
+      //           this.generateListlayout(this.defaultLayout)
+      //         }
+      //       });
+
+      //     } else {
+      //       //write the code for cancel click
+      //     }
+
+      //   });
     }
 
     if (actionName.toLowerCase() == 'UpdateStatus'.toLowerCase()) {
-      this.toster.showWarning(this.resource[this.generateResourceName("MethodNotImplemented")]);
+      this.toster.showWarning(this.getResourceValue("metadata_method_notimplement_message"));
     }
 
   }
@@ -222,7 +238,7 @@ export class CountryComponent implements OnInit {
 
       } else {
         isvalid = false;
-        this.toster.showWarning(this.resource[this.generateResourceName('NoFieldsFound')]);
+        this.toster.showWarning(this.getResourceValue('metadata_operation_warning_notfoundmessage'));
       }
 
       if (layout.listLayoutDetails.searchProperties && layout.listLayoutDetails.searchProperties.length > 0) {
@@ -368,11 +384,8 @@ export class CountryComponent implements OnInit {
   configToggle() {
     this.isConfigToggle = !this.isConfigToggle;    
   }
-
-  generateResourceName(word)
- {
-    if (!word) return word;
-    return word[0].toLowerCase() + word.substr(1);
+  getResourceValue(key) {
+    return this.globalResourceService.getResourceValueByKey(key);
   }
 
 }

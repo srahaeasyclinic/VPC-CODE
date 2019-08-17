@@ -32,6 +32,7 @@ export class ListFieldsComponent implements OnInit {
 
   public searchText: string;
   public resource: Resource;
+  public clickableList: any;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -47,6 +48,7 @@ export class ListFieldsComponent implements OnInit {
     this.resource = this.globalResourceService.getGlobalResources();
     this.layoutInfo = this.activatedRoute.snapshot.parent.data['layoutDetails'];
     this.addedItemToMainList = [];
+    this.clickableList = [];
     this.addedItemToMainList = this.layoutInfo.listLayoutDetails.fields;
     this.pickListSource = [];
 
@@ -55,6 +57,12 @@ export class ListFieldsComponent implements OnInit {
     this.activatedRoute.parent.parent.parent.url.subscribe((urlPath) => {
       this.name = urlPath[0].path;
       this.getPicklistFieldsByName(this.name);
+    });
+
+    this.addedItemToMainList.forEach((item) => {
+      if (!item.hidden) {
+        this.clickableList.push(item);
+      }
     });
 
     if (this.addedItemToMainList && this.addedItemToMainList.length > 0) {
@@ -111,6 +119,7 @@ export class ListFieldsComponent implements OnInit {
       this.selectedItemFromMainList.sequence = (this.addedItemToMainList != null) ? this.addedItemToMainList.length + 1 : 1;
 
       this.addedItemToMainList.push(this.selectedItemFromMainList);
+      this.clickableList.push(this.selectedItemFromMainList);
       this.reOrderMainList();
       this.selectedItemFromMainList.isAdded = true;
 
@@ -236,6 +245,11 @@ export class ListFieldsComponent implements OnInit {
           }
         }
 
+        var clickableIndex = this.clickableList.indexOf(this.selectedItemFromAddedList);
+        if (clickableIndex != -1) {
+          this.clickableList.splice(clickableIndex, 1);
+        }
+
         this.reOrderMainList();
       }
 
@@ -330,6 +344,19 @@ export class ListFieldsComponent implements OnInit {
 
         if (ev.target.checked === true) {
           this.layoutInfo.listLayoutDetails.fields[i].clickable = false;
+
+          var a: number = this.clickableList.findIndex(i => i.name === this.selectedItemFromAddedList.name);
+          if (a > -1) {
+            this.clickableList.splice(a, 1);
+          }
+        }
+        else {
+
+          var clickableIndex = this.clickableList.indexOf(this.selectedItemFromAddedList);
+          if (clickableIndex == -1) {
+            this.clickableList.push(this.selectedItemFromAddedList);
+          }          
+          this.reOrderClickableList();
         }
       }
     }
@@ -407,4 +434,21 @@ export class ListFieldsComponent implements OnInit {
       a++;
     });
   }
+
+  private reOrderClickableList() {
+    let a = 0;
+    this.clickableList.forEach((item) => {
+      item.sequence = a;
+      a++;
+    });
+  }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
+  }
+
 }

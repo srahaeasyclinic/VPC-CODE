@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Metadata.Business.DataAnnotations;
 using VPC.Metadata.Business.DataTypes;
 using VPC.Metadata.Business.Entity;
@@ -26,14 +27,14 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NonQueryable]
         public override PicklistContext PicklistContext => new PicklistContext(PicklistType.RuleType);
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [BasicColumn]
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
         public override InternalId InternalId { get; set; }
 
-        [AccessibleLayout(1, 2, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.Form, (int)LayoutType.List)]
         [NonQueryable]
         [ColumnName("[Name]")]
         public override Name Name { get; set; }
@@ -47,7 +48,8 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
     }
     public enum RuleTypeEnum
     {
-        Visibility = 1
+        Visibility = 1,
+        Unique=2
 
     }
     //public class RuleType : ComplexPicklist

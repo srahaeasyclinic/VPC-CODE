@@ -36,6 +36,90 @@ namespace VPC.Framework.Business.Initilize.Data
             return code;
         }
 
+        internal Guid GetNewlyCreatedEntityId(Guid rootTenantId, dynamic defaultValue, Guid intialisedTenantId, string entityId)
+        {
+            var code = Guid.Empty;
+            try
+            {
+                Guid value = new Guid(defaultValue.ToString());
+                SqlProcedureCommand cmd = CreateProcedureCommand("dbo.GetNewlyCreatedEntityId");
+                cmd.AppendGuid("@guidRootTenantId", rootTenantId);
+                cmd.AppendGuid("@guidIntialisedTenantId", intialisedTenantId);
+                cmd.AppendGuid("@guidTargetValue", value);
+                cmd.AppendSmallText("@entityId", entityId);
+                using (SqlDataReader reader = ExecuteCommandAndReturnReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        code = reader.IsDBNull(0) ? Guid.Empty : reader.GetGuid(0);
+                    }
+                }
+            }
+            catch (SqlException e)
+            {
+                _log.Error(e);
+                throw ReportAndTranslateException(e, "InitilizeData::getRootTenantCode");
+            }
+
+            return code;
+        }
+
+        internal Guid GetNewlyCreatedPickListId(Guid rootTenantId, dynamic defaultValue, Guid intialisedTenantId, string picklistId)
+        {
+            var code = Guid.Empty;
+            try
+            {
+                Guid value = new Guid(defaultValue.ToString());
+                SqlProcedureCommand cmd = CreateProcedureCommand("dbo.GetNewlyCreatedPickListId");
+                cmd.AppendGuid("@guidRootTenantId", rootTenantId);
+                cmd.AppendGuid("@guidIntialisedTenantId", intialisedTenantId);
+                cmd.AppendGuid("@guidTargetValue", value);
+                cmd.AppendSmallText("@picklistId", picklistId);
+                using (SqlDataReader reader = ExecuteCommandAndReturnReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        code = reader.IsDBNull(0) ? Guid.Empty : reader.GetGuid(0);
+                    }
+                }
+            }
+            catch (SqlException e)
+            {
+                _log.Error(e);
+                throw ReportAndTranslateException(e, "InitilizeData::getRootTenantCode");
+            }
+
+            return code;
+        }
+
+        internal List<LayoutModel> GetAllEntityAndPickListFormLayoutsByTenantId(Guid id)
+        {
+            var layouts = new List<LayoutModel>();
+            try
+            {
+                SqlProcedureCommand cmd = CreateProcedureCommand("dbo.GetAllEntityAndPickListFormLayoutsByTenantId");
+                cmd.AppendGuid("@guidTenantId", id);
+
+                using (SqlDataReader reader = ExecuteCommandAndReturnReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        var layoutInfo = new LayoutModel();
+                        layoutInfo.Id = reader.IsDBNull(0) ? Guid.Empty : reader.GetGuid(0);
+                        layoutInfo.TypeId = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                        layoutInfo.Layout = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+                        layouts.Add(layoutInfo);
+                    }
+                }
+            }
+            catch (SqlException e)
+            {
+                _log.Error(e);
+                throw ReportAndTranslateException(e, "InitilizeData::getRootTenantCode");
+            }
+
+            return layouts;
+        }
 
         internal List<LayoutModel> GetRootTenantLayouts(Guid tenantId)
         {
@@ -135,8 +219,8 @@ namespace VPC.Framework.Business.Initilize.Data
                 cmd.AppendGuid("@rootTenantId", rootTenantCode);
                 cmd.AppendGuid("@targetTenantId", initilizedTenantCode);
                 cmd.AppendGuid("@guidUserId", userId);
-               // var xmlIds = GetXmlString(picklists);
-               // cmd.AppendXml("@xmlIds", xmlIds);
+                // var xmlIds = GetXmlString(picklists);
+                // cmd.AppendXml("@xmlIds", xmlIds);
                 ExecuteCommand(cmd);
 
                 // foreach (var picklist in picklists)
@@ -180,7 +264,7 @@ namespace VPC.Framework.Business.Initilize.Data
                 //                 Console.WriteLine("Default case");
                 //                 match = false;
                 //                 break;
-                               
+
                 //         }
                 //         if(!match) continue;
                 //         spname += "Clone";

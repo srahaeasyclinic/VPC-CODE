@@ -35,20 +35,25 @@ namespace VPC.Entities.EntityCore.Metadata
         public override InternalId InternalId { get; set; }
 
         [DefaultValue(InfoType.Company)]
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.Company);
 
+
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string> { { "EN10002-ST01", "Standard" } };
 
         [AccessibleLayout((int)LayoutType.List)]
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("IsLegalEntity")]
-        [DisplayName("Is Legal Entity")]
+        [DisplayName("Is legal entity")]
         [NotNull]
         public BooleanType IsLegalEntity { get; set; }
 
@@ -61,7 +66,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [InverseProperty("[Id]")]
         [ColumnName("ContactInformationId")]
-        [DisplayName("Contact Information")]
+        [DisplayName("Contact information")]
         [NonQueryable]
         //[DynamicPrefix(InfoPrefix.ContactInformation_Company)]
         public ContactInformation ContactInformation { get; set; }
@@ -69,7 +74,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [InverseProperty("[Id]")]
         [ColumnName("[OfficialAddressId]")]
-        [DisplayName("Official Address")]
+        [DisplayName("Official address")]
         [NonQueryable]
         //[DynamicPrefix(InfoPrefix.OfficialAddress_Company)]
         public Address OfficialAddress { get; set; }
@@ -77,7 +82,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [InverseProperty("[Id]")]
         [ColumnName("[InvoiceAddressId]")]
-        [DisplayName("Invoice Address")]
+        [DisplayName("Invoice address")]
         [NonQueryable]
         //[DynamicPrefix(InfoPrefix.InvoiceAddress_Company)]
         public Address InvoiceAddress { get; set; }
@@ -85,7 +90,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [InverseProperty("[Id]")]
         [ColumnName("[PostalAddressId]")]
-        [DisplayName("Postal Address")]
+        [DisplayName("Postal address")]
         [NonQueryable]
         //[DynamicPrefix(InfoPrefix.PostalAddress_Company)]
         public Address PostalAddress { get; set; }
@@ -107,7 +112,7 @@ namespace VPC.Entities.EntityCore.Metadata
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[PreferredLanguageId]")]
-        [DisplayName("Preferred Language")]
+        [DisplayName("Preferred language")]
         [NonQueryable]
         //[DynamicPrefix(InfoPrefix.PreferredLanguage_Company)]
         public PickList<Language> PreferredLanguageId { get; set; }

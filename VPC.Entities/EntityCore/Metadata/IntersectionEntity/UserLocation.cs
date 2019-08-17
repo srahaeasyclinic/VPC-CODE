@@ -15,6 +15,7 @@ namespace VPC.Entities.EntityCore.Metadata.IntersectionEntity
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public InternalId TenantId { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -22,8 +23,10 @@ namespace VPC.Entities.EntityCore.Metadata.IntersectionEntity
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [DefaultValue(InfoType.UserLocation)]
@@ -36,6 +39,7 @@ namespace VPC.Entities.EntityCore.Metadata.IntersectionEntity
         [NotNull]
         [ForeignKey("[dbo].[User]", "[Id]")]
         //[DynamicPrefix(InfoPrefix.User_UserLocation)]
+        [DisplayName("User Id")]
         public Lookup<User> UserId { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]     
@@ -45,6 +49,7 @@ namespace VPC.Entities.EntityCore.Metadata.IntersectionEntity
         [NotNull]
         [ForeignKey("[dbo].[Location]", "[Id]")]
         //[DynamicPrefix(InfoPrefix.Location_UserLocation)]
+        [DisplayName("Location Id")]
         public Lookup<Location> LocationId { get; set; }
     }
 }

@@ -18,6 +18,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public override InternalId TenantId { get; set; }
 
         public override PicklistContext PicklistContext => new PicklistContext(0);
@@ -26,6 +27,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -33,14 +35,17 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         [ForeignKey("[dbo].[PickListValue]", "[Id]")]
         [ColumnName("[PickListValueId]")]
         [NotNull]
+        [DisplayName("Picklist value")]
         public InternalId PicklistValueId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
         [ColumnName("[scopeEntityId]")]  
         [NotNull]
+        [DisplayName("Scope entity")]
         public NumericType scopeEntityId { get; set; }
 
         

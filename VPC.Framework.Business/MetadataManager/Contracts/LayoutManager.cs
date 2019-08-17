@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Entities.Role;
 using VPC.Framework.Business.MetadataManager.API;
@@ -20,6 +21,7 @@ namespace VPC.Framework.Business.MetadataManager.Contracts {
         Guid CreatePicklistLayout (string entityName, LayoutModel layoutModel, Guid userId, Guid tenantId);
         List<LayoutModel> GetLayoutsByPicklistName (Guid tenantId, string picklistName);
         void UpdateLayoutDetails (Guid tenantId, Guid layoutId, LayoutModel templateModel);
+        void UpdateLayoutDetailsXml (Guid tenantId,List<LayoutModel> templateModel);
         void SetPicklistLayoutDefault (string entityName, LayoutModel layoutModel, Guid userId, Guid tenantId);
         void SetListLayoutDefault (string entityName, LayoutModel layoutModel, Guid userId, Guid tenantId);
         void DeletePicklistLayout (Guid tenantId, Guid layoutId);
@@ -42,6 +44,10 @@ namespace VPC.Framework.Business.MetadataManager.Contracts {
 
         List<RoleInfo> GetUserRoles (Guid userId);
         List<FieldModel> GetComputedFields (Guid tenantId, string name, LayoutType type, string subtype, int context);
+
+        Guid CloneLayout (string entityName, Guid layoutId, LayoutModel layoutModel, Guid userId, Guid tenantId);
+
+        Guid ClonePicklistLayout (string entityName, Guid layoutId, LayoutModel layoutModel, Guid userId, Guid tenantId);
     }
 
     public sealed class LayoutManager : ILayoutManager {
@@ -104,6 +110,12 @@ namespace VPC.Framework.Business.MetadataManager.Contracts {
                 if(result != null && result.DisplayName != null)
                 {
                     layout.SingularName = result.DisplayName;
+                }
+
+                //append version name               
+                if(result != null && result.VersionControl != null && !string.IsNullOrEmpty(result.VersionControl.Name))
+                {
+                    layout.VersionName =Char.ToLowerInvariant( result.VersionControl.Name[0]) +  result.VersionControl.Name.Substring(1); ;
                 }
 
             }
@@ -184,9 +196,11 @@ namespace VPC.Framework.Business.MetadataManager.Contracts {
         void ILayoutManager.DeleteListLayout (Guid tenantId, Guid layoutId) {
             _admin.DeleteListLayout (tenantId, layoutId);
         }
-
-        void ILayoutManager.UpdateLayoutDetails (Guid tenantId, Guid layoutId, LayoutModel templateModel) {
+     void ILayoutManager.UpdateLayoutDetails (Guid tenantId, Guid layoutId, LayoutModel templateModel) {
             _admin.UpdateLayoutDetails (tenantId, layoutId, templateModel);
+        }
+        void ILayoutManager.UpdateLayoutDetailsXml (Guid tenantId, List<LayoutModel> templateModel) {
+            _admin.UpdateLayoutDetailsXml (tenantId, templateModel);
         }
 
         List<LayoutModel> ILayoutManager.GetLayoutsByEntityName (Guid tenantId, string entityName) {
@@ -505,6 +519,196 @@ namespace VPC.Framework.Business.MetadataManager.Contracts {
                     // }
                     GetComputedChild (item.Fields, nameList);
                     GetComputedChild (item.Tabs, nameList);
+                }
+            }
+        }
+
+        Guid ILayoutManager.CloneLayout (string entityName, Guid layoutId, LayoutModel layoutModel, Guid userId, Guid tenantId) {
+            //get old layout
+            var layout = _review.GetLayoutsDetailsById (tenantId, layoutId);
+
+            layoutModel.Id = Guid.NewGuid ();
+            if(layout != null && layout.EntityId != null && layout.LayoutType > 0 && layout.Layout != null)
+            {
+                layoutModel.EntityId = layout.EntityId;
+                layoutModel.LayoutType = layout.LayoutType;
+                //layoutModel.Layout = layout.Layout;
+            }                
+            else
+            {
+                layoutModel.EntityId = _iMetadataManager.GetEntityContextByEntityName (entityName, false);
+            }    
+          
+            //filter old layout
+            FilterSourceLayout(layout, entityName, layoutModel);
+
+            layoutModel.ModifiedBy = userId;          
+            layoutModel.Subtype = _iMetadataManager.GetSubTypeId (entityName, layoutModel.SubtypeeName);
+
+            _admin.CreateLayout (tenantId, layoutModel);
+            return layoutModel.Id;            
+        }
+
+         Guid ILayoutManager.ClonePicklistLayout (string entityName, Guid layoutId, LayoutModel layoutModel, Guid userId, Guid tenantId) {
+            //get old layout
+            var layout = _review.GetPicklistLayoutDetailsById (tenantId, layoutId);
+
+            layoutModel.Id = Guid.NewGuid ();
+            if(layout != null && layout.EntityId != null && layout.LayoutType > 0 && layout.Layout != null)
+            {
+                layoutModel.EntityId = layout.EntityId;
+                layoutModel.LayoutType = layout.LayoutType;
+                //layoutModel.Layout = layout.Layout;
+            }
+            else
+            {
+                layoutModel.EntityId = _iMetadataManager.GetEntityContextByEntityName (entityName, false);
+            }    
+
+            //filter old layout
+            FilterSourceLayout(layout, entityName, layoutModel);       
+
+            layoutModel.ModifiedBy = userId;
+
+            _admin.CreatePicklistLayout (tenantId, layoutModel);
+            return layoutModel.Id;
+        }
+
+        bool RemoveInAccessibleFields (List<FieldModel> fields, string fieldName) {
+
+            foreach (var item in fields) {
+                switch (item.ControlType.ToLower()) {
+                    // case "Section":
+                    //     checkFieldAccesscibility (item.Fields);
+                    //     break;
+                    case "tabs":
+                        RemoveInAccessibleFields (item.Tabs, fieldName);
+                        break;
+                    case "tab":
+                        RemoveInAccessibleFields (item.Fields, fieldName);
+                        break;
+                    case "section":
+                        RemoveInAccessibleFields (item.Fields, fieldName);
+                        break;
+                    case "custom":
+                        RemoveInAccessibleFields (item.Fields, fieldName);
+                        break;
+                    default:
+                        if(item.Name.ToLower() == fieldName.ToLower())
+                        {
+                            fields.Remove(item);
+                            return true;
+                        }                        
+                        break;
+                }
+                
+            }
+
+            return false;
+
+        }
+
+        void FilterSourceLayout(LayoutModel sourceLayout, string entityName, LayoutModel targetLayout)
+        {
+            if(sourceLayout != null && sourceLayout.Layout != null && sourceLayout.LayoutType == LayoutType.Form)
+            {
+                //clone layout fields
+                var sourceDeserializedLayout = JsonConvert.DeserializeObject<FormLayoutDetails>(sourceLayout.Layout);
+                List<string> sourceFieldList = FormList(sourceDeserializedLayout);
+
+                //entity fields to clean
+                var entityDetails = _iMetadataManager.GetEntitityByName(entityName).Fields.Where(a => a.AccessibleLayoutTypes != null);
+                //new clone context
+                int cloneContext = (int)targetLayout.Context;
+                List<string> removableFieldList = new List<string>();
+
+                //check in layout fields
+                BuildRemovableFields(sourceFieldList, entityDetails, cloneContext, removableFieldList);
+
+                //copy to variable before cleaning
+                //var modifiedDetails = sourceDeserializedLayout;
+                if (removableFieldList != null && removableFieldList.Count > 0)
+                {
+                    foreach (var item in removableFieldList)
+                    {
+                        RemoveInAccessibleFields(sourceDeserializedLayout.Fields, item);
+                    }
+                }
+
+                if (sourceDeserializedLayout.Fields.Count > 0)
+                {
+                    targetLayout.Layout = JsonConvert.SerializeObject(sourceDeserializedLayout, new JsonSerializerSettings
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    });
+                }
+            }
+            else
+            {
+                targetLayout.Layout = sourceLayout.Layout;
+            }
+        }
+
+        private static void BuildRemovableFields(List<string> sourceFieldList, IEnumerable<FieldModel> entityDetails, int cloneContext, List<string> removableFieldList)
+        {
+            if (sourceFieldList != null && sourceFieldList.Count > 0 && entityDetails != null)
+            {
+                foreach (var element in sourceFieldList)
+                {
+                    foreach (var item in entityDetails)
+                    {
+                        if (element.ToLower() == item.Name.ToLower())
+                        {
+                            if (item.AccessibleLayoutTypes != null && item.AccessibleLayoutTypes.Count > 0)
+                            {
+                                //check whether both 21,22 is present
+                                bool doubleFormField = false;
+                                //check whether field is accessible in form
+                                bool formAccessibleField = false;
+                                int i = 0;
+                                foreach (var data in item.AccessibleLayoutTypes)
+                                {
+                                    if ((int)data.ToString().Length > 1)
+                                    {
+                                        i += 1;
+                                        formAccessibleField = true;
+                                    }
+                                    else if ((int)data == (int)LayoutType.Form)
+                                    {
+                                        formAccessibleField = true;
+                                    }
+                                }
+
+                                if (i == 2)
+                                {
+                                    doubleFormField = true;
+                                }
+                                else
+                                {
+                                    doubleFormField = false;
+                                }
+
+                                foreach (var data in item.AccessibleLayoutTypes)
+                                {
+                                    //handle 21, 22
+                                    if ((int)data.ToString().Length > 1 && doubleFormField == false)
+                                    {
+                                        int firstDigit = (int)data / 10;
+                                        int secondDigit = (int)data % 10;
+
+                                        if (cloneContext != secondDigit)
+                                        {
+                                            removableFieldList.Add(item.Name);
+                                        }
+                                    }
+                                    else if (formAccessibleField == false)
+                                    {
+                                        removableFieldList.Add(item.Name);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

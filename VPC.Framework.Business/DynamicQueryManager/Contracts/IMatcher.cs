@@ -73,6 +73,17 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                 var itemId = (item.EntityFullName.ToLower().Equals(className.ToLower()))?options.PrimaryId:Guid.NewGuid();
                 AddBusinessColumn (columns, classColumns, primaryKey1, tableName1, tablePrefix, itemId);
                 AddBusinessColumn (columns, classColumns, BusinessConstant.TenantId, tableName1, tablePrefix, options.TenantId);
+
+                //------------------- new logic for product 
+                var exceptionalColumns = columns.Where (t => t.ReferenceColumnName.ToLower ().Equals (primaryKey1.ToLower ()) && t.ReferenceTableName.ToLower ().Equals (tableName1.ToLower ())).ToList();
+                if(exceptionalColumns.Any()){
+                    foreach (var col in exceptionalColumns)
+                    {
+                        col.Value = itemId;
+                        classColumns.Add (col);
+                    }
+                }
+                //-------------------
             }
             //
             var entityIsAnItem = iMetadataManager.EntityIsAnItem (className, false);
@@ -84,51 +95,9 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
             var mergeColumns = classColumns.Concat (itemMatchingFields).ToList ();
             //add rest item if table is item
             AddRestItemColumns (itemFields, mergeColumns, options, clientPayload);
-
-
-            //Extra business logic
-            AddComputedFieldLogic(mergeColumns);
             return mergeColumns;
         }
 
-        private void AddComputedFieldLogic(List<ColumnAndField> columns)
-        {
-            foreach (var column in columns)
-            {
-                if (column.DataType.Equals(DataType.Password))
-                {
-                    
-                }
-            }
-
-
-// var starPassword = entityColumns.FirstOrDefault (x => x.FieldName.Equals (BusinessConstant.PasswordReplace));
-//             if (starPassword != null) {
-//                 var col = starPassword.EntityFullName + "." + starPassword.FieldName;
-//                 var passwordValue = resource[col];
-//                 if (passwordValue != null) {
-//                     var matchingPasswordItem = matchingColumns.SingleOrDefault (x => x.FieldName == starPassword.FieldName && x.ColumnName == starPassword.ColumnName);
-
-//                     if (matchingPasswordItem != null) {
-//                         byte[] passwordHash, passwordSalt;
-//                         var encriptPassword = new EncriptPasswrod ();
-//                         encriptPassword.CreatePasswordHash (passwordValue.ToString (), out passwordHash, out passwordSalt);
-
-//                         var saltPassword = entityColumns.FirstOrDefault (x => x.ColumnName.Equals (BusinessConstant.PasswordSalt));
-//                         if (saltPassword != null) {
-//                             saltPassword.Value = Convert.ToBase64String (passwordSalt);
-//                             matchingColumns.Add (saltPassword);
-//                         }
-//                         var hashPassword = entityColumns.FirstOrDefault (x => x.ColumnName.Equals (BusinessConstant.PasswordHash));
-//                         if (hashPassword != null) {
-//                             hashPassword.Value = Convert.ToBase64String (passwordHash);
-//                             matchingColumns.Add (hashPassword);
-//                         }
-//                     }
-//                 }
-//             }
-
-        }
 
         private List<GroupedColumns> SplitTableMatching (List<ColumnAndField> allColumns, List<ColumnAndField> matchingColumns) {
             var consolidatedChildren =

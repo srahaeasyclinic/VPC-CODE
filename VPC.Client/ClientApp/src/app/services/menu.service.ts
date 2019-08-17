@@ -11,6 +11,11 @@ import { LayoutModel } from '../model/layoutmodel';
 import { SortDescriptor, GroupDescriptor } from '@progress/kendo-data-query';
 import { TosterService } from '../services/toster.service';
 import { HttpHeaders } from '@angular/common/http';
+import { CommonService } from './common.service';
+import * as _ from 'lodash';
+import { BreadcrumbsService } from '../bread-crumb/BreadcrumbsService';
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,6 +25,7 @@ export class MenuService {
 
 
   private menuItem: string = '/api/menu';
+  private allmenuItem: string = '/api/menu/all';
   private layout: string = "/api/meta-data";
   private pickList: string = "/api/picklists";
   query: string = '?pageIndex=1' + '&pageSize=100';
@@ -39,205 +45,14 @@ export class MenuService {
   private pageSize: number = 10;
 
 
-  constructor(private picklistService: PicklistUiService, private toster: TosterService, private http: HttpClient) { }
+  constructor(private commonService: CommonService,
+    private picklistService: PicklistUiService,
+    private toster: TosterService,
+    private http: HttpClient,
+    private breadcrumsService: BreadcrumbsService
+  ) { }
 
-  // getMenu(): Array<MenuItem> {
-  //   return [
-  //     {
-  //       "group": "Metadata",
-  //       "name": "Metadata",
-  //       "menuType": "Entity",
-  //       "referenceEntity": "Metadata",
-  //       "path": "/metadata",
-  //       "sequence": "1"
-  //     },
-  //     {
-  //       "group": "Organization",
-  //       "name": "User",
-  //       "menuType": "Entity",
-  //       "referenceEntity": "User",
-  //       "path": "/ui/user",
-  //       "sequence": "1"
-  //     },
-  //     {
-  //       "group": "Tenant",
-  //       "name": "Tenant",
-  //       "menuType": "Entity",
-  //       "referenceEntity": "Tenant",
-  //       "path": "/ui/tenant",
-  //       "sequence": "1"
-  //     },
-  //     {
-  //       "group": "Organization",
-  //       "name": "Roles",
-  //       "menuType": "Entity",
-  //       "referenceEntity": "Roles",
-  //       "path": "/roles",
-  //       "sequence": "1"
-  //     },
-  //     {
-  //       "group": "Organization",
-  //       "name": "Organization unit",
-  //       "menuType": "Entity",
-  //       "referenceEntity": "OrganizationUnit",
-  //       "path": "/ui/organizationunit",
-  //       "sequence": "1"
-  //     },
-  //     {
-  //       "group": "Picklist layout",
-  //       "name": "Picklist layout",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "Picklist layout",
-  //       "path": "/picklist",
-  //       "sequence": "1"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Country",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "Country",
-  //       "path": "picklist/ui/country",
-  //       "sequence": "1"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Currency",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "Currency",
-  //       "path": "picklist/ui/currency",
-  //       "sequence": "2"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Timezone",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "Timezone",
-  //       "path": "picklist/ui/timezone",
-  //       "sequence": "3"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "City",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "City",
-  //       "path": "picklist/ui/city",
-  //       "sequence": "4"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Language",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "Language",
-  //       "path": "picklist/ui/language",
-  //       "sequence": "5"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Municipality",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "Municipality",
-  //       "path": "picklist/ui/municipality",
-  //       "sequence": "6"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "State",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "State",
-  //       "path": "picklist/ui/state",
-  //       "sequence": "7"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Qualification",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "Qualification",
-  //       "path": "picklist/ui/qualification",
-  //       "sequence": "8"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Unit type",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "UnitType",
-  //       "path": "picklist/ui/unittype",
-  //       "sequence": "9"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Profession",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "Profession",
-  //       "path": "picklist/ui/profession",
-  //       "sequence": "10"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Organization Type",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "OrganizationType",
-  //       "path": "picklist/ui/organizationtype",
-  //       "sequence": "11"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "name": "Time Calculation Type",
-  //       "menuType": "Infrastructure context",
-  //       "referenceEntity": "OrganizationType",
-  //       "path": "picklist/ui/timecalculationtype",
-  //       "sequence": "12"
-  //     },
-  //     {
-  //       "group": "Subscription",
-  //       "name": "Subscription",
-  //       "menuType": "Entity",
-  //       "referenceEntity": "Subscription",
-  //       "path": "/subscriptions",
-  //       "sequence": "13"
-  //     },
-  //   ];
-  // }
-
-  // private getMenuGroup(): Array<MenuGroup> {
-  //   return [
-  //     {
-  //       "group": "Metadata",
-  //       "sequence": "1",
-  //       "icon": "fa fa-users"
-  //     },
-
-  //     {
-  //       "group": "Organization",
-  //       "sequence": "1",
-  //       "icon": "fa fa-users"
-  //     },
-  //     {
-  //       "group": "Picklist layout",
-  //       "sequence": "2",
-  //       "icon": "fa fa-list-ul"
-  //     },
-  //     {
-  //       "group": "Picklist",
-  //       "sequence": "3",
-  //       "icon": "fa fa-list-ul"
-  //     },
-  //     {
-  //       "group": "Settings",
-  //       "sequence": "4",
-  //       "icon": "fa fa-cogs"
-  //     },
-  //     {
-  //       "group": "Tenant",
-  //       "sequence": "5",
-  //       "icon": "fa fa-university"
-  //     },
-  //     {
-  //       "group": "Subscription",
-  //       "sequence": "5",
-  //       "icon": "fa fa-user"
-  //     }
-  //   ]
-  // }
+  
 
   // public getMenuItems(groupName: string): Array<MenuItem> {
   //   this.items = this.getMenu();
@@ -292,11 +107,13 @@ export class MenuService {
 
   public saveMenuItem(name: string, menuItemModel: NewMenuItem): Observable<any> {
     var menuItemUrl = `${environment.apiUrl}` + this.menuItem;
+    //console.log('menu '+ JSON.stringify(menuItemModel));
     return this.http.post(menuItemUrl, menuItemModel);
   }
 
   public updateMenuItem(name: string, id: string, menuItemModel: NewMenuItem): Observable<any> {
     var menuItemUrl = `${environment.apiUrl}` + this.menuItem + '/' + id;
+      //console.log('menu '+ JSON.stringify(menuItemModel));
     return this.http.put(menuItemUrl, menuItemModel);
   }
 
@@ -311,8 +128,15 @@ export class MenuService {
   private cacheGroup: NewMenuItem;
   private cacheMenu: NewMenuItem;
 
+  
+
   public getAllMenu(): Observable<any> {
     var picklistsUrl = `${environment.apiUrl}` + this.menuItem + this.query;
+    return this.http.get<NewMenuItem[]>(picklistsUrl);
+  }
+
+  public getAllMenuBytenant(): Observable<any> {
+    var picklistsUrl = `${environment.apiUrl}` + this.allmenuItem;
     return this.http.get<NewMenuItem[]>(picklistsUrl);
   }
 
@@ -342,6 +166,7 @@ export class MenuService {
     this.cacheMenus = null;
     this.cacheGroup = null;
     this.cacheMenu = null;
+    this.breadcrumsService.breadcrumb = null;
   }
 
   CheckPasswordChangeAccess(): any {
@@ -358,4 +183,135 @@ export class MenuService {
     return this.http.get<any>(routeUrl);
   }
 
+  clearAllcache():void
+  {
+    this.clearAllCacheItem();
+
+    var picklistsUrl = `${environment.apiUrl}` + '/api/menu/clear-cache';
+    this.http.get<NewMenuItem[]>(picklistsUrl).pipe(first())
+      .subscribe(ele => {
+        this.clearAllCacheItem();
+      },
+        error => {
+          console.log(JSON.stringify(error));
+        });
+
+  }
+    //----------------------------------------DYNAMIC MENU ---------------------------------\\\
+  public virtualGroup: Array<string> = ["", "object-manager", "picklist-manager", "metadata#picklistmetadata", "configuration-manager"];
+  public getVirtualGroup(menuTypeId: number, actionTypeId: number = null) {
+    var virtualGroupStr = this.virtualGroup[menuTypeId];
+    if (virtualGroupStr && actionTypeId != null && menuTypeId == 3) {
+      var arr = virtualGroupStr.split("#");
+      return arr[actionTypeId - 2];
+    }
+    return virtualGroupStr;
+  }
+  
+  public getVirtualGroupbyname(topmenuGroupname:string,leftGroupname:string):NewMenuItem {
+    let menuObj: NewMenuItem;
+   
+    if ( this.cacheMenus == null|| this.cacheMenus==undefined) {
+      this.getAllMenu().subscribe(result => {
+      if (result) {
+         this.cacheMenus = result;
+         return this.getmenu(topmenuGroupname, leftGroupname);
+      }
+     });
+    }
+    else {
+      return this.getmenu(topmenuGroupname, leftGroupname);
+    }
+
+    return menuObj;
+  }
+
+  private getmenu(topmenuGroupname:string,leftGroupname:string):NewMenuItem
+  {
+    let parentobj = this.cacheMenus.find(w => w.name.toLocaleLowerCase() == topmenuGroupname.toLocaleLowerCase());
+    if (parentobj != undefined && parentobj != null)
+    {
+      return this.cacheMenus.find(w => w.name.toLocaleLowerCase() == leftGroupname.toLocaleLowerCase() && w.parentId == parentobj.id);
+    }
+    
+    return null;
+  }
+
+setMenuContext(obj: MenuContextObject)
+{
+  if (obj!=undefined && obj!=null)
+    {
+          //console.log('SetContext',obj);
+    localStorage.setItem('currentmenuobject', JSON.stringify(obj)); 
+    this.breadcrumsService.setGroupMenuBreadcums(obj);
+    }
+     
 }
+ 
+
+    // getMenuconext():Observable<MenuContextObject>
+    // {
+    //     var retrievedObject = localStorage.getItem('currentmenuobject');
+    //     if (retrievedObject!=undefined && retrievedObject!=null)
+    //     {
+    //         return JSON.parse(retrievedObject);
+    //     }
+    //     return null;
+    // }
+    getMenuconext():MenuContextObject
+    {
+        var retrievedObject = localStorage.getItem('currentmenuobject');
+        if (retrievedObject!=undefined && retrievedObject!=null)
+        {
+          //console.log("menuContext",JSON.parse(retrievedObject));
+            return JSON.parse(retrievedObject);
+        }
+      
+        return null;
+    }
+  
+isGUID(expression:string)
+{
+    if (expression != null)
+    {
+        let pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        return pattern.test(expression);
+    }
+    return false;
+}
+  
+  
+  
+  
+}
+
+////////// dynamic menu ////////////////////////////
+export class MenuContextObject{
+  topmainGroup: string;
+  topmainGroupId: string;
+  topgroupName: string;
+  topgroupId: string;
+  leftgroupName: string;
+  leftgroupId: string;
+  param_name: string;
+  menuType: number;
+}
+
+export enum MenuType{
+
+    Entity = 1,
+    
+    Picklist = 2,
+
+    Context = 3,
+
+    wellkown = 4
+    
+}
+
+export class editableColumnname
+{
+  name: string;
+  columnname: string;
+}
+

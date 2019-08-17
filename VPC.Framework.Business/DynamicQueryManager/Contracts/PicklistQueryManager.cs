@@ -47,7 +47,7 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts
 
         private readonly bool _isPliclist = true;
 
-        private string BuildSelectQuery(Guid tenantId, string entityName, QueryContext queryModel, bool pagingRequired)
+        private string BuildSelectQuery(Guid tenantId, string entityName, QueryContext queryModel, bool pagingRequired, bool mappingRequired = true)
         {
             IMetadataManager entityManager = new MetadataManager.Contracts.MetadataManager();
             var tableName = entityManager.GetTableNameByEntityname(entityName);
@@ -126,7 +126,7 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts
             var matchingColumnsWithSequence = GetMatchingColumnsWithSequenceForSelectQuery(tenantId, entityName, result.ToArray(), entityColumns, tableName, entityTablePrimaryKey);
             if (!matchingColumnsWithSequence.Any()) throw new FieldAccessException("Column not found");
 
-            var query = GetDbQuery(matchingColumnsWithSequence, queryModel, entityName, pagingRequired);
+            var query = GetDbQuery(matchingColumnsWithSequence, queryModel, entityName, pagingRequired, mappingRequired);
             return query;
         }
         private void AddForeignKey(SelectQueryBuilder queryBuilder, List<ColumnAndField> columns, string tableName)
@@ -259,7 +259,12 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts
                 switch (item.DataType)
                 {
                     case Metadata.Business.DataAnnotations.DataType.PickList:
-                        continue;
+                        IPicklistManager iIPicklistManager = new PicklistManager ();
+                        var isNonCustomizablePicklist = iIPicklistManager.IsNonCustomizablePicklist (item.TypeOf);
+                        if (!isNonCustomizablePicklist) {
+                            continue;
+                        }
+                        break;
                     case Metadata.Business.DataAnnotations.DataType.Guid when !item.TableName.ToLower().Equals(primaryTable.TableName.ToLower()):
                         continue;
                 }
@@ -504,7 +509,7 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts
 
         DataTable IPicklistQueryManager.GetResultById(Guid tenantId, string entityName, dynamic id, QueryContext queryModel)
         {
-            var query = BuildSelectQuery(tenantId, entityName, queryModel, false);
+            var query = BuildSelectQuery(tenantId, entityName, queryModel, false, false);
             IQueryReview review = new QueryReview();
             return review.GetResult(tenantId, entityName, query);
         }

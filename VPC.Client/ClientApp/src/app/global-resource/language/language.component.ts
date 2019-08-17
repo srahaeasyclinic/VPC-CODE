@@ -3,7 +3,9 @@ import { Router, UrlTree, UrlSegment, UrlSegmentGroup, PRIMARY_OUTLET, RouterSta
 import { filter, first } from 'rxjs/operators';
 import { ResourceService } from '../../resource/resource.service';
 import { Location } from '@angular/common';
-import {GlobalResourceService} from '../global-resource.service';
+import { GlobalResourceService } from '../global-resource.service';
+import { RoutelocalizationService } from '../../services/routelocalization.service';
+
 @Component({
     selector: 'app-language',
     templateUrl: './language.component.html',
@@ -13,12 +15,13 @@ import {GlobalResourceService} from '../global-resource.service';
   export class LanguageComponent implements OnInit {
 
     public languages:any = [];
+    public selectedLangeKey:string;
     
-    constructor(private router: Router, 
+    constructor(private readonly location: Location,private router: Router, 
         private activatedRoute: ActivatedRoute, 
         private resourceService: ResourceService,
-        private location: Location,
-        private globalResourceService:GlobalResourceService,
+      private globalResourceService: GlobalResourceService,
+        private localization: RoutelocalizationService
         ) {
       }
 
@@ -31,6 +34,7 @@ import {GlobalResourceService} from '../global-resource.service';
         this.resourceService.getLanguages().subscribe(data => {
           if (data) {
             this.languages = [...data.result];
+            this.selectedLangeKey=this.localization.getDefaultlanguageKey();
           }
         }, 
         error => console.log(error));
@@ -41,13 +45,20 @@ import {GlobalResourceService} from '../global-resource.service';
         var lang={
           key:lan.key,
           text:lan.text,
-        };        
-        localStorage.setItem('langInfo', JSON.stringify(lang));
+        };   
+        this.selectedLangeKey=lan.key;
+        this.localization.setdefaultLanguage(lang);
         this.globalResourceService.getResource();
-        window.location.reload();
-        //this.router.navigate(["../"], { relativeTo: this.activatedRoute });
-        //this.router.navigate([],{ relativeTo: this.activatedRoute });
-        //console.log(this.router.url);
+
+        let paths: string[] = location.pathname.split('/');
+        if (paths&&paths.length>1)
+        {
+          paths[1] = this.localization.getDefaultlanguageKey().toLocaleLowerCase();
+          //this.location.go(paths.join("/"));
+           this.location.replaceState(paths.join("/"))
+          
+        }
+      
     }
 
   }

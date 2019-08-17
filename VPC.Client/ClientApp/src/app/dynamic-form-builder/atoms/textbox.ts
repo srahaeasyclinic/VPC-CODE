@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { Router, ActivatedRoute, Params } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -12,6 +13,7 @@ import { MessageEvent } from '../messaging/message.event';
 import { ResultInitialiser } from '../messaging/result/resultintialiser';
 import { IMethod } from '../messaging/result/resultintialiser';
 import { AgeCalculation } from '../messaging/result/methods/agecalculation';
+import { MenuService } from 'src/app/services/menu.service';
 // text,email,tel,textarea,password, 
 @Component({
     selector: 'textbox',
@@ -40,14 +42,24 @@ export class TextBoxComponent implements OnInit {
     get isValid() { return this.form.controls[this.field.name].valid; }
     get isDirty() { return this.form.controls[this.field.name].dirty; }
     private Isvalid: boolean;
+    public entityName:string;
     private validateMessages = '';
     messages: any;
-    constructor(private validateService: ValidationService, private broadcaster: Broadcaster, private messageEvent: MessageEvent) {
+    constructor(private menuService: MenuService,private validateService: ValidationService, private broadcaster: Broadcaster, private messageEvent: MessageEvent,private route:ActivatedRoute,) {
 
     }
     ngOnInit(): void {
         // console.log(JSON.stringify(this.field));
         this.Isvalid = true;
+
+        // if(this.route.parent!=null){
+        //     this.route.parent.params.subscribe((urlPath) => {
+        //         this.entityName = urlPath["name"];
+        //     });
+        // }
+        let result=this.menuService.getMenuconext();
+        this.entityName = result.param_name;
+        
         // if (this.field && this.field.typeOf && this.field.typeOf.toLowerCase() == "computedtype" && this.field.receivingType) {
         //     this.registerTypeBroadcast();
 
@@ -104,7 +116,7 @@ export class TextBoxComponent implements OnInit {
         if (this.mode === 1) {
 
             if (this.field.value) {
-                this.validateMessages = this.validateService.Validatefield(this.field, this.field.value);
+                this.validateMessages = this.validateService.Validatefield(this.field, this.field.value,this.entityName);
             }
             else {
                 // if (this.field.required) {

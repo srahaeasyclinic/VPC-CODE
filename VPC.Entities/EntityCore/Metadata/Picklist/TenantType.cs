@@ -15,11 +15,13 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
     {
         [NonQueryable]
         [NotNull]
+         [DisplayName("Tenant Id")]
         public override InternalId TenantId { get; set; }
 
         [BasicColumn]
         [NonQueryable]
         [NotNull]
+         [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [BasicColumn]
@@ -28,6 +30,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         public override PicklistContext PicklistContext => new PicklistContext(PicklistType.TenantType);
 
         [NonQueryable]
+         [DisplayName("Name")]
         public override Name Name { get; set; }
 
         public override DataTable GetValues()

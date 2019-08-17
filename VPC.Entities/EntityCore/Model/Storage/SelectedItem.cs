@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 
-namespace VPC.Entities.EntityCore.Model.Storage
-{
-    public class SelectedItem
-    {
+namespace VPC.Entities.EntityCore.Model.Storage {
+    public class SelectedItem {
         public string Name { get; set; }
         public int Sequence { get; set; }
         public bool Hidden { get; set; }
@@ -13,9 +11,12 @@ namespace VPC.Entities.EntityCore.Model.Storage
         public string Properties { get; set; }
         //public List<string> Selected { get; set; }
         public List<ActiveValue> Values { get; set; }
-        public bool Clickable { get; set; }   
-        public string DefaultView { get; set; }     
-        public string typeOf { get; set; }
+        public bool Clickable { get; set; }
+        public string DefaultView { get; set; }
+        public string TypeOf { get; set; }
+
+        public string Context { get; set; }
+        public string ContextType { get; set; }
+
     }
 }
-

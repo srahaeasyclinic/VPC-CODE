@@ -8,7 +8,7 @@
     <div>
         <div *ngIf="onlyLogin !== true" class="breadcrumb-wrap">
         <nav aria-label="breadcrumb">
-            <app-breadcrumb></app-breadcrumb>
+            <!-- <app-breadcrumb></app-breadcrumb> -->
             <!-- <ol class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="#">Home</a>
@@ -17,33 +17,47 @@
                 <li class="breadcrumb-item active" aria-current="page" *ngFor="let link of menu; let i = index;">
                     <a href="#">{{link.title}}</a>
                 </li>
-            </ol>  -->
+            </ol>  && setSubgroup(menu.groupId)!=undefined && setSubgroup(menu.groupId).length>0 setSubgroup(menu.groupId)!=null-->
         </nav>
     </div>
     </div>
-    <div class="content-wrap">
-        <div *ngIf="onlyLogin !== true" ngbDropdown class="top-dropdown" ngbDropdownToggle>
-            <a><span class="fa fa-th"></span></a>
-            <div ngbDropdownMenu>
-                <div class="top-drp-wrapper">
-                    <div *ngFor="let menu of groups">
-                        <div class="dropdown-item" (click)="topMenuClick(menu)">
-                            <div class="icon">
-                                <i class="{{menu.groupName}}"></i>
-                                <!-- <i class="fa fa-user"></i> -->
-                            </div>
-                            <div class="text">
-                                {{menu.groupName}}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <app-language></app-language>
-    </div>
+  <!-- {{groups|json}} -->
+    
 
     <div class="user">
+
+            <div class="content-wrap">
+                    <div *ngIf="onlyLogin !== true" ngbDropdown class="top-dropdown" ngbDropdownToggle>
+                        <a><span class="fa fa-th"></span></a>
+                        <div ngbDropdownMenu>
+            
+                            <div >
+                                <div *ngFor="let menu of groupMenu" class="top-drp-wrapper">
+                                <div *ngIf="menu.subGroup.length>0">
+                                    <div class="menu-style">                            
+                                       <div *ngFor="let submenu of menu.subGroup">
+                                            <div class="dropdown-item" (click)="topMenuClick(submenu)">
+                                                <div class="icon">
+                                                    <i class="{{(submenu.menuIcon!='' && submenu.menuIcon!=null && submenu.menuIcon!=undefined)?submenu.menuIcon:'fa fa-th'}}"></i>
+                                                    <!-- <i class="fa fa-user"></i> -->
+                                                </div>
+                                                <div class="text">
+                                                     <!-- {{submenu.name}} -->
+                                                     {{getResourceValue(submenu.menucode)}}
+                                                </div>
+                                            </div>
+                                    
+                                       </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+            
+            
+                        </div>
+                    </div>
+                    <app-language></app-language>
+                </div>
         <!-- <div class="msg-entrance">
             <span class="fa fa-comments-o fa-fw"></span>
         </div> -->
@@ -59,10 +73,10 @@
                 <div class="profile">
                     <ul>
                         <li (click)="onChangePass()" *ngIf="authService.isLoggedIn && canUserChangePassword">
-                          <a><i class="fa fa-key"></i>{{getResourceValue("ChangePassword_Field")}}</a>
+                          <a><i class="fa fa-key"></i>{{getResourceValue("security_task_changepassword")}}</a>
                         </li>
                         <li (click)="onLogout()" *ngIf="authService.isLoggedIn">
-                          <a><i class="fa fa-sign-out"></i>{{getResourceValue("Logout")}}</a>
+                          <a><i class="fa fa-sign-out"></i>{{getResourceValue("security_task_logout")}}</a>
                         </li>
                     </ul>
                 </div>

@@ -25,33 +25,57 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
     
     public class CollectionTaskDetail : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.CollectionTaskDetail);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20054-ST01", "Standard"}
         };
 
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+
+        [DisplayName("Task Id")]
         public Guid TaskId { get; set; }
+
+        [DisplayName("Product variant code")]
         public XSmallText ProductVariantCode { get; set; }
+
+        [DisplayName("Planned quantity")]
         public DecimalType PlannedQuantity { get; set; }
+
+        [DisplayName("Produced type")]
         public PickList<ProducedType> ProducedType { get; set; }
+
+        [DisplayName("Location code")]
         public Lookup<Location> LocationCode { get; set; }
 
         // Status
+        [DisplayName("Quantity")]
         public DecimalType Quantity { get; set; }
+
+        [DisplayName("Batch no")]
         public SmallText BatchNo { get; set; }
+
+        [DisplayName("Serial no")]
         public SmallText SerialNo { get; set; }
+
+        [DisplayName("Parent Id")]
         public Guid ParentId { get; set; }
+
+        [DisplayName("Set no")]
         public NumericType SetNo { get; set; }
     }
 }

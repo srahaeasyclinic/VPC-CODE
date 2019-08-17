@@ -23,32 +23,43 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
  
     public class ProductVariantAttribute : PrimaryEntity, IItem<Item>
     {
+        [DisplayName ("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.ProductVariantAttribute);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName ("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName ("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName ("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20035-ST01", "Standard"}
         };
 
+        [DisplayName ("Sub type")]
         public override XSmallText SubType { get; set; }
+
         [Tagable]
+        [DisplayName ("Product variant code")]
         public Lookup<ProductVariant> ProductVariantCode { get; set; }
+
         [Tagable]
-        public Lookup<Attribute> AttributeCode { get; set; }
-        [Tagable]
-        public Lookup<AttributeValue> AttributeValueCode { get; set; }
+        [DisplayName ("Is custom value")]
+       // public Lookup<Attribute> AttributeCode { get; set; }
+       // [Tagable]
+       // public Lookup<AttributeValue> AttributeValueCode { get; set; }
        
         public BooleanType IsCustomValue { get; set; }
+
         [Tagable]
+        [DisplayName ("Additional price")]
         public DecimalType AdditionalPrice { get; set; } 
     }
 }

@@ -279,9 +279,13 @@ namespace VPC.Framework.Business.WorkFlow.Contracts
 
             dynamic jsonObject = new JObject (); 
             jsonObject.CurrentWorkFlowStep = operationWapper.NextTransitionType ;
+
+            var myObj = new JObject();
+            myObj.Add(operationWapper.EntityName, jsonObject);
+
             IEntityResourceManager _iEntityResourceManager = new VPC.Framework.Business.EntityResourceManager.Contracts.EntityResourceManager ();
             var resultId = _iEntityResourceManager.UpdateResultWithoutWorkFlow(tenantId, operationWapper.UserId,operationWapper.RefId,
-            operationWapper.EntityName, jsonObject, operationWapper.SubTypeName);
+            operationWapper.EntityName, myObj, operationWapper.SubTypeName);
 
             //----- Insert into history table
             var entityId = iMetadataManager.GetEntityContextByEntityName(operationWapper.EntityName);

@@ -19,20 +19,26 @@ using VPC.Framework.Business.MetadataManager.Contracts;
 using VPC.Framework.Business.RelationManager.Contracts;
 using VPC.Metadata.Business.DataTypes;
 using VPC.Metadata.Business.Entity.Infrastructure;
+using VPC.Metadata.Business.Entity.Trigger;
+using VPC.Metadata.Business.Entity.Trigger.Execution;
 using VPC.Metadata.Business.Operator.DataAnnotations;
 using Comparison = VPC.Framework.Business.DynamicQueryManager.Core.Enums.Comparison;
 
-namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
+namespace VPC.Framework.Business.DynamicQueryManager.Contracts
+{
 
-    public interface IInsertHelper {
-        string BuildInsertQuery (Guid itemId, Guid tenantId, string entityName, JObject payload, string subtype, Guid userId);
+    public interface IInsertHelper
+    {
+        string BuildInsertQuery(Guid itemId, Guid tenantId, string entityName, JObject payload, string subtype, Guid userId);
         // List<GroupedColumns> MatchTest (Guid tenantId, string entityName, JObject payload, string subtype, Guid userId);
     }
 
-    public class InsertHelper : IInsertHelper {
-        string IInsertHelper.BuildInsertQuery (Guid itemId, Guid tenantId, string entityName, JObject payload, string subtype, Guid userId) {
-            var matchingColumns = GetMatchingColumns (itemId, tenantId, entityName, payload, subtype, userId);
-            var insertQuery = BuildInsertQueryV1 (matchingColumns);
+    public class InsertHelper : IInsertHelper
+    {
+        string IInsertHelper.BuildInsertQuery(Guid itemId, Guid tenantId, string entityName, JObject payload, string subtype, Guid userId)
+        {
+            var matchingColumns = GetMatchingColumns(itemId, tenantId, entityName, payload, subtype, userId);
+            var insertQuery = BuildInsertQueryV1(itemId, entityName, matchingColumns);
             return insertQuery;
         }
 
@@ -41,12 +47,14 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
         //     return GetMatchingColumns(tenantId, entityName, payload, subtype, userId);
         // }
 
-        private List<GroupedColumns> GetMatchingColumns (Guid primaryId, Guid tenantId, string entityName, JObject payload, string subtype, Guid userId) {
-            IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager ();
-            var entityColumns = iMetadataManager.GetColumnNameByEntityName (entityName, null);
-            var context = iMetadataManager.GetEntityContextByEntityName (entityName);
-            if (entityColumns == null) throw new FieldAccessException ("Column not found.");
-            var matchingOptions = new MatchingOptions {
+        private List<GroupedColumns> GetMatchingColumns(Guid primaryId, Guid tenantId, string entityName, JObject payload, string subtype, Guid userId)
+        {
+            IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager();
+            var entityColumns = iMetadataManager.GetColumnNameByEntityName(entityName, null);
+            var context = iMetadataManager.GetEntityContextByEntityName(entityName);
+            if (entityColumns == null) throw new FieldAccessException("Column not found.");
+            var matchingOptions = new MatchingOptions
+            {
                 PrimaryId = primaryId,
                 TenantId = tenantId,
                 AddValueFromPayload = true,
@@ -54,79 +62,118 @@ namespace VPC.Framework.Business.DynamicQueryManager.Contracts {
                 UserId = userId,
                 EntitySubType = subtype,
             };
-            IMatcher iMatcher = new Matcher ();
-            return iMatcher.GetMatchingColumnsForInsertQuery (entityName, entityColumns, payload, matchingOptions);
+            IMatcher iMatcher = new Matcher();
+            return iMatcher.GetMatchingColumnsForInsertQuery(entityName, entityColumns, payload, matchingOptions);
         }
 
-        private string BuildInsertQueryV1 (List<GroupedColumns> matchingColumns) {
+        private string BuildInsertQueryV1(Guid itemId, string entityName, List<GroupedColumns> matchingColumns)
+        {
             //create lower tables...
-            Dictionary<string, string> executedTables = new Dictionary<string, string> ();
+            Dictionary<string, string> executedTables = new Dictionary<string, string>();
             var query = "";
-            var tablesWhoHasForeignKeyReference = matchingColumns.Where (t => t.NeedToUpdateColumn != null).ToList ();
-            if (tablesWhoHasForeignKeyReference.Any ()) {
-                foreach (var table in tablesWhoHasForeignKeyReference) {
-                    query += GetQueryStr (table);
-                    StoreExecutedTables (executedTables, table);
+            var tablesWhoHasForeignKeyReference = matchingColumns.Where(t => t.NeedToUpdateColumn != null).ToList();
+            if (tablesWhoHasForeignKeyReference.Any())
+            {
+                foreach (var table in tablesWhoHasForeignKeyReference)
+                {
+                    query += GetQueryStr(table);
+                    StoreExecutedTables(executedTables, table);
                 }
             }
 
             //create item table..
-            var itemTable = matchingColumns.FirstOrDefault (t => t.EntityFullName.ToLower ().Equals (ItemHelper.ItemClassName.ToLower ()));
-            if (itemTable != null) {
-                query += GetQueryStr (itemTable);
-                StoreExecutedTables (executedTables, itemTable);
+            var itemTable = matchingColumns.FirstOrDefault(t => t.EntityFullName.ToLower().Equals(ItemHelper.ItemClassName.ToLower()));
+            if (itemTable != null)
+            {
+                query += GetQueryStr(itemTable);
+                StoreExecutedTables(executedTables, itemTable);
             }
 
             //create other tables..
-            foreach (var item in matchingColumns) {
-                var clientName = (string.IsNullOrEmpty (item.ClientName)) ? item.EntityFullName : item.ClientName;
-                var isExecuted = executedTables.Where (t => t.Key.Equals (clientName)).ToList ();
-                if (isExecuted.Any ()) continue;
-                query += GetQueryStr (item);
+            foreach (var item in matchingColumns)
+            {
+                var clientName = (string.IsNullOrEmpty(item.ClientName)) ? item.EntityFullName : item.ClientName;
+                var isExecuted = executedTables.Where(t => t.Key.Equals(clientName)).ToList();
+                if (isExecuted.Any()) continue;
+                query += GetQueryStr(item);
             }
 
             // add relateions
-            foreach (var table in tablesWhoHasForeignKeyReference) {
+            foreach (var table in tablesWhoHasForeignKeyReference)
+            {
                 if (table.NeedToUpdateColumn == null) continue;
-                var columnWithValue = new Dictionary<string, string> ();
-                UpdateQueryBuilder updateQuery = new UpdateQueryBuilder ();
-                columnWithValue.Add (table.NeedToUpdateColumn.ColumnName, table.Id.ToString ());
-                updateQuery.AddTable (table.NeedToUpdateColumn.TableName, columnWithValue);
-                var targetRow = matchingColumns.FirstOrDefault (t => t.EntityFullName.ToLower ().Equals (table.NeedToUpdateColumn.EntityFullName.ToLower ()));
+                var columnWithValue = new Dictionary<string, string>();
+                UpdateQueryBuilder updateQuery = new UpdateQueryBuilder();
+                columnWithValue.Add(table.NeedToUpdateColumn.ColumnName, table.Id.ToString());
+                updateQuery.AddTable(table.NeedToUpdateColumn.TableName, columnWithValue);
+                var targetRow = matchingColumns.FirstOrDefault(t => t.EntityFullName.ToLower().Equals(table.NeedToUpdateColumn.EntityFullName.ToLower()));
                 if (targetRow == null) continue;
-                updateQuery.AddWhere (table.NeedToUpdateColumn.PrimaryKey, Comparison.Equals, targetRow.Id.ToString (), 1);
-                query += updateQuery.BuildQuery ();
+                updateQuery.AddWhere(table.NeedToUpdateColumn.PrimaryKey, Comparison.Equals, targetRow.Id.ToString(), 1);
+                query += updateQuery.BuildQuery();
             }
-            return TransactionHelper.BuildQuery (query);
+
+            IMetadataManager iMetadataManager = new MetadataManager.Contracts.MetadataManager();
+            var triggers = iMetadataManager.GetTriggerProperties(entityName);
+            if (triggers.Any())
+            {
+                var singletonTrigger = triggers[0];
+                var bodyProp = singletonTrigger.GetBody();
+                var search = matchingColumns.FirstOrDefault(t => t.EntityFullName.ToLower().Equals(entityName.ToLower()));
+                if (search == null) return TransactionHelper.BuildQuery(query);
+                {
+                    var payload = bodyProp.Select(item => search.Columns.FirstOrDefault(t => t.FieldName.ToLower().Equals(item.ToLower()))).Where(matching => matching != null).ToDictionary<ColumnAndField, string, string>(matching => matching.ColumnName, matching => matching.Value);
+                    if (!payload.Any()) return TransactionHelper.BuildQuery(query);
+                    var triggerEngine = new TriggerEngine();
+                    var triggerExecutionPayload = new TriggerExecutionPayload
+                    {
+                        PayloadObj = payload,
+                        ConditionalValue = itemId.ToString()
+                    };
+                    var triggerQuery = triggerEngine.GetQuery(triggers, triggerExecutionPayload);
+                    if (!string.IsNullOrEmpty(triggerQuery))
+                    {
+                        query += triggerQuery;
+                    }
+                }
+            }
+            //------------
+            return TransactionHelper.BuildQuery(query);
         }
 
-        private static void StoreExecutedTables (Dictionary<string, string> executedTables, GroupedColumns table) {
-            var clientName = (string.IsNullOrEmpty (table.ClientName)) ? table.EntityFullName : table.ClientName;
-            executedTables.Add (clientName, table.EntityFullName);
+        private static void StoreExecutedTables(Dictionary<string, string> executedTables, GroupedColumns table)
+        {
+            var clientName = (string.IsNullOrEmpty(table.ClientName)) ? table.EntityFullName : table.ClientName;
+            executedTables.Add(clientName, table.EntityFullName);
         }
 
-        private string GetQueryStr (GroupedColumns table) {
-            var queryBuilder = new InsertQueryBuilder ();
-            var insertedColumns = GetInsertedColumns (table.Columns);
-            queryBuilder.InsertIntoTable (table.Columns[0].TableName, insertedColumns, false);
-            var query = queryBuilder.BuildQuery ();
+        private string GetQueryStr(GroupedColumns table)
+        {
+            var queryBuilder = new InsertQueryBuilder();
+            var insertedColumns = GetInsertedColumns(table.Columns);
+            queryBuilder.InsertIntoTable(table.Columns[0].TableName, insertedColumns, false);
+            var query = queryBuilder.BuildQuery();
             return query;
         }
 
-        private Dictionary<string, string> GetInsertedColumns (List<ColumnAndField> columns) {
-            var matchedColumns = new Dictionary<string, string> ();
-            foreach (var list in columns) {
-                var match = matchedColumns.FirstOrDefault (t => t.Key == list.ColumnName);
+        private Dictionary<string, string> GetInsertedColumns(List<ColumnAndField> columns)
+        {
+            var matchedColumns = new Dictionary<string, string>();
+            foreach (var list in columns)
+            {
+                var match = matchedColumns.FirstOrDefault(t => t.Key == list.ColumnName);
                 if (match.Key != null || list.Value == null) continue;
-                if (list.DataType.Equals(Metadata.Business.DataAnnotations.DataType.Password)) {
+                if (list.DataType.Equals(Metadata.Business.DataAnnotations.DataType.Password))
+                {
                     var password = new Password();
-                    password.DigestPassword(list.Value.ToString ());
-                    matchedColumns.Add ("[" + list.DataType + "Hash]", Convert.ToBase64String (password.PasswordHash));
-                    matchedColumns.Add ("[" + list.DataType + "Salt]", Convert.ToBase64String (password.PasswordSalt));
-                } else {
-                    string value = list.DataType.ToString ().ToLower ().Equals ("datetime") ? HelperUtility.ConvertDateToUTC (list.Value.ToString ()) : list.Value.ToString ();
-                    if (string.IsNullOrEmpty (value)) continue;
-                    matchedColumns.Add (list.ColumnName, list.Value.ToString ());
+                    password.DigestPassword(list.Value.ToString());
+                    matchedColumns.Add("[" + list.DataType + "Hash]", Convert.ToBase64String(password.PasswordHash));
+                    matchedColumns.Add("[" + list.DataType + "Salt]", Convert.ToBase64String(password.PasswordSalt));
+                }
+                else
+                {
+                    string value = list.DataType.ToString().ToLower().Equals("datetime") ? HelperUtility.ConvertDateToUTC(list.Value.ToString()) : list.Value.ToString();
+                    if (string.IsNullOrEmpty(value)) continue;
+                    matchedColumns.Add(list.ColumnName, value);
                 }
             }
             return matchedColumns;

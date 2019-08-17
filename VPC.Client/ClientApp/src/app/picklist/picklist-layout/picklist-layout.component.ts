@@ -12,6 +12,7 @@ import swal from 'sweetalert2';
 import { TosterService } from '../../services/toster.service';
 import { GlobalResourceService } from '../../global-resource/global-resource.service';
 import { Resource } from '../../model/resource';
+import { PicklistService } from '../../picklist/picklist.service';
 
 @Component({
   selector: 'app-picklist-layout',
@@ -36,7 +37,11 @@ export class PicklistLayoutComponent implements OnInit {
   submitted = false;
   private samelayoutTypeForDefaultCount: number = 0;
   public resource: Resource;
-
+  private oldLayoutId: string = "";
+  public showContext: boolean = false;
+  public cloneLayoutName:string = "";
+  public drpCloneContext:string = "";
+  
   layoutTypes = [
     new LayoutType(1, 'View'),
     new LayoutType(2, 'Form'),
@@ -44,13 +49,14 @@ export class PicklistLayoutComponent implements OnInit {
   ];
 
   contexts = [
-    new Context(1, 'New'),
+    new Context(1, 'Add'),
     new Context(2, 'Edit')
   ];
 
   constructor(
     private modalService: NgbModal,
     private layoutService: PicklistLayoutService,
+    private picklistService:PicklistService,
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
@@ -138,14 +144,14 @@ export class PicklistLayoutComponent implements OnInit {
     let errorMessage: string = "";
 
     if (this.layoutName === "") {
-      errorMessage += this.getResourceValue("Nameisrequired")  + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("metadata_field_name")  + "<br/>";
     }
     if (this.drpType === "") {
-      errorMessage += this.getResourceValue("TypeIsRequired") + "<br/>";
+      errorMessage += this.globalResourceService.requiredValidator("metadata_field_type") + "<br/>";
     }
     else if (this.drpType === "2") {
       if (this.drpContext === "") {
-        errorMessage += this.getResourceValue("ContextIsRequired") + "<br/>";
+        errorMessage += this.globalResourceService.requiredValidator("metadata_field_context") + "<br/>";
       }
     }
 
@@ -160,11 +166,11 @@ export class PicklistLayoutComponent implements OnInit {
 
     //this.setDefaultLayoutByLayoutTypeCount(); //set default layout based on layout type if not exists
 
-    this.layoutModel.Context = (this.drpContext == '') ? 0 : parseInt(this.drpContext);
+    this.layoutModel.context = (this.drpContext == '') ? 0 : parseInt(this.drpContext);
 
     this.layoutService.saveLayout(this.layoutModel, this.metaDataName).subscribe(result => {
       this.modalReference.close();
-      this.toster.showSuccess(this.getResourceValue("LayoutSavedSuccessfully"));
+      this.toster.showSuccess(this.getResourceValue("metadata_operation_save_success_message"));
 
       this.id = result;
       var type = "";
@@ -182,7 +188,10 @@ export class PicklistLayoutComponent implements OnInit {
         type = "list";
         //this.router.navigate(["picklist/" + this.metaDataName + "/layout/" + this.id + "/list" ]);
       }
-      this.router.navigate(["./" + type.toLowerCase() + "/" + this.id], { relativeTo: this.route });
+      this.router.navigate(["./" + type.toLowerCase() + "/" + this.id], { relativeTo: this.route }).then(x=>
+        {
+          this.picklistService.showToolbar.emit()
+        });
     });
 
 
@@ -215,7 +224,7 @@ export class PicklistLayoutComponent implements OnInit {
     this.layoutModel.EntityId = data.entityId;
     this.layoutModel.name = data.name;
     this.layoutModel.layoutType = data.layoutType;
-    this.layoutModel.Context = data.context;
+    this.layoutModel.context = data.context;
 
     this.layoutService.saveLayoutDefault(this.layoutModel, this.metaDataName).subscribe(result => {
       if (result) {
@@ -225,34 +234,53 @@ export class PicklistLayoutComponent implements OnInit {
   }
 
   private deleteLayout(data) {
-    swal({
-      title: this.getResourceValue("Areyousure"),
-      text: this.getResourceValue("Youwntbeabletorevertthis"),
-      type: this.getResourceValue("warning"),
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: this.getResourceValue("Yesdeleteit"),
-      showLoaderOnConfirm: true,
-    })
-      .then((willDelete) => {
-        if (willDelete.value) {
-          this.layoutService.deleteLayout(data.id, this.metaDataName).subscribe(result => {
-            if (result) {
-              this.getLayouts(this.metaDataName);
-            }
-          });
 
-        } else {
-          //write the code for cancel click
+    this.globalResourceService.openDeleteModal.emit()
+
+    this.globalResourceService.notifyConfirmationDelete.subscribe(x => {
+      this.layoutService.deleteLayout(data.id, this.metaDataName).subscribe(result => {
+        if (result) {
+          this.getLayouts(this.metaDataName);
         }
-
       });
+       
+      })
+
+
+
+
+    // swal({
+    //   title: this.getResourceValue("common_message_areyousure"),
+    //   text: this.getResourceValue("common_message_youwontbeabletorevertthis"),
+    //   type: "warning",
+    //   showCancelButton: true,
+    //   confirmButtonColor: '#3085d6',
+    //   cancelButtonColor: '#d33',
+    //   confirmButtonText: this.getResourceValue("common_message_yesdeleteit"),
+    //   showLoaderOnConfirm: true,
+    // })
+    //   .then((willDelete) => {
+    //     if (willDelete.value) {
+    //       this.layoutService.deleteLayout(data.id, this.metaDataName).subscribe(result => {
+    //         if (result) {
+    //           this.getLayouts(this.metaDataName);
+    //         }
+    //       });
+
+    //     } else {
+    //       //write the code for cancel click
+    //     }
+
+    //   });
   }
 
   private goToLayoutDetail(id, type) {
     // this.router.navigate(["picklist/" + this.metaDataName + "/layout/" + id + "/" + type.toLowerCase()]);
-    this.router.navigate(["./" + type.toLowerCase() + "/" + id], { relativeTo: this.route });
+    this.router.navigate(["./" + type.toLowerCase() + "/" + id], { relativeTo: this.route })
+    .then(x=>
+      {
+        this.picklistService.showToolbar.emit()
+      });
   }
   generateResourceName(word) {
     if (!word) return word;
@@ -261,6 +289,61 @@ export class PicklistLayoutComponent implements OnInit {
 
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
+  }
+
+  public cloneLayout(data, content) {
+    //console.log('data -' + data);
+
+    this.cloneLayoutName = data.name + " - copy";
+    let cloneType: number = 0;
+    cloneType = parseInt(data.layoutType);
+    this.oldLayoutId = data.id;
+
+    if (cloneType > 0) {
+      if (cloneType == 2) {
+        this.showContext = true;
+      } else {
+        this.showContext = false;
+      }
+    }
+
+    let ngbModalOptions: NgbModalOptions = {
+      backdrop: 'static',
+      keyboard: false
+    };
+    this.modalReference = this.modalService.open(content, ngbModalOptions);
+  }
+
+  public saveClone(content) {
+    let errorMessage: string = "";
+
+    if (this.cloneLayoutName === "") {
+      errorMessage += this.globalResourceService.requiredValidator("metadata_field_name")  + "<br/>";
+    }
+    // if (this.drpType === "") {
+    //   errorMessage += this.getResourceValue("common_validation_type") + "<br/>";
+    // }
+    // else if (this.drpType === "2") {
+    //   if (this.drpContext === "") {
+    //     errorMessage += this.getResourceValue("ContextIsRequired") + "<br/>";
+    //   }
+    // }
+
+    if (errorMessage != "") {
+      this.toster.showError(errorMessage);
+      return;
+    }
+
+    this.layoutModel.name = this.cloneLayoutName;
+    //this.layoutModel.layoutType = parseInt(this.drpType);
+    this.layoutModel.context = (this.drpCloneContext == '') ? 0 : parseInt(this.drpCloneContext);
+
+    this.layoutService.cloneLayout(this.layoutModel, this.metaDataName, this.oldLayoutId).subscribe(result => {
+      this.modalReference.close();
+      this.toster.showSuccess(this.getResourceValue("metadata_operation_layoutclone_success_message"));      
+      this.getLayouts(this.metaDataName);
+    });
+
   }
 }
 

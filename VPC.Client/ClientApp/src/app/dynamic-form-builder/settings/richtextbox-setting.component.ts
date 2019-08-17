@@ -8,7 +8,7 @@ import { Resource } from '../../model/resource';
   selector: 'richtextbox-setting',
   template: `
 <div class="modal-header">
-  <label class="text-important" id="modal-title">{{getResourceValue('RichTextboxSettings')}}</label>
+  <label class="text-important" id="modal-title">{{getResourceValue('metadata_label_richtextboxsettings')}}</label>
   <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
     <span aria-hidden="true">&times;</span>
   </button>
@@ -21,13 +21,13 @@ import { Resource } from '../../model/resource';
 
         <required-validator *ngSwitchCase="'requiredvalidator'" [node]="node" [validator]="validatorItem"></required-validator>
         <length-validator *ngSwitchCase="'lengthvalidator'" [validator]="validatorItem"></length-validator>
-
+        <defaultvalue-validator *ngSwitchCase="'defaultvaluevalidator'" [validator]="validatorItem" [datatype]="node.dataType" [typeof]="node.typeOf" ></defaultvalue-validator>
 
       </div>
     </div>
     <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('Cancel')}}</button>
-    <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('Submit')}}</button>
+    <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('operation_submit')}}</button>
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
   </div>
 </div>
 

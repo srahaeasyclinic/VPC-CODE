@@ -7,7 +7,7 @@ import { Resource } from '../../model/resource';
   selector: 'radio-setting',
   template: `
   <div class="modal-header">
-    <label id="modal-title">{{getResourceValue('RadioSettings')}}</label>
+    <label id="modal-title">{{getResourceValue('metadata_label_radiosettings')}}</label>
     <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -20,11 +20,12 @@ import { Resource } from '../../model/resource';
                 <required-validator *ngSwitchCase="'requiredvalidator'" [node]="node" [validator]="validatorItem"></required-validator>
               <length-validator *ngSwitchCase="'lengthvalidator'" [validator]="validatorItem"></length-validator> 
               <range-validator *ngSwitchCase="'rangevalidator'" [validator]="validatorItem"></range-validator>            
+              <defaultvalue-validator *ngSwitchCase="'defaultvaluevalidator'" [validator]="validatorItem" [datatype]="node.dataType" [typeof]="node.typeOf" ></defaultvalue-validator>
             </div>          
         </div>
         <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('Cancel')}}</button>
-        <button type="button" class="btn btn-primary" (click)="modal.close('Ok click')">{{getResourceValue('Submit')}}</button>
+        <button type="button" class="btn btn-primary" (click)="saveSattings()">{{getResourceValue('operation_submit')}}</button>
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue('task_cancel')}}</button>
       </div> 
   </div>
   
@@ -36,7 +37,12 @@ export class RadioSettingComponent {
     @Input() eventType: any;
     @Output() saveEvent: EventEmitter<any> = new EventEmitter();
     public resource: Resource;
-  
+    public widths = [
+      { id: 12, name: "100%" },
+      { id: 9, name: "75%" },
+      { id: 6, name: "50%" },
+      { id: 3, name: "25%" }
+    ];
     constructor(public modal: NgbActiveModal,private globalResourceService: GlobalResourceService,) {}
   
     private columns = [];
@@ -52,7 +58,7 @@ export class RadioSettingComponent {
   
  
   
-    private saveSattings() {
+    public saveSattings() {
       this.saveEvent.emit(this.node);
     }
   getResourceValue(key) {

@@ -1,0 +1,16 @@
+<div class="tab-section">
+<kendo-grid
+          [kendoGridBinding]="gridData"
+            [pageSize]="10"
+            [pageable]="true"
+            [sortable]="true"
+            [filterable]="true"
+            
+            [height]="510">
+            <kendo-grid-column field="name" title="{{getResourceValue('metadata_entityname')}}" [width]="140"></kendo-grid-column>
+            <kendo-grid-column field="displayName" title="{{getResourceValue('metadata_displayname')}}" [width]="120"></kendo-grid-column>
+            <kendo-grid-column field="type" title="{{getResourceValue('metadata_datatype')}}" [width]="120"></kendo-grid-column>
+            <kendo-grid-column field="relatedEntity" title="{{getResourceValue('metadata_relatedentity')}}" [width]="100"></kendo-grid-column>
+            <kendo-grid-column field="relatedField" title="{{getResourceValue('metadata_relatedfields')}}" [width]="130"></kendo-grid-column>
+        </kendo-grid>
+      </div>

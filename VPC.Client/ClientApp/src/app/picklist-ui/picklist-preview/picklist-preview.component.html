@@ -8,12 +8,12 @@
   </div>
   <div class="msg-tips-wrap">
     <div class="margin-right-5">
-      <div [ngClass]="(isPreviousIdAvailable)?'active-item':'inactive-item'" (click)="previousData()">
+      <div [ngClass]="(isPreviousIdAvailable)?'active-item':'inactive-item'" (click)="(isPreviousIdAvailable)?previousData():false">
         <span class="fa fa-chevron-circle-left"></span>
       </div>
     </div>
     <div class="margin-left-10">
-      <div [ngClass]="(isNexIdAvailable)?'active-item':'inactive-item'" (click)="nextData()">
+      <div [ngClass]="(isNexIdAvailable)?'active-item':'inactive-item'" (click)="(isNexIdAvailable)?nextData():false">
         <span class="fa fa-chevron-circle-right"></span>
       </div>
     </div>
@@ -22,6 +22,6 @@
 
 <div class="page-content">
   
-  <my-tree [rootNode]="tree" [resource]="resource" [mode]="2" *ngIf="isTreeReady" class="preview">
+  <my-tree [rootNode]="tree" [resource]="resource" [mode]="2" [entityName]="entityName" *ngIf="isTreeReady" class="preview">
   </my-tree>
 </div>

@@ -18,6 +18,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public override InternalId TenantId { get; set; }
         public override PicklistContext PicklistContext => new PicklistContext(0);
 
@@ -25,15 +26,18 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [ForeignKey("[dbo].[PickListValue]", "[Id]")]
         [ColumnName("[PickListValueId]")]
         [NotNull]
+        [DisplayName("Picklist value")]
         public InternalId PicklistValueId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
@@ -44,6 +48,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         //[DynamicPrefix(InfoPrefix.Municipality_State)]
         [NotNull]
         //[DynamicPrefix(InfoPrefix.CountryId_Municipality)]
+        [DisplayName("Country")]
         public PickList<Country> CountryId { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
@@ -52,6 +57,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist.ExtendedPicklistValue
         [InverseProperty("[Id]")] //situated in currency table...
         [ColumnName("[StateId]")] //one to one relation
         //[DynamicPrefix(InfoPrefix.StateId_Municipality)]
+        [DisplayName("State")]
         public PickList<State> StateId { get; set; }
 
 

@@ -23,29 +23,42 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
     
     public class ProductionOrderOperation : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.ProductionOrderOperation);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20047-ST01", "Standard"}
         };
 
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+
+        [DisplayName("Production order number")]
         [Tagable]
         public Lookup<ProductionOrder> ProductionOrderNumber { get; set; }
+
+        [DisplayName("Position")]
         [Tagable]
         public NumericType Position { get; set; }
+
+        [DisplayName("Start date")]
         [Tagable]
         public DateTime StartDate { get; set; }
+
+        [DisplayName("End date")]
         [Tagable]
         public DateTime EndDate { get; set; }
         // [Tagable]

@@ -1,24 +1,24 @@
-<div>
-  <ngb-tabset class="c-left-tab">
+<div class="margin-top-15">
+  <ngb-tabset class="security-tab">
     <ngb-tab>
       <ng-template ngbTabTitle>
-        <span class="tab-title">{{getResourceValue('Entities')}}</span>
+        <span class="tab-title">{{getResourceValue('security_lable_entity')}}</span>
       </ng-template>
       <ng-template ngbTabContent>
         <mat-accordion *ngIf="!roleId">
           <mat-expansion-panel *ngFor="let role of entitySecurity;">
             <mat-expansion-panel-header>
               <mat-panel-title>
-                {{getResourceByKey(role.name)}}
+                <div class="text-bold">{{role.name}}</div>                
               </mat-panel-title>
             </mat-expansion-panel-header>
             <div class="row">
               <div *ngFor="let operationLvl of role.entity.operationLevel;" class="col-md-4 form-group">
-                <label> {{getResourceByKey(operationLvl.name)}}</label>
-                <select class="form-control" [(ngModel)]="operationLvl.scopeSelected"
+                <label> {{operationLvl.name}}</label>
+                <select class="input-control" [(ngModel)]="operationLvl.scopeSelected"
                   (ngModelChange)="onAccessSelected($event,role.entity.data)">
                   <option *ngFor="let accessLvl of role.entity.accessLevel" value={{accessLvl.id}}>
-                    {{getResourceByKey(accessLvl.name)}}
+                    {{accessLvl.name}}
                   </option>
                 </select>
               </div>
@@ -30,11 +30,11 @@
           <div *ngFor="let role of entitySecurity;">
             <div class="row">
               <div *ngFor="let operationLvl of role.entity.operationLevel;" class="col-md-4 form-group">
-                <label> {{getResourceByKey(operationLvl.name)}}</label>
-                <select class="form-control" [(ngModel)]="operationLvl.scopeSelected"
+                <label> {{operationLvl.name}}</label>
+                <select class="input-control" [(ngModel)]="operationLvl.scopeSelected"
                   (ngModelChange)="onAccessSelected($event,role.entity.data)">
                   <option *ngFor="let accessLvl of role.entity.accessLevel" value={{accessLvl.id}}>
-                    {{getResourceByKey(accessLvl.name)}}
+                    {{accessLvl.name}}
                   </option>
                 </select>
               </div>
@@ -48,7 +48,7 @@
 
     <ngb-tab>
       <ng-template ngbTabTitle>
-        <span class="tab-title">{{getResourceValue('Functions')}}</span>
+        <span class="tab-title">{{getResourceValue('security_lable_function')}}</span>
       </ng-template>
       <ng-template ngbTabContent>
         <app-functionsequrity [roleIdParam]="roleId" [entityNameParam]="entityName"></app-functionsequrity>
@@ -58,7 +58,7 @@
 
     <ngb-tab>
       <ng-template ngbTabTitle>
-        <span class="tab-title">{{getResourceValue('Reports')}}</span>
+        <span class="tab-title">{{getResourceValue('security_lable_report')}}</span>
       </ng-template>
       <ng-template ngbTabContent>
 
@@ -67,7 +67,7 @@
 
     <ngb-tab>
       <ng-template ngbTabTitle>
-        <span class="tab-title">{{getResourceValue('Dashlets')}}</span>
+        <span class="tab-title">{{getResourceValue('security_lable_dashlet')}}</span>
       </ng-template>
       <ng-template ngbTabContent>
 

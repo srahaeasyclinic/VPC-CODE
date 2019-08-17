@@ -67,6 +67,29 @@
         public static short CommunicationMetadata = short.Parse(PicklistTypeStr.MetaDataPikclist);
         //public static short CommunicationContextType = short.Parse(PicklistTypeStr.CommType);
         public static short HPicklist = short.Parse(PicklistTypeStr.HiertestPikclist);
+
+        public static short EmailStatus = short.Parse(PicklistTypeStr.EmailStatus);
+
+        public static short Crew = short.Parse(PicklistTypeStr.Crew);
+        public static short BatchTypeContext = short.Parse(PicklistTypeStr.BatchTypeContext);
+        public static short BatchType = short.Parse(PicklistTypeStr.BatchType);
+        public static short Hour = short.Parse(PicklistTypeStr.Hour);
+        public static short Minute =short.Parse(PicklistTypeStr.Minute);
+        public static short BatchInterval=short.Parse(PicklistTypeStr.BatchInterval);
+        public static short SchedulerDailyUnit=short.Parse(PicklistTypeStr.SchedulerDailyUnit);
+        public static short Month=short.Parse(PicklistTypeStr.Month);
+        public static short Day=short.Parse(PicklistTypeStr.Day);
+        public static short Week=short.Parse(PicklistTypeStr.Week);
+
+        public static short SchedulerMonthlyUnit=short.Parse(PicklistTypeStr.SchedulerMonthlyUnit);
+         public static short SchedulerYearlyUnit=short.Parse(PicklistTypeStr.SchedulerYearlyUnit);
+         public static short ProductLockCode=short.Parse(PicklistTypeStr.ProductLockCode);
+         public static short ProductDangerousGoodsCode=short.Parse(PicklistTypeStr.ProductDangerousGoodsCode);
+         public static short ProductCustomTariff=short.Parse(PicklistTypeStr.ProductCustomTariff);
+         //public static short ProductSize=short.Parse(PicklistTypeStr.ProductSize);
+         public static short ProductAttribute=short.Parse(PicklistTypeStr.ProductAttribute);
+        // public static short ProductColor=short.Parse(PicklistTypeStr.ProductColor);
+         public static short ProductUnitOfMeasure=short.Parse(PicklistTypeStr.ProductUnitOfMeasure);
     }
 
     public static class PicklistTypeStr
@@ -119,6 +142,29 @@
         public static string ReasonForLeaving = "10045";
         public static string Designation = "10046";
 
+        public static string EmailStatus="10047";
+
+        public static string Crew="10048";
+        public static string BatchTypeContext="10049";
+        public static string BatchType="10050";
+        public static string Hour="10051";
+        public static string Minute="10052";
+        public static string BatchInterval="10053";
+        public static string SchedulerDailyUnit="10054";
+        public static string Month="10055";
+         public static string Day="10056";
+         public static string Week="10057";
+        public   static string SchedulerMonthlyUnit="10058";
+        public   static string SchedulerYearlyUnit="10059";
+        public static string ProductLockCode = "10060";
+        public static string ProductDangerousGoodsCode="10061";
+        public static string ProductCustomTariff="10062";
+       // public static string ProductSize="10063";
+        public static string ProductAttribute="10064";
+      //  public static string ProductColor="10065";
+         public static string ProductUnitOfMeasure="10066";
+
+
 
         //Standard complex pick-list        
         public static string Currency = "20001";
@@ -135,5 +181,7 @@
         //public static string CommType = "30007";
         public static string MetaDataPikclist = "30008";
         public static string HiertestPikclist = "30009";
+        
+        
     }
 }

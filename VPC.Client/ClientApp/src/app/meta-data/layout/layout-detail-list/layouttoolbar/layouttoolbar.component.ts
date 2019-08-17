@@ -26,6 +26,7 @@ export class LayouttoolbarComponent implements OnInit {
   private toolbarGroup: string;
   public layoutInfo: LayoutModel = new LayoutModel();
   public resource: Resource;
+  public searchText: string = '';
 
   constructor(
     private layoutservice: LayoutService,
@@ -238,6 +239,14 @@ export class LayouttoolbarComponent implements OnInit {
       item.sequence = a;
       a++;
     });
+  }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
   }
 
 }

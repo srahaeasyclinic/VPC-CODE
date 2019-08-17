@@ -17,11 +17,7 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [CustomizeValue()]
     public class UserCategory : SimplePicklist
     {
-        
-
-   
-
- [NonQueryable]
+        [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
         public override InternalId TenantId { get; set; }
@@ -59,7 +55,39 @@ namespace VPC.Entities.EntityCore.Metadata.Picklist
         [NotNull]
         public MediumText Text { get; set; }
 
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        [DefaultValue()]
+        [NonQueryable]
+        [InverseProperty("[Id]")]
+        [ColumnName("[UpdatedBy]")]
+        [NotNull]
+        public Lookup<User> UpdatedBy { get; set; }
 
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        [DefaultValue()]
+        [NonQueryable]
+        [ColumnName("[UpdatedDate]")]
+        [NotNull]
+        public DateTime UpdatedDate { get; set; }
+
+        [DefaultValue("1")]
+        [ColumnName("[Active]")]
+        [NotNull]
+        [SimpleSearch]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        public PickList<Active> Active { get; set; }
+
+        [DefaultValue("0")]
+        [ColumnName("[IsDeletetd]")]
+        [NotNull]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        public BooleanType IsDeletetd { get; set; }
+
+        [DefaultValue("0")]
+        [ColumnName("[Flagged]")]
+        [NotNull]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
+        public BooleanType Flagged { get; set; }
 
         public override DataTable GetValues()
         {

@@ -5,6 +5,6 @@ namespace VPC.Framework.Business.BatchType
 {
     public interface IBatchTypes
     {
-        BatchTypeReturnMessage OnExecute(dynamic obj);        
+        void OnExecute(dynamic obj);        
     } 
 }

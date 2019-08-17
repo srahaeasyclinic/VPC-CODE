@@ -19,6 +19,8 @@ namespace VPC.Metadata.Business.DataAnnotations
         DateOfBirth,
         Calendar,
         RichText,
+
+        Link,
         //HierarchyDropDown
     }
 }

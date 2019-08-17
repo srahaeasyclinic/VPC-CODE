@@ -8,6 +8,8 @@ export class BatchTypeInfo {
         idleTime:number
         status:boolean
         itemNameInt:ItemNameInt
+        itemTimeout:number
+        itemRetryCount:number
 }
 
 

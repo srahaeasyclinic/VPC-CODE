@@ -1,0 +1,35 @@
+﻿<ng-template #sessionExpiry let-modal>
+  <ng-container *ngIf="!isLoginModal ">
+    <div class="modal-expire">
+      <div class="modal-top">
+        <div class="icon">
+          <i class="fa fa-clock-o" aria-hidden="true"></i>
+        </div>
+        <div class="text">
+          {{getResourceValue("application_label_sessionexpirypopup")}}
+        </div>
+
+      </div>
+      <div class="modal-info">
+        <div class="time-wrapper">
+          {{getResourceValue("sessionexpirypopup_label_minutes")}}
+          <div class="time margin-top-5">
+            {{data.minutes}}
+          </div>
+        </div>
+        <div class="time-wrapper">
+          {{getResourceValue("sessionexpirypopup_label_seconds")}}
+          <div class="time margin-top-5">
+            {{data.seconds}}
+          </div>
+        </div>
+      </div>
+      <div class="modal-bottom">
+        <button class="btn btn-primary"
+          (click)="revokeAuthorization()">{{getResourceValue("sessionexpirypopup_operation_stillhere")}}</button>
+      </div>
+    </div>
+  </ng-container>
+  <app-login [isModal]="isLoginModal" (setIsModal)="setIsModal()" *ngIf="isLoginModal">
+  </app-login>
+</ng-template>

@@ -15,7 +15,7 @@ namespace VPC.Framework.Business.EntitySecurity.APIs
     {
         EntitySecurityCacheInfo SecurityCache(Guid tenantId, Guid userId,bool isSuperAdmin);
         void Clear(Guid tenantId, Guid userId, string keyType);
-        List<KeyValuePair<Guid,BatchTypeInfo>> BatchTypesCache();
+        List<VPC.Entities.BatchType.BatchType> BatchTypesCache();
         void BatchTypeClear();
     }
 
@@ -145,22 +145,22 @@ namespace VPC.Framework.Business.EntitySecurity.APIs
             }
         }
 
-        List<KeyValuePair<Guid,BatchTypeInfo>> ISecurityCacheManager.BatchTypesCache()
+        List<VPC.Entities.BatchType.BatchType> ISecurityCacheManager.BatchTypesCache()
         {           
-            if (VPCCache.GetInstance().Contains<List<KeyValuePair<Guid,BatchTypeInfo>>>(string.Format("{0}", EntityCacheType.BatchTypes)))
+            if (VPCCache.GetInstance().Contains<List<VPC.Entities.BatchType.BatchType>>(string.Format("{0}", EntityCacheType.BatchTypes)))
             {
-                return VPCCache.GetInstance().Get<List<KeyValuePair<Guid,BatchTypeInfo>>>(string.Format("{0}", EntityCacheType.BatchTypes));
+                return VPCCache.GetInstance().Get<List<VPC.Entities.BatchType.BatchType>>(string.Format("{0}", EntityCacheType.BatchTypes));
             }
-            var batchTypes=batchTypeManager.GetEnabledBatchTypes();            
+            var batchTypes=batchTypeManager.GetEnabledBatchType();            
             VPCCache.GetInstance().Set(string.Format("{0}", EntityCacheType.BatchTypes), batchTypes);
             return batchTypes;            
         }
 
         void ISecurityCacheManager.BatchTypeClear()
         {
-            if (VPCCache.GetInstance().Contains<List<KeyValuePair<Guid,BatchTypeInfo>>>(string.Format("{0}",EntityCacheType.BatchTypes)))
+            if (VPCCache.GetInstance().Contains<List<KeyValuePair<Guid,VPC.Entities.BatchType.BatchType>>>(string.Format("{0}",EntityCacheType.BatchTypes)))
                 {
-                    VPCCache.GetInstance().Remove<List<KeyValuePair<Guid,BatchTypeInfo>>>(string.Format("{0}", EntityCacheType.BatchTypes));
+                    VPCCache.GetInstance().Remove<List<KeyValuePair<Guid,VPC.Entities.BatchType.BatchType>>>(string.Format("{0}", EntityCacheType.BatchTypes));
                 }            
         }
     }

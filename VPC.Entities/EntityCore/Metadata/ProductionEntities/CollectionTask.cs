@@ -25,23 +25,32 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
     
     public class CollectionTask : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.CollectionTask);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+         [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+         [DisplayName("Name")]
         public override Name Name { get; set; }
 
+         [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20053-ST01", "Standard"}
         };
 
+         [DisplayName("Sub type")]    
         public override XSmallText SubType { get; set; }
+
+         [DisplayName("Collection Id")]
         public Guid CollectionId { get; set; }
+
+         [DisplayName("Operation Id")]
         public Guid OperationId { get; set; }
     }
 }

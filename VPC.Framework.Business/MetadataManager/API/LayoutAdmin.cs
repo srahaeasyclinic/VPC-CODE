@@ -9,7 +9,8 @@ namespace VPC.Framework.Business.MetadataManager.API
     public interface ILayoutAdmin
     {
         void CreateLayout(Guid tenantId, LayoutModel layoutModel);
-        void UpdateLayoutDetails(Guid tenantId, Guid layoutId, LayoutModel templateModel);
+       void UpdateLayoutDetails(Guid tenantId, Guid layoutId, LayoutModel templateModel);
+                void UpdateLayoutDetailsXml(Guid tenantId,  List<LayoutModel> templateModel );
         void CreatePicklistLayout(Guid tenantId, LayoutModel layoutModel);
         void SetPicklistLayoutDefault(Guid tenantId, LayoutModel layoutModel);
         void SetListLayoutDefault(Guid tenantId, LayoutModel layoutModel);
@@ -27,9 +28,15 @@ namespace VPC.Framework.Business.MetadataManager.API
             _data.CreateLayout(tenantId, layoutModel);
         }
 
-        void ILayoutAdmin.UpdateLayoutDetails(Guid tenantId, Guid layoutId, LayoutModel templateModel)
+       void ILayoutAdmin.UpdateLayoutDetails(Guid tenantId, Guid layoutId, LayoutModel templateModel)
         {
             _data.UpdateLayoutDetails(tenantId, layoutId, templateModel);
+        }
+
+
+         void ILayoutAdmin.UpdateLayoutDetailsXml(Guid tenantId,List<LayoutModel> templateModel )
+        {
+            _data.UpdateLayoutDetailsXml(tenantId, templateModel);
         }
         void ILayoutAdmin.CreatePicklistLayout(Guid tenantId, LayoutModel layoutModel)
         {

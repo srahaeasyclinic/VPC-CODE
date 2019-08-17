@@ -357,4 +357,13 @@ generateResourceName(word) {
       a++;
     });
   }
+
+  public resetAvailableFilter(){
+    this.searchText='';
+  }
+
+  public resetItemFilter(){
+    this.addedItemToMainList.name='';
+  }
+
 }

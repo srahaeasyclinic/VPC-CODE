@@ -22,6 +22,8 @@ export class Entities {
   rules: Rule[];
   relatedEntities: Entities[];
   rowLevelOperations: RowLevelOperations[];
-  detailEntities:any;
+  detailEntities:Entities[];
   activityEntity:Entities;
+  versionControl:Entities;
+  draggedItem:boolean;
 }

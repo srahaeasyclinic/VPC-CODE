@@ -90,7 +90,7 @@ namespace VPC.Framework.Business.SchedulerConfiguration.SchedulerMonthly.Data
     #region Review
       internal SchedulerMonthlyInfo GetSchedulerMonthly(Guid tenantId,Guid schedulerId )
         {
-            SchedulerMonthlyInfo info =null;
+            SchedulerMonthlyInfo info =new SchedulerMonthlyInfo();
             try
             {
                 var cmd = CreateProcedureCommand("dbo.SchedulerMonthly_GetBy_SchedulerId");

@@ -1,18 +1,18 @@
 <div class="tab-section">
 <div class="row margin-top-20">
   <div class="col-md-4 col-sm-6 col-xs-12">
-    <label>{{getResourceValue('Fields')}}</label>
-    <ng-multiselect-dropdown placeholder=" {{getResourceValue('Fields')}}" [data]="this.fields" [(ngModel)]="selectedFields" [settings]="dropdownSettings" >
+    <label>{{getResourceValue('metadata_fields')}}</label>
+    <ng-multiselect-dropdown placeholder="{{getResourceValue('metadata_fields')}}" [data]="this.fields" [(ngModel)]="selectedFields" [settings]="dropdownSettings" >
     </ng-multiselect-dropdown>
   </div>
   <div class="col-md-4 col-sm-6 col-xs-12">
-    <label>{{getResourceValue('SortColumn')}}</label>
+    <label>{{getResourceValue('metadata_sortcolumn')}}</label>
     <select required [(ngModel)]='sortResults' class="input-control">
       <option class='option' *ngFor='let option of selectedFields' [value]="option">{{option}}</option>
     </select>
   </div>
   <div class="col-md-2">
-    <label>{{getResourceValue('SortDirection')}}</label>
+    <label>{{getResourceValue('metadata_sortdirection')}}</label>
     <select required [(ngModel)]='selectedSortOrder' class="input-control">
       <option class='option' *ngFor='let option of selectedOrderOptions' [value]="option">{{option}}</option>
     </select>
@@ -28,7 +28,7 @@
 
     <!-- Filter Results -->
     <a (click)="addFilterValue()" class="btn btn-primary margin-top-20 margin-bottom-10">
-      {{getResourceValue('FilterResults')}}
+      {{getResourceValue('metadata_task_filterresults')}}
     </a>
   </div>
 
@@ -47,7 +47,7 @@
             </select>
           </td>
           <td>
-            <input type="textbox" [(ngModel)]="field.value" placeholder="{{getResourceValue('EnterValue')}}" class="input-control">
+            <input type="textbox" [(ngModel)]="field.value" placeholder="{{getResourceValue('metadata_entervalue')}}" class="input-control">
           </td>
           <td>
             <a class="btn-small-action pull-right" (click)="removeFilterValue(i)">
@@ -61,14 +61,14 @@
 </div>
 <div class="row margin-top-20">
   <div class="col-md-4">
-    <label>{{getResourceValue('MaximumResults')}}</label>
-    <input type="textbox" [(ngModel)]="maxvalue" placeholder="{{getResourceValue('Max')}}" class="input-control">
+    <label>{{getResourceValue('metadata_maximumresults')}}</label>
+    <input type="textbox" [(ngModel)]="maxvalue" placeholder="{{getResourceValue('metadata_maximumresults')}}" class="input-control">
   </div>
 </div>
 <div class="row margin-top-20">
   <div class="col-md-12">
-    <a class="btn btn-primary margin-right-15" (click)="buildQuery()">{{getResourceValue('BuildQuery')}}</a>
-    <a class="btn btn-secondary" (click)="executeQuery()">{{getResourceValue('ExecuteQuery')}}</a>
+    <a class="btn btn-primary margin-right-15" (click)="buildQuery()">{{getResourceValue('metadata_operation_buildquery')}}</a>
+    <a class="btn btn-secondary" (click)="executeQuery()">{{getResourceValue('metadata_operation_executequery')}}</a>
   </div>
 </div>
 

@@ -9,6 +9,8 @@ import { ResourceService } from '../../services/resource.service';
 import { ITreeNode } from 'src/app/dynamic-form-builder/tree.module';
 import { Data } from '../../services/storage.data';
 import { GlobalResourceService } from '../../global-resource/global-resource.service';
+import { MenuService, MenuType } from '../../services/menu.service';
+import { BreadcrumbsService } from '../../bread-crumb/BreadcrumbsService';
 
 @Component({
   selector: 'app-picklist-edit',
@@ -21,9 +23,9 @@ export class PicklistEditComponent implements OnInit {
     private toster: TosterService, private resourceService: ResourceService,
     private commonService: CommonService, private route: ActivatedRoute, private data: Data,
     private globalResourceService: GlobalResourceService,
-
-
-    ) { }
+    private menuService: MenuService,
+private breadcrumsService: BreadcrumbsService
+  ) { }
 
   private entityName: string = '';
   private entityId: string = '';
@@ -41,19 +43,27 @@ export class PicklistEditComponent implements OnInit {
   private doCheck: boolean;
 
   ngOnInit() {
-    this.resource = this.globalResourceService.getGlobalResources();
-    // this.getResource();
-    // Get the picklist entity name from URL route
-    this.route.params.subscribe(params => {
-      this.entityId = params["id"];
-    })
+    let result = this.menuService.getMenuconext();
+    this.entityName = result.param_name;
+    if (result && result.menuType == MenuType.Picklist) {
 
-    this.route.parent.params.subscribe((urlPath) => {
-      // this.entityId = urlPath[urlPath.length - 1].path;
-      this.entityName = urlPath["name"];     
-    });
+      let objeidtable: any = JSON.parse(localStorage.getItem("editableColumnname"))
+       this.breadcrumsService.setchildMenuBreadcums([{ elementName: "edit", 'elementURL': "",'isGroup':false }, { elementName: objeidtable.name, 'elementURL': "",'isGroup':false }]);
 
-    this.getPicklist();
+      this.resource = this.globalResourceService.getGlobalResources();
+      // this.getResource();
+      // Get the picklist entity name from URL route
+      this.route.params.subscribe(params => {
+        this.entityId = params["id"];
+      })
+
+      // this.route.parent.params.subscribe((urlPath) => {
+      //   // this.entityId = urlPath[urlPath.length - 1].path;
+      //   this.entityName = urlPath["name"];     
+      // });
+
+      this.getPicklist();
+    }
 
   }
 
@@ -79,12 +89,20 @@ export class PicklistEditComponent implements OnInit {
       //Get the data for the previous next operation
       this.transitObject = this.data.storage;
 
-      let recordNo : number = 0;
-      let currentPage : number = 0;
+      let recordNo: number = 0;
+      let currentPage: number = 0;
+      let numberOfItems: number = 0;
       currentPage = this.transitObject.pageIndex - 1;
-    
+
+      if (this.transitObject.pageSize) {
+        numberOfItems = this.transitObject.pageSize;
+      }
+      else {
+        numberOfItems = 10;
+      }
+
       if (!this.transitObject.recordNo) {
-        recordNo = (currentPage * 10) + (this.transitObject.itemIndex) + 1;
+        recordNo = (currentPage * numberOfItems) + (this.transitObject.itemIndex) + 1;
         this.transitObject.recordNo = recordNo;
       }
       else {
@@ -99,7 +117,7 @@ export class PicklistEditComponent implements OnInit {
       this.getDefaultLayout(this.entityName);
 
     } else {
-      this.toster.showWarning(this.getResourceValue("UrlTemperedorNoEntityNameoridFoundorEntityNotYetDecorated"));
+      this.toster.showWarning(this.getResourceValue("metadata_operation_alert_warning_message"));
     }
   }
 
@@ -115,7 +133,7 @@ export class PicklistEditComponent implements OnInit {
       .pipe(first())
       .subscribe(
         data => {
-          this.toster.showSuccess(this.getResourceValue("UpdatedSuccessfully"));
+          this.toster.showSuccess(this.globalResourceService.updateSuccessMessage(this.entityName+"_displayname"));
           this.router.navigate(["../../"], { relativeTo: this.route });
         },
         error => {
@@ -143,7 +161,7 @@ export class PicklistEditComponent implements OnInit {
 
                 this.isPreviousIdAvailable = (this.transitObject && (this.transitObject.recordNo > 1));
                 this.isNexIdAvailable = (this.transitObject && this.transitObject.itemIndex >= 0 && (this.transitObject.recordNo < this.transitObject.totalRecords));
-
+                this.setbreadcums(data);
                 this.data.storage = this.transitObject;
                 //this.router.navigate(["picklist/ui/" + this.entityName + "/edit/" + this.entityId]);
                 this.doCheck = false;
@@ -181,6 +199,9 @@ export class PicklistEditComponent implements OnInit {
                 this.isNexIdAvailable = (this.transitObject && this.transitObject.itemIndex >= 0 && (this.transitObject.recordNo < this.transitObject.totalRecords));
                 //this.getDefaultLayout(this.entityName);
 
+
+
+                this.setbreadcums(data);
                 this.data.storage = this.transitObject;
                 // this.router.navigate(["picklist/ui/" + this.entityName + "/edit/" + this.entityId]);
                 this.doCheck = false;
@@ -281,4 +302,11 @@ export class PicklistEditComponent implements OnInit {
   getResourceValue(key) {
     return this.globalResourceService.getResourceValueByKey(key);
   }
+
+  setbreadcums(data) {
+    let objeidtable: any = JSON.parse(localStorage.getItem("editableColumnname"))
+    localStorage.setItem("editableColumnname",data.result[0][objeidtable.columnname])
+    this.breadcrumsService.setBreadcums_at_last({ elementName: data.result[0][objeidtable.columnname], 'elementURL': "",'isGroup':false }, "");
+  }
+
 }

@@ -17,6 +17,8 @@ namespace VPC.Metadata.Business.DataTypes
 
             var requiredValidator2 = new PercentValidator();
             this.AddValidator(requiredValidator2);
+             var defaultValueValidattor = new DefaultValueValidator (ControlType);
+            this.AddValidator (defaultValueValidattor);
         }
         public override string Value { get; set; }
     }

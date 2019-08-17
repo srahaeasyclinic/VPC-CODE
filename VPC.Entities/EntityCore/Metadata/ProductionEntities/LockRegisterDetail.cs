@@ -24,27 +24,43 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
     
     public class LockRegisterDetail : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.LockRegisterDetail);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20056-ST01", "Standard"}
         };
-
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
+
+        [DisplayName("Lock code")]
         public XSmallText LockCode { get; set; }
+
+        [DisplayName("Start date")]
         public DateTime StartDate { get; set; }
+
+        [DisplayName("End date")]
         public DateTime EndDate { get; set; }
+
+        [DisplayName("Is purchase locked")]
         public BooleanType IsPurchaseLocked { get; set; }
+
+        [DisplayName("Is sale locked")]
         public BooleanType IsSaleLocked { get; set; }
+
+        [DisplayName("Is inventory locked")]
         public BooleanType IsInventoryLocked { get; set; }
     }
 }

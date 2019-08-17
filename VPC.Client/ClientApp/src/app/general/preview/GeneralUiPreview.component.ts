@@ -12,6 +12,8 @@ import { CommonService } from 'src/app/services/common.service';
 import { ValidationService } from 'src/app/services/validation.service';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { GlobalResourceService } from '../../global-resource/global-resource.service';
+import { MenuService, MenuType } from 'src/app/services/menu.service';
+import { BreadcrumbsService } from '../../bread-crumb/BreadcrumbsService';
 
 @Component({
   selector: 'app-general-ui-preview',
@@ -30,7 +32,7 @@ export class GeneralUiPreviewComponent implements OnInit {
   public isNexIdAvailable: boolean = false;
 
   private resource: any;
-  private entityName: string;
+  public entityName: string;
   private groupName: string;
   private layoutType: string = "Form";
   private layoutContext: string = "Edit";
@@ -49,7 +51,10 @@ export class GeneralUiPreviewComponent implements OnInit {
     private commonService: CommonService,
     private validateService: ValidationService,
     private modalService: NgbModal,
-    private globalResourceService: GlobalResourceService) { }
+    private globalResourceService: GlobalResourceService,
+    private menuService: MenuService,
+    private breadcrumsService: BreadcrumbsService
+  ) { }
   //private previousClick: boolean = false;
 
   ngOnInit() {
@@ -67,32 +72,57 @@ export class GeneralUiPreviewComponent implements OnInit {
 
   }
 
+  private getRuleList(entityName: string): void {
+    this.commonService.getRuleList(entityName)
+      .pipe(first())
+      .subscribe(
+        data => {
+          if (data) {
+            //console.log('data', data);
+            this.displayRule = data.retVal;
+            this.displayRule.map(function (i) { return i["source"] = i.sourceList.map(function (e) { return e.name }).join() });
+            this.displayRule.map(function (i) { return i["target"] = i.targetList.map(function (t) { return t.name }).join() });
+          }
+        },
+        error => {
+          console.log(error)
+        }
+      );
+  }
+
 
   private processUrl(): void {
 
+    let result = this.menuService.getMenuconext();
+    this.entityName = result.param_name;
+    if (result && result.menuType == MenuType.Entity) {
+
+      //this.menuService.setchildMenuBreadcums([{ elementName: "preview", 'elementURL': "" }, { elementName: result.param_name, 'elementURL': "" }]);
+      
       this.activatedRoute.parent.params.subscribe((urlPath) => {
-        this.entityName = urlPath["name"];
+        // this.entityName = urlPath["name"];
         this.groupName = urlPath["group"];
 
-      this.activatedRoute.queryParams
-        .filter(params => params.subType)
-        .subscribe(params => {
-          this.layoutSubType = params.subType;
-          this.getPreviousNextData();
-          if (this.entityName && this.layoutSubType) {
-            this.getDefaultLayout(this.entityName, this.layoutType, this.layoutSubType, this.layoutContext);
-          } else {
-            this.toster.showWarning('Url tempered! or no entity name found!');
-          }
-        }, error => {
-          if (error.status === 501) {
-            this.toster.showError(error.message);
-          }
+        this.activatedRoute.queryParams
+          .filter(params => params.subType)
+          .subscribe(params => {
+            this.layoutSubType = params.subType;
+            this.getPreviousNextData();
+            if (this.entityName && this.layoutSubType) {
+              this.getDefaultLayout(this.entityName, this.layoutType, this.layoutSubType, this.layoutContext);
+            } else {
+              this.toster.showWarning('Url tempered! or no entity name found!');
+            }
+          }, error => {
+            if (error.status === 501) {
+              this.toster.showError(error.message);
+            }
 
-        });
-    });
+          });
+        this.getRuleList(this.entityName);
+      });
+    }
   }
-
   private getDefaultLayout(name: string, type: string, subtype: string, context: string): void {
     this.layoutService.getDefaultLayout(name, type, subtype, context)
       .pipe(first())
@@ -100,6 +130,7 @@ export class GeneralUiPreviewComponent implements OnInit {
         data => {
           if (data) {
             this.layoutInfo = new LayoutModel();
+            
             this.layoutInfo = data;
             this.activatedRoute.params.subscribe((params: Params) => {
               let entityValueId = params['id'];
@@ -124,12 +155,16 @@ export class GeneralUiPreviewComponent implements OnInit {
       .subscribe(
         data => {
           if (data) {
-            this.entityInfo = data;
+            
+            this.entityInfo = data;           
+
+
             //console.log('this.entityInfo ', this.entityInfo);
             if (this.entityInfo && this.layoutInfo && this.layoutInfo.formLayoutDetails) {
               //console.log("this.layoutInfo.formLayoutDetails.fields", this.layoutInfo.formLayoutDetails.fields);
               //console.log("this.entityInfo", this.entityInfo);
-              this.mapData(this.layoutInfo.formLayoutDetails.fields, this.entityInfo);
+              // this.mapData(this.layoutInfo.formLayoutDetails.fields, this.entityInfo);
+              this.mapData1(this.layoutInfo.formLayoutDetails.fields, this.entityInfo);
               this.tree = this.layoutInfo.formLayoutDetails;
               this.isTreeReady = true;
               //console.log("after mapping tree is ", JSON.stringify(this.tree));
@@ -142,40 +177,64 @@ export class GeneralUiPreviewComponent implements OnInit {
           }
         });
   }
-
-  private mapData(fields, whichObject) {
-    fields.forEach((item, index) => {
-      Object.keys(whichObject).forEach(function (key, index) {
-        if (key.toLocaleLowerCase() == item.name.toLocaleLowerCase()) {
-          item.value = whichObject[key];
-        }
-      });
-      if (item.fields != null && item.fields.length > 0) {
-        this.mapData(item.fields, whichObject);
-      }
-      if (item.tabs != null && item.tabs.length > 0) {
-        this.mapData(item.tabs, whichObject);
-      }
-    });
-  }
+  // private mapData(fields, whichObject) {
+  //   fields.forEach((item, index) => {
+  //     Object.keys(whichObject).forEach(function (key, index) {
+  //       if (key.toLocaleLowerCase() == item.name.toLocaleLowerCase()) {
+  //         item.value = whichObject[key];
+  //       }
+  //     });
+  //     if (item.fields != null && item.fields.length > 0) {
+  //       this.mapData(item.fields, whichObject);
+  //     }
+  //     if (item.tabs != null && item.tabs.length > 0) {
+  //       this.mapData(item.tabs, whichObject);
+  //     }
+  //   });
+  // }
+ private mapData1(fields, whichObject) {
+   fields.forEach((item, index) => {
+     Object.keys(whichObject).forEach(function (entity, index) {
+       Object.keys(whichObject[entity]).forEach(function (key, index) {
+         if (key.toLocaleLowerCase() == item.name.toLocaleLowerCase()) {
+           item.value = whichObject[entity][key];
+           item.entityName = entity;
+         }
+       });
+     });
+     if (item.fields != null && item.fields.length > 0) {
+       this.mapData1(item.fields, whichObject);
+     }
+     if (item.tabs != null && item.tabs.length > 0) {
+       this.mapData1(item.tabs, whichObject);
+     }
+   });
+ }
 
   private getPreviousNextData(): void {
     if (this.data) {
       //Get the data for the previous next operation
       this.transitObject = this.data.storage;
-      let recordNo : number = 0;
-      let currentPage : number = 0;
+      let recordNo: number = 0;
+      let currentPage: number = 0;
+      let numberOfItems:number = 0;
       currentPage = this.transitObject.pageIndex - 1;
 
-      if(!this.transitObject.recordNo)
-      {
-        recordNo = (currentPage * 10) + (this.transitObject.itemIndex) + 1;
-        this.transitObject.recordNo = recordNo;        
-      }     
+      if (this.transitObject.pageSize) {
+        numberOfItems = this.transitObject.pageSize;
+      }
       else
       {
+        numberOfItems = 10;
+      }
+
+      if (!this.transitObject.recordNo) {
+        recordNo = (currentPage * numberOfItems) + (this.transitObject.itemIndex) + 1;
+        this.transitObject.recordNo = recordNo;
+      }
+      else {
         recordNo = this.transitObject.recordNo;
-      }  
+      }
 
       this.isPreviousIdAvailable = (this.transitObject && (this.transitObject.recordNo > 1));
       this.isNexIdAvailable = (this.transitObject && this.transitObject.itemIndex >= 0 && (this.transitObject.recordNo < this.transitObject.totalRecords));
@@ -213,8 +272,7 @@ export class GeneralUiPreviewComponent implements OnInit {
     // if (this.transitObject && this.transitObject.itemIndex) {
     //   query += 'pageIndex=' + this.transitObject.itemIndex + '&';
     // }
-    if(this.transitObject.recordNo)
-    {
+    if (this.transitObject.recordNo) {
       query += 'pageIndex=' + this.transitObject.recordNo + '&';
     }
 
@@ -239,12 +297,12 @@ export class GeneralUiPreviewComponent implements OnInit {
 
 
   redirectToListPageWithError(): void {
-    this.toster.showError(this.entityName + ' relation not created');
+    this.toster.showError(this.getResourceValue('metadata_relation_not_created'));
     this.router.navigate(['ui/' + this.entityName]);
   }
 
   private redirectToListPage() {
-    this.toster.showSuccess(this.entityName + ' updated successfully.');
+    this.toster.showSuccess(this.globalResourceService.updateSuccessMessage(this.entityName.toLowerCase() + '_displayname'));
     this.router.navigate(['ui/' + this.entityName]);
   }
 
@@ -252,7 +310,7 @@ export class GeneralUiPreviewComponent implements OnInit {
     if (this.transitObject && this.transitObject.fields) {
 
       this.transitObject.recordNo = this.transitObject.recordNo + 1;
-      this.transitObject.nextClick = true;     
+      this.transitObject.nextClick = true;
 
       let query: string = this.getQuery();
       this.entityValueService.getEntityValues(this.entityName, query)
@@ -265,12 +323,13 @@ export class GeneralUiPreviewComponent implements OnInit {
 
                 this.isPreviousIdAvailable = (this.transitObject && (this.transitObject.recordNo > 1));
                 this.isNexIdAvailable = (this.transitObject && this.transitObject.itemIndex >= 0 && (this.transitObject.recordNo < this.transitObject.totalRecords));
-
+                this.setbreadcums(data);
+                
                 //this.getEntityDetails(this.entityName, id);
 
                 this.data.storage = this.transitObject;
                 //this.router.navigate(["ui/" + this.entityName + "/preview/" + id], { queryParams: { subType: this.layoutSubType } });
-                this.router.navigate(["../../preview", id], { queryParams: {subType: this.layoutSubType }, relativeTo: this.activatedRoute });
+                this.router.navigate(["../../preview", id], { queryParams: { subType: this.layoutSubType }, relativeTo: this.activatedRoute });
               }
 
             }
@@ -302,11 +361,11 @@ export class GeneralUiPreviewComponent implements OnInit {
 
                 this.isPreviousIdAvailable = (this.transitObject && (this.transitObject.recordNo > 1));
                 this.isNexIdAvailable = (this.transitObject && this.transitObject.itemIndex >= 0 && (this.transitObject.recordNo < this.transitObject.totalRecords));
-
+                this.setbreadcums(data);
                 //this.getEntityDetails(this.entityName,id);
                 this.data.storage = this.transitObject;
                 //this.router.navigate(["ui/" + this.entityName + "/preview/" + id], { queryParams: { subType: this.layoutSubType } });
-                this.router.navigate(["../../preview", id], { queryParams: {subType: this.layoutSubType }, relativeTo: this.activatedRoute });
+                this.router.navigate(["../../preview", id], { queryParams: { subType: this.layoutSubType }, relativeTo: this.activatedRoute });
               }
             }
           },
@@ -319,34 +378,41 @@ export class GeneralUiPreviewComponent implements OnInit {
     }
   }
 
-  public update(content: string): string {
+  // public update(content: string): string {
 
-    this.validateMessages = [];
-    this.validateMessages = this.validateService.validate(this.tree.fields);
-    let ngbModalOptions: NgbModalOptions = {
-      backdrop : 'static',
-      keyboard : false
-    };
+  //   this.validateMessages = [];
+  //   this.validateMessages = this.validateService.validate(this.tree.fields);
+  //   let ngbModalOptions: NgbModalOptions = {
+  //     backdrop: 'static',
+  //     keyboard: false
+  //   };
 
-    if (this.validateMessages.length > 0) {
-      this.modalService.open(content, ngbModalOptions);
-      return
-    }
-    let value: any = {};
-    value = this.commonService.createKeyValue(this.tree.fields, value);
-    let id = this.getEntityValueId();
-    this.entityValueService.updateEntityValues(this.entityName, value, id, this.layoutSubType)
-      .pipe(first())
-      .subscribe(
-        data => {
-          this.redirectToListPage();
-        },
-        error => {
-          if (error.status === 501) {
-            this.toster.showError(error.message);
-          }
-        });
-  }
+  //  this.validateMessages = [];
+  //  this.validateMessages = this.validateService.validate(this.tree.fields,this.entityName);
+  //  let ngbModalOptions: NgbModalOptions = {
+  //    backdrop : 'static',
+  //    keyboard : false
+  //  };
+
+  //  if (this.validateMessages.length > 0) {
+  //    this.modalService.open(content, ngbModalOptions);
+  //    return
+  //  }
+  //  let value: any = {};
+  //  value = this.commonService.createKeyValue(this.tree.fields, value);
+  //  let id = this.getEntityValueId();
+  //  this.entityValueService.updateEntityValues(this.entityName, value, id, this.layoutSubType)
+  //    .pipe(first())
+  //    .subscribe(
+  //      data => {
+  //        this.redirectToListPage();
+  //      },
+  //      error => {
+  //        if (error.status === 501) {
+  //          this.toster.showError(error.message);
+  //        }
+  //      });
+  //}
   generateResourceName(word: string) {
     return this.commonService.generateResourceNameWithHierarchy(word);
   }
@@ -380,4 +446,10 @@ export class GeneralUiPreviewComponent implements OnInit {
     return this.globalResourceService.getResourceValueByKey(key);
   }
 
+  setbreadcums(data) {
+    let objeidtable: any = JSON.parse(localStorage.getItem("editableColumnname"))
+    this.breadcrumsService.setBreadcums_at_last({ elementName: data.result[0][objeidtable.columnname], 'elementURL': "",'isGroup':false }, "");
+  }
+
+  
 }

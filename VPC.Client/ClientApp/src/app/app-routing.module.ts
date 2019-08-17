@@ -38,7 +38,13 @@ import { LayoutactionComponent } from "./meta-data/layout/layout-detail-list/lay
 import { FreetextSearchComponent } from "./meta-data/layout/layout-detail-list/freetextsearch/freetextsearch.component";
 import { SimpleSearchComponent } from "./meta-data/layout/layout-detail-list/simplesearch/simplesearch.component";
 import { AdvanceSearchComponent } from "./meta-data/layout/layout-detail-list/advancesearch/advancesearch.component";
-import { LayoutDetailFormComponent } from './meta-data/layout/layout-detail-form/layout-detail-form.component';
+import { ListFreeTextSearchComponent } from './picklist/picklist-layout/list/list-free-text-search/list-free-text-search.component';
+import { ListActionComponent } from './picklist/picklist-layout/list/list-action/list-action.component';
+import { ListSimpleSearchComponent } from './picklist/picklist-layout/list/list-simple-search/list-simple-search.component';
+import { ListToolbarComponent } from './picklist/picklist-layout/list/list-toolbar/list-toolbar.component';
+import { ListFieldsComponent } from './picklist/picklist-layout/list/list-fields/list-fields.component';
+import { ListAdvanceSearchComponent } from './picklist/picklist-layout/list/list-advance-search/list-advance-search.component';
+
 import { LayoutDetailViewComponent } from './meta-data/layout/layout-detail-view/layout-detail-view.component';
 import { LayoutDetailViewFieldsComponent } from './meta-data/layout/layout-detail-view/layout-detail-view-fields/layout-detail-view-fields.component';
 import { LayoutDetailViewActionComponent } from './meta-data/layout/layout-detail-view/layout-detail-view-action/layout-detail-view-action.component';
@@ -53,16 +59,12 @@ import { PicklistOperationComponent } from './picklist/picklist-operation/pickli
 import { PicklistQueryComponent } from './picklist/picklist-query/picklist-query.component';
 import { ListComponent } from './picklist/picklist-layout/list/list.component';
 import { PicklistLayoutResolverService } from './picklist/picklist-layout/list/picklist-layout-resolver.service';
-import { ListFreeTextSearchComponent } from './picklist/picklist-layout/list/list-free-text-search/list-free-text-search.component';
-import { ListActionComponent } from './picklist/picklist-layout/list/list-action/list-action.component';
-import { ListSimpleSearchComponent } from './picklist/picklist-layout/list/list-simple-search/list-simple-search.component';
-import { ListToolbarComponent } from './picklist/picklist-layout/list/list-toolbar/list-toolbar.component';
-import { ListFieldsComponent } from './picklist/picklist-layout/list/list-fields/list-fields.component';
+
 import { ViewComponent } from './picklist/picklist-layout/view/view.component';
 import { ViewFieldsComponent } from './picklist/picklist-layout/view/view-fields/view-fields.component';
 import { FormComponent } from './picklist/picklist-layout/form/form.component';
 import { ListPreviewComponent } from './picklist/picklist-layout/list/list-preview/list-preview.component';
-import { ListAdvanceSearchComponent } from './picklist/picklist-layout/list/list-advance-search/list-advance-search.component';
+
 
 // dynamic form builder  
 import { CheckboxSettingComponent } from "./dynamic-form-builder/settings/checkbox-setting.component";
@@ -73,6 +75,8 @@ import { RadioSettingComponent } from "./dynamic-form-builder/settings/radio-set
 import { SectionSettingComponent } from "./dynamic-form-builder/settings/section-setting.component";
 import { TabSettingComponent } from "./dynamic-form-builder/settings/tab-setting.component";
 import { TextboxSettingComponent } from "./dynamic-form-builder/settings/textbox-setting.component";
+import { LinkSettingComponent } from "./dynamic-form-builder/settings/link-setting.component";
+import { CalendarSettingComponent } from './dynamic-form-builder/settings/calendar-setting.component';
 import { AddSettingComponent } from "./dynamic-form-builder/settings/add-setting.component";
 import { UserComponent } from "./user/user.component";
 import { UserCreateComponent } from "./user/user-create.component";
@@ -85,6 +89,11 @@ import { CountryNewComponent } from './country/country-new/country-new.component
 import { CountryDetailComponent } from './country/country-detail/country-detail.component';
 import { RequiredValidatorComponent } from "./dynamic-form-builder/validator/requried-validator.component";
 import { LengthValidatorComponent } from "./dynamic-form-builder/validator/length-validator.component";
+
+
+
+import { DefaultValidatorComponent } from "./dynamic-form-builder/validator/defaultvalue-validator.component";
+
 import { RangeValidatorComponent } from "./dynamic-form-builder/validator/range-validator.component";
 import { PicklistListComponent } from './picklist-ui/picklist-list/picklist-list.component';
 import { PicklistNewComponent } from './picklist-ui/picklist-new/picklist-new.component';
@@ -132,173 +141,29 @@ import { MetadataDesignerIntialiser } from './initialiser/metadatadesignerIntial
 import { LayoutIntialiserComponent } from './meta-data/layout/layoutinitialiser.component';
 import { ResourceComponent } from './resource/resource.component';
 import { BaseIntialiser } from './initialiser/baseintialiser.component';
+
+import { RelatedEntitiesComponent } from './meta-data/relatedentities/relatedentities.component';
+import { QuickAddSettingComponent } from './dynamic-form-builder/settings/custom/quickadd-setting.component';
+import { IntializeMetadataConfigurer } from './meta-data/layout/layout-detail-list/intializemetadataconfigurer/intializemetadataconfigurer.component';
+import { BatchItemComponent } from "./batchitem/batchitem.component";
+import { LayoutDetailFormComponent } from './meta-data/layout/layout-detail-form/layout-detail-form.component';
+import { MenuGroupComponent } from './menu-group/menu-group.component';
+import { FormLayoutDesignerComponent } from './meta-data/layout/layout-detail-form/form-layout-designer/form-layout-designer.component';
+import { PagenotfoundComponent } from './pagenotfound/pagenotfound.component';
+
 //import { LayoutTopBarComponent } from './meta-data/layout/layout-top-bar/layout-top-bar.component';
 
+
+//const componentResolver:RoutingComponentFactry;
 const routes: Routes = [
 
   { path: '', component: LoginComponent, pathMatch: 'full' },
 
   { path: 'forgotpassword', component: ForgotPasswordComponent, pathMatch: 'full' },
   { path: 'changepassword', component: ChangePasswordComponent, pathMatch: 'full' },
-  { path: 'home', component: HomeComponent, pathMatch: 'full', canActivate: [AuthorizationCheck] },
-  {
-    path: 'picklist-manager/:group/:name', component: PicklistIntialiser, pathMatch: 'prefix', canActivate: [AuthorizationCheck],
-    children: [
-      { path: '', component: PicklistListComponent, canActivate: [AuthorizationCheck] },
-      { path: 'new', component: PicklistNewComponent , canActivate: [AuthorizationCheck]},
-      { path: 'preview/:id', component: PicklistPreviewComponent, canActivate: [AuthorizationCheck] },
-      { path: 'edit/:id', component: PicklistEditComponent, canActivate: [AuthorizationCheck] },
-    ]
-  },
-  {
-    path: 'object-manager/:group/:name', component: MetadataIntialiser, pathMatch: 'prefix', canActivate: [AuthorizationCheck],
-    children: [
-      { path: '', component: GeneralUiDisplayComponent, canActivate: [AuthorizationCheck] },
-      { path: 'new', component: GeneralUiNewComponent , canActivate: [AuthorizationCheck]},
-      { path: 'preview/:id', component: GeneralUiPreviewComponent, canActivate: [AuthorizationCheck] },
-      { path: 'edit/:id', component: GeneralUiEditComponent, canActivate: [AuthorizationCheck] },
-    ]
-  },
-  {
-    path: 'configuration-manager/:group', component: ConfigurationIntialiser, pathMatch: 'prefix', canActivate: [AuthorizationCheck],
-    children: [
-      { path: '', redirectTo: 'menu-item', pathMatch: 'prefix' , canActivate: [AuthorizationCheck]},
-      { path: 'menu-item', component: MenuItemComponent, canActivate: [AuthorizationCheck] },
-      { path: 'subscriptions', component: SubscriptionComponent, canActivate: [AuthorizationCheck] },
-      { path: 'subscriptions/:subscriptionId', component: SubscriptionDetailComponent, canActivate: [AuthorizationCheck] },
-      { path: 'roles', component: RoleComponent, canActivate: [AuthorizationCheck] },
-      {
-        path: 'roles/:roleId', component: RoleDetailComponent, canActivate: [AuthorizationCheck],
-        children: [
-          { path: 'entitysecurity/:name', component: EntitySecurityComponent , canActivate: [AuthorizationCheck]},
-          { path: 'workflowsecurity/:name', component: WorkFlowSecurityComponent, canActivate: [AuthorizationCheck] }
-        ]
-      },
-      { path: 'communication', component: CommunicationComponent, canActivate: [AuthorizationCheck] },
-      { path: 'batchtypes', component: BatchTypeComponent, canActivate: [AuthorizationCheck] },
-      { path: 'resource', component: ResourceComponent, canActivate: [AuthorizationCheck] },
-      {path:'counter',component:CounterComponent,canActivate:[AuthorizationCheck]},
-    ]
-  },
-  {
-    path: 'entity-designer/:group/:name', component: MetadataDesignerIntialiser, pathMatch: 'prefix', canActivate: [AuthorizationCheck],
-    children: [
-      { path: '', component: MetadataComponent, canActivate: [AuthorizationCheck] },
-      {
-        path: ':entityName',
-        component: MetadataDetailComponent,
-        children: [
-          { path: '', redirectTo: 'fields', pathMatch: 'full', canActivate: [AuthorizationCheck] },
-          { path: 'workflow', component: WorkFlowComponent, canActivate: [AuthorizationCheck] },
-          {
-            path: 'layout', component: LayoutIntialiserComponent, canActivate: [AuthorizationCheck],
-            children: [
-              { path: '', component: LayoutComponent, canActivate: [AuthorizationCheck] },
-              {
-                path: 'list/:id', component: LayoutDetailListComponent,canActivate: [AuthorizationCheck],
-                resolve: {
-                  layoutDetails: LayoutResolver
-                },
-                children: [
-                  { path: '', redirectTo: 'fields', pathMatch: 'full',canActivate: [AuthorizationCheck] },
-                  { path: 'fields', component: LayoutfieldsComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'textsearch', component: FreetextSearchComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'simplesearch', component: SimpleSearchComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'advancesearch', component: AdvanceSearchComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'toolbar', component: LayouttoolbarComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'action', component: LayoutactionComponent,canActivate: [AuthorizationCheck] }
-                ]
-              },
-              {
-                path: 'form/:id',
-                component: LayoutDetailFormComponent,canActivate: [AuthorizationCheck],
-                resolve: {
-                  layoutDetails: LayoutResolver
-                }
-              },
-              {
-                path: 'view/:id',
-                component: LayoutDetailViewComponent,canActivate: [AuthorizationCheck],
-                resolve: {
-                  layoutDetails: LayoutResolver
-                },
-                children: [
-                  { path: '', redirectTo: 'fields', pathMatch: 'full',canActivate: [AuthorizationCheck] },
-                  { path: 'fields', component: LayoutDetailViewFieldsComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'action', component: LayoutDetailViewActionComponent,canActivate: [AuthorizationCheck] }
-                ]
-              },
-            ]
-          },
-
-          { path: 'fields', component: FieldsComponent,canActivate: [AuthorizationCheck] },
-          { path: 'relations', component: RelationsComponent,canActivate: [AuthorizationCheck] },
-          { path: 'operations', component: TaskoperationComponent,canActivate: [AuthorizationCheck] },
-          { path: 'rules', component: RuleComponent,canActivate: [AuthorizationCheck] },
-          { path: 'query', component: QueryComponent,canActivate: [AuthorizationCheck] },
-          {
-            path: 'rolesecurity', component: RoleSecurityComponent, canActivate: [AuthorizationCheck],children: [
-              { path: '', redirectTo: 'entitysecurity', pathMatch: 'full',canActivate: [AuthorizationCheck] },
-              { path: 'entitysecurity', component: EntitySecurityComponent,canActivate: [AuthorizationCheck] },
-              { path: 'workflowsecurity', component: WorkFlowSecurityComponent,canActivate: [AuthorizationCheck] }
-            ]
-          },
-        ]
-      }
-    ]
-  },
-  {
-    path: 'picklist-designer/:group/:name', component: PicklistDesignerIntialiser, pathMatch: 'prefix',canActivate: [AuthorizationCheck],
-    children: [
-      { path: '', component: PicklistComponent,canActivate: [AuthorizationCheck] },
-      {
-        path: ':picklistName', component: PicklistDetailComponent,canActivate: [AuthorizationCheck],
-        children: [
-          { path: '', redirectTo: 'fields', pathMatch: 'full',canActivate: [AuthorizationCheck] },
-          {
-            path: 'layouts', component: LayoutIntialiserComponent,canActivate: [AuthorizationCheck],
-            children: [
-              { path: '', component: PicklistLayoutComponent,canActivate: [AuthorizationCheck] },
-              {
-                path: 'list/:id', component: ListComponent,canActivate: [AuthorizationCheck],
-                resolve: {
-                  layoutDetails: PicklistLayoutResolverService
-                },
-                children: [
-                  { path: '', redirectTo: 'fields', pathMatch: 'full',canActivate: [AuthorizationCheck] },
-                  { path: 'fields', component: ListFieldsComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'textsearch', component: ListFreeTextSearchComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'simplesearch', component: ListSimpleSearchComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'toolbars', component: ListToolbarComponent,canActivate: [AuthorizationCheck] },
-                  { path: 'actions', component: ListActionComponent,canActivate: [AuthorizationCheck] }
-                ]
-              },
-              {
-                path: 'form/:id', component: FormComponent,canActivate: [AuthorizationCheck],
-                resolve: {
-                  layoutDetails: PicklistLayoutResolverService
-                }
-              },
-              {
-                path: 'view/:id',
-                component: ViewComponent,
-                canActivate: [AuthorizationCheck],
-                resolve: {
-                  layoutDetails: PicklistLayoutResolverService
-                },
-                children: [
-                  { path: '', redirectTo: 'fields', pathMatch: 'full',canActivate: [AuthorizationCheck] },
-                  { path: 'fields', component: ViewFieldsComponent,canActivate: [AuthorizationCheck] }
-                ]
-              },
-            ]
-          },
-          { path: 'fields', component: PicklistFieldComponent,canActivate: [AuthorizationCheck] },
-          { path: 'operations', component: PicklistOperationComponent,canActivate: [AuthorizationCheck] },
-        ]
-      },
-    ]
-  },
+  /////////////////////////////////////////The pagenotfound route is used to show 404 page error when user token is expired//////////////////////////////////////////////////
+  { path: 'pagenotfound', component: PagenotfoundComponent, pathMatch:"full"},
+ ///////////////////////////////////////////////////////////////////END////////////////////////////////////////////////////////////////////////////////
   //{ path: '**', component: LoginComponent }
 ]
 
@@ -345,6 +210,13 @@ export const routableComponents = [
   FreetextSearchComponent,
   SimpleSearchComponent,
   AdvanceSearchComponent,
+  ListFreeTextSearchComponent,
+  ListActionComponent,
+  ListSimpleSearchComponent,
+  ListToolbarComponent,
+  ListFieldsComponent,
+  ListAdvanceSearchComponent,
+
   PicklistComponent,
   PicklistDetailComponent,
   PicklistFieldComponent,
@@ -366,11 +238,11 @@ export const routableComponents = [
   FormComponent,
   ViewComponent,
   //ListAdvanceSearchComponent,
-  ListFreeTextSearchComponent,
-  ListActionComponent,
-  ListSimpleSearchComponent,
-  ListToolbarComponent,
-  ListFieldsComponent,
+  //ListFreeTextSearchComponent,
+  //ListActionComponent,
+  //ListSimpleSearchComponent,
+  //ListToolbarComponent,
+  //ListFieldsComponent,
   ListPreviewComponent,
   ViewFieldsComponent,
   CheckboxSettingComponent,
@@ -380,7 +252,9 @@ export const routableComponents = [
   SectionSettingComponent,
   TabSettingComponent,
   TextboxSettingComponent,
+  LinkSettingComponent,
   RichtextboxSettingComponent,
+  CalendarSettingComponent,
   MultiSelectDropdownSettingComponent,
   AddSettingComponent,
   RequiredValidatorComponent,
@@ -430,5 +304,21 @@ export const routableComponents = [
   MetadataDesignerIntialiser,
   LayoutIntialiserComponent,
   BaseIntialiser,
+  QuickAddSettingComponent,
+  RelatedEntitiesComponent,
+  IntializeMetadataConfigurer,
+  DefaultValidatorComponent,
+  BatchItemComponent,
+  MenuGroupComponent,
+  FormLayoutDesignerComponent
  // LayoutTopBarComponent
 ];
+
+// function MyComponentFactory(route: ActivatedRoute): Type<any> {
+//     if (route.snapshot.data['type']==='bug') {
+//         return BugDetailComponent;
+//     }
+//     return FeatureRequestDetailComponent;
+// }
+
+ 

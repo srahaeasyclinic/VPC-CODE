@@ -17,9 +17,9 @@ import { HierarchyDropdownService } from '../../services/hierarchy-dropdown.serv
     template: `
   <div *ngIf="mode!==2">
     <select class="input-control" [id]="field.name" [(ngModel)]="field.value" [disabled] = "field.readOnly" (change)="onChange($event)">
-      <ng-template ngFor let-item [ngForOf]="pickresults">
+      <ng-template ngFor let-item [ngForOf]="pickresults | orderBy: 'group.name'">
             <optgroup *ngIf="item.items" label="{{item.group.name+' ('+item.group.totalchild+')'}}">
-                <option *ngFor="let child of item.items" [value]="child.internalId">
+                <option *ngFor="let child of item.items | orderBy: 'text'" [value]="child.internalId">
                 <span>{{child.text}}</span>
                 </option>
             </optgroup>

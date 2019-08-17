@@ -7,10 +7,10 @@
             [filterable]="true"
             
             [height]="510">
-            <kendo-grid-column field="name" title="{{getResourceValue('Name')}}" [width]="140"></kendo-grid-column>
-            <kendo-grid-column field="displayName" title="{{getResourceValue('DisplayName')}}" [width]="120"></kendo-grid-column>
-            <kendo-grid-column field="type" title="{{getResourceValue('Type')}}" [width]="120"></kendo-grid-column>
-            <kendo-grid-column field="relatedEntity" title="{{getResourceValue('Entity')}}" [width]="100"></kendo-grid-column>
-            <kendo-grid-column field="relatedField" title="{{getResourceValue('RelatedFields')}}" [width]="130"></kendo-grid-column>
+            <kendo-grid-column field="name" title="{{getResourceValue(name+'_field_name')}}" [width]="140"></kendo-grid-column>
+            <kendo-grid-column field="displayName" title="{{getResourceValue(name+'_displayname')}}" [width]="120"></kendo-grid-column>
+            <kendo-grid-column field="type" title="{{getResourceValue(name+'_field_type')}}" [width]="120"></kendo-grid-column>
+            <kendo-grid-column field="relatedEntity" title="{{getResourceValue(name+'_field_entitycode')}}" [width]="100"></kendo-grid-column>
+            <kendo-grid-column field="relatedField" title="{{getResourceValue(name+'_field_relatedfields')}}" [width]="130"></kendo-grid-column>
         </kendo-grid>
       </div>

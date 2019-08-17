@@ -1,4 +1,4 @@
-<div *ngIf="(defaultLayout)" class="text-header">{{defaultLayout.pluralName}}</div>
+<div *ngIf="(defaultLayout)" class="text-header">{{getResourceValue(entityName.toLowerCase()+'_pluralname')}}</div>
 <div class="detailsMenu" *ngIf="defaultLayout">
     <utility-top-bar [defaultLayoutData]="defaultLayout"></utility-top-bar>
     <right-search-bar (searchQueryEvent)='onSearchQueryEvent($event)' [defaultLayoutData]="defaultLayout"></right-search-bar>

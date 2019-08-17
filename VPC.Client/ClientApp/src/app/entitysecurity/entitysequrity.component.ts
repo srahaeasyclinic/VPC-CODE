@@ -9,6 +9,7 @@ import { EntitySecurityService } from './entitysequrity.service';
 import { TosterService } from 'src/app/services/toster.service';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { Resource } from '../model/resource';
+import { MenuService } from '../services/menu.service';
 
 
 @Component({
@@ -26,7 +27,7 @@ export class EntitySecurityComponent implements OnInit {
   public resource = Resource;
 
   constructor(private activatedRoute: ActivatedRoute,private router: Router,private entitySecurityService:EntitySecurityService,
-    private toster:TosterService,  private globalResourceService: GlobalResourceService) { 
+    private toster:TosterService,  private globalResourceService: GlobalResourceService,private menuService: MenuService) { 
       
     //   this.router.routeReuseStrategy.shouldReuseRoute = function() {
     //     return false;
@@ -43,10 +44,13 @@ export class EntitySecurityComponent implements OnInit {
     
    if(!this.entityName )
    {
-    this.activatedRoute.parent.parent.params.subscribe((params: Params) => {
-      this.entityName = params['entityName'];
-      this.roleId='';
-    });
+     let result=this.menuService.getMenuconext();
+     this.entityName = result.param_name;
+     this.roleId='';
+    // this.activatedRoute.parent.parent.params.subscribe((params: Params) => {
+    //   this.entityName = params['entityName'];
+    //   this.roleId='';
+    // });
 
    }
 
@@ -89,7 +93,7 @@ export class EntitySecurityComponent implements OnInit {
                   obj.entity.data=data;
                 }                       
           });  
-           this.toster.showSuccess(this.getResourceValue("DataSavedSuccessfully"));  
+           this.toster.showSuccess(this.getResourceValue("metadata_security_operation_save_success_message"));  
           }
           
         },
@@ -102,7 +106,7 @@ export class EntitySecurityComponent implements OnInit {
     this.entitySecurityService.updateEntitySecurity(this.entityName,sequrityEntity).pipe(first()).subscribe(
         data => {   
           if (data)   
-          this.toster.showSuccess(this.getResourceValue("DataUpdatedSuccessfully"));  
+          this.toster.showSuccess(this.getResourceValue("metadata_security_operation_update_success_message"));  
         },
         error => {
           console.log(error);

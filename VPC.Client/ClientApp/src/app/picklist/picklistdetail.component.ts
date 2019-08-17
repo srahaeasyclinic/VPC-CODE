@@ -5,6 +5,8 @@ import { PicklistService } from './picklist.service';
 import { first } from 'rxjs/operators';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { Resource } from '../model/resource';
+//import { MenuService } from '../services/menu.service';
+import { BreadcrumbsService } from '../bread-crumb/BreadcrumbsService';
 
 @Component({
   selector: 'picklistdetail',
@@ -24,20 +26,29 @@ export class PicklistDetailComponent implements OnInit {
     { path: 'layouts', label: 'Layouts' },
     //{ path: 'workflows', label: 'WorkFlow' }
   ];
-
+  showToolbar: boolean = false;
   constructor(
     private picklistService: PicklistService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private globalResourceService: GlobalResourceService) {
+    private globalResourceService: GlobalResourceService,
+ private breadcrumsService: BreadcrumbsService) {
   }
 
 
 
   ngOnInit() {
+    this.picklistService.showToolbar.subscribe(x=>{
+      this.showToolbar= true
+    })
+
     this.resource = this.globalResourceService.getGlobalResources();
     this.activatedRoute.params.subscribe((params: Params) => {
       this.picklistName = params['picklistName'];
+      
+      // element push in the breadcums array.
+      this.breadcrumsService.setchildMenuBreadcums([{ elementName: this.picklistName, 'elementURL': "",'isGroup':false }], "picklistmetadata");
+      
       this.getEntitiesByName(this.picklistName);
     });
   }

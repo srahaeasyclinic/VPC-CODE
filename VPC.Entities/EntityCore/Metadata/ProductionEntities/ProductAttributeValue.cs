@@ -24,30 +24,38 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
    
     public class ProductAttributeValue : PrimaryEntity, IItem<Item>
     {
+        [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.ProductAttributeValue);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20037-ST01", "Standard"}
         };
 
+        [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
        
-        public Guid ProductAttributeId { get; set; }
-        [Tagable]
-        public Lookup<AttributeValue> AttributeValueCode { get; set; }
+       // public Guid ProductAttributeId { get; set; }
+        //[Tagable]
+       // public Lookup<AttributeValue> AttributeValueCode { get; set; }
        
+       [DisplayName("Is custom value")]
         public BooleanType IsCustomValue { get; set; }
+
         [Tagable]
+        [DisplayName("Additional price")]
         public DecimalType AdditionalPrice { get; set; }
        
     }

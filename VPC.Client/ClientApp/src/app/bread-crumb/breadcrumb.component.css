@@ -6,6 +6,7 @@
     position: absolute;
     top: 22px;
     left: 246px;
+    font-size: 0.8rem;
 }
 
 .breadcrumb li {
@@ -19,38 +20,23 @@
     -ms-text-overflow: ellipsis;
 }
 
-.breadcrumb li a.active,
-.breadcrumb li.active {
-
-    color: #fff;
-    font-size: 0.8rem;
-    cursor: pointer;
-    /* text-decoration: underline; */
-}
-.breadcrumb li a.active:hover,
-.breadcrumb li.active:hover {
-    
-     text-decoration: underline;
-     cursor: pointer;
+.default{
+    cursor: not-allowed;
+    color:#fff;
 }
 
-.breadcrumb li a.inactive,
-.breadcrumb li.inactive {
-    color: #fff;
-    font-size: 0.8rem;
-    cursor: default;
-    /* text-decoration: underline; */
+.clickable{
+    color:#b9d5f5 !important;
 }
-.breadcrumb li a.inactive:hover,
-.breadcrumb li.inactive:hover {
-     text-decoration: none;
-     cursor: default;
+
+.clickable:hover{
+    text-decoration: underline !important;
 }
 
 
 .breadcrumb li span{
     color:#fff;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 500;
 }
 

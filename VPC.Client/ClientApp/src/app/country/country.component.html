@@ -1,11 +1,11 @@
 <div class="detailsMenu">
   <div class="msg-tips-left">
     <div class="msg-entrance">
-      <a [routerLink]="['/country/new']" [queryParams]="{ type: 'form',  context:'create'}">{{resource[generateResourceName("Create")]}}</a>
+      <a [routerLink]="['/country/new']" [queryParams]="{ type: 'form',  context:'create'}">{{getResourceValue("country_operation_create")}}</a>
     </div>
   </div>
   <div class="msg-tips-wrap">
-    <div class="msg-entrance" (click)="configToggle()" ngbTooltip="{{resource[generateResourceName('SearchFilter')]}}" container="body">
+    <div class="msg-entrance" (click)="configToggle()" ngbTooltip="{{getResourceValue('metadata_searchfilter')}}" container="body">
       <span class="fa fa-search" *ngIf="!isConfigToggle"></span>
       <span class="fa fa-chevron-right" *ngIf="isConfigToggle"></span>
     </div>
@@ -47,7 +47,7 @@
   <!-- Right Filter End -->
 </div>
 <div class="r-filter-page">
-  <kendo-grid [data]="gridData" [columnMenu]="true" [filterable]="true" [sortable]="true" [sort]="sort" [pageSize]="10" [pageable]="true"
+  <kendo-grid [data]="gridData" [columnMenu]="true" [filterable]="true" [sortable]="true" [sort]="sort" [pageSize]="pageSize" [pageable]="true"
     [skip]="skip" [style.height.%]="100" [scrollable]="null" [resizable]="true" (dataStateChange)="pageChange($event)" (sortChange)="sortChange($event)">
     <ng-container *ngFor="let column of columns">
       <kendo-grid-column *ngIf="column.isClickable" [field]="column.field" [title]="column.title" [width]="column.width">

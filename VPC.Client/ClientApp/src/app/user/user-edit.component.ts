@@ -9,6 +9,7 @@ import { UserService } from './user.service';
 import { ResourceService } from '../services/resource.service';
 import {TosterService} from 'src/app/services/toster.service';
 import {CommonService} from 'src/app/services/common.service';
+import { GlobalResourceService } from '../global-resource/global-resource.service'
 
 @Component({
     selector: 'user-edit',
@@ -40,7 +41,8 @@ export class UserEditComponent implements OnInit {
         private userService:UserService,
         private resourceService: ResourceService,
         private toster: TosterService,
-        private commonService: CommonService
+        private commonService: CommonService,
+        private globalResourceService: GlobalResourceService
     ) 
     {
 
@@ -164,7 +166,7 @@ export class UserEditComponent implements OnInit {
           .pipe(first())
           .subscribe(
             data => {
-              this.toster.showSuccess(this.entityName + this.resource[this.generateResourceName("UpdatedSuccessfully")]);
+              this.toster.showSuccess( this.globalResourceService.updateSuccessMessage(this.entityName +"_displayname"));
               this.router.navigate(['users']);
             },
             error => {
@@ -200,4 +202,7 @@ export class UserEditComponent implements OnInit {
     if (!word) return word;
     return word[0].toLowerCase() + word.substr(1);
   }
+  getResourceValue(key) {
+		return this.globalResourceService.getResourceValueByKey(key);
+	}
 }

@@ -13,6 +13,7 @@ import { ResourceService } from '../services/resource.service';
 import { MenuItemComponent } from '../menu-item/menu-item.component';
 import { GlobalResourceService } from '../global-resource/global-resource.service';
 import { Resource } from '../model/resource';
+import { CommonService } from '../services/common.service';
 
 @Component({
   selector: 'app-metadata',
@@ -25,8 +26,9 @@ export class MetadataComponent implements OnInit {
   public gridData: any = this.entityList;
   public resource: Resource;
   private name: string ="";
-
+  public pageSize:number = this.commonService.defaultPageSize();
   constructor(
+    private commonService : CommonService,
     private route: ActivatedRoute,
     private router: Router,
     //private alertService: AlertService,
@@ -59,11 +61,13 @@ export class MetadataComponent implements OnInit {
       this.gridData = this.metadataService.get_metadata();
     }
     else {
-      this.metadataService.getEntities()
+      this.metadataService.getEntities("primaryentity")
         .pipe(first())
         .subscribe(
           data => {
             if (data) {
+              // this.gridData = [...data];
+              // this.gridData = this.gridData.filter(a=> a.type.toLowerCase() !== "extendedentity");
               this.gridData = data;
               
               this.metadataService.set_metadata(this.gridData);

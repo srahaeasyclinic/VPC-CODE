@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using VPC.Metadata.Business.Operator.DataAnnotations;
+using VPC.Metadata.Business.Validator.Schema;
 
 namespace VPC.Metadata.Business.DataAnnotations
 {
@@ -37,6 +38,17 @@ namespace VPC.Metadata.Business.DataAnnotations
 
          public abstract bool Value {get; set;}
 
+  private List<ValidatorBase> validators = new List<ValidatorBase>();
+       
+        public override void AddValidator(ValidatorBase validator)
+        {
+            validators.Add(validator);
+        }
 
+
+        public override List<ValidatorBase> GetValidators()
+        {
+            return validators;
+        }
     }
 }

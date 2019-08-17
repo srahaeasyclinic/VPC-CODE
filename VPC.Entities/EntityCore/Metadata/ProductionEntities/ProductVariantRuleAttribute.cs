@@ -24,26 +24,34 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
  
     public class ProductVariantRuleAttribute : PrimaryEntity, IItem<Item>
     {
+        [DisplayName ("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.ProductVariantRuleAttribute);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName ("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+        [DisplayName ("Name")]
         public override Name Name { get; set; }
 
+        [DisplayName ("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20039-ST01", "Standard"}
         };
 
+        [DisplayName ("Sub type")]
         public override XSmallText SubType { get; set; }
        
+       [DisplayName ("Product variant rule Id")]
         public Guid ProductVariantRuleId { get; set; }
+        
         [Tagable]
+        [DisplayName ("Attribute code")]
         public PickList<Attribute> AttributeCode { get; set; }
     }
 }

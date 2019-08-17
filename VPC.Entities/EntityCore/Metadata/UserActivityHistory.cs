@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using VPC.Entities.EntityCore.Model.Storage;
 using VPC.Metadata.Business.DataAnnotations;
 using VPC.Metadata.Business.DataTypes;
 using VPC.Metadata.Business.Entity;
@@ -27,7 +28,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [NotNull]
         public InternalId TenantId { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
@@ -42,10 +43,10 @@ namespace VPC.Entities.EntityCore.Metadata
             {"EN10021-ST01", "Standard"}
         };
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         public override XSmallText SubType { get; set; }
 
-        [AccessibleLayout(1, 2, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.Form, (int)LayoutType.List)]
         [ApplicableForFilter]
         [FreeTextSearch]
         [AdvanceSearch]
@@ -53,7 +54,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [NotNull]
         public SmallText HistoryName { get; set; }
 
-        [AccessibleLayout(1, 2, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.Form, (int)LayoutType.List)]
         [ApplicableForFilter]
         [FreeTextSearch]
         [AdvanceSearch]
@@ -61,7 +62,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [NotNull]
         public SmallText Test { get; set; }
 
-        [AccessibleLayout(1, 3)]
+        [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
         [NonQueryable]
         [ForeignKey("[dbo].[User]", "[Id]")]
         [ColumnName("[UserId]")]

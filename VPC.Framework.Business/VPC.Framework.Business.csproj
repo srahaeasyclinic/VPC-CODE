@@ -40,6 +40,11 @@
     <ProjectReference Include="..\VPC.CACHE\VPC.Cache.csproj" />
   </ItemGroup>
 
+   <ItemGroup>
+    <PackageReference Include="GemBox.Spreadsheet" Version="45.0.0.1010" />
+  </ItemGroup>
+
+
   <ItemGroup>
     <Folder Include="DynamicQueryManager\Data\" />
     <Folder Include="EntityResourceManager\APIs\" />
@@ -50,6 +55,21 @@
     <None Include="..\VPC.WebApi\nlog.config" Link="nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

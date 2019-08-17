@@ -12,6 +12,7 @@ import { LayoutComponent } from './layout/layout.component';
 import { WorkFlowComponent } from './workflow/workflow.component';
 import { MetadataDetailComponent } from './metadatadetail.component';
 import { MetadataComponent } from './metadata.component';
+import { RelatedEntitiesComponent } from './relatedentities/relatedentities.component';
 
 const routes: Routes = [
   { path: 'metadata', component: MetadataComponent },
@@ -24,6 +25,7 @@ const routes: Routes = [
       { path: 'layout', component: LayoutComponent },
       { path: 'fields', component: FieldsComponent },
       { path: 'relations', component: RelationsComponent },
+      { path: 'relatedentities', component: RelatedEntitiesComponent },
       { path: 'operations', component: TaskoperationComponent },
       { path: 'rules', component: RuleComponent },
       { path: 'query', component: QueryComponent },

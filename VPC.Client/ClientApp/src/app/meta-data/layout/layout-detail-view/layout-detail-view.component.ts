@@ -5,6 +5,7 @@ import { LayoutModel } from '../../../model/layoutmodel';
 import { TosterService } from '../../../services/toster.service';
 import { Resource } from 'src/app/model/resource';
 import { GlobalResourceService } from 'src/app/global-resource/global-resource.service';
+import { MenuService } from '../../../services/menu.service';
 
 @Component({
   selector: 'app-layout-detail-view',
@@ -26,7 +27,8 @@ export class LayoutDetailViewComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private layoutService: LayoutService,
     private toster: TosterService,
-    public globalResourceService: GlobalResourceService
+    public globalResourceService: GlobalResourceService,
+    private menuService: MenuService
   ) {
  }
  
@@ -40,15 +42,17 @@ export class LayoutDetailViewComponent implements OnInit {
 			this.id = params['id'];
 		  });   
 	  
-		  this.activatedRoute.parent.parent.params.subscribe((params: Params) => {
-			this.entityname = params['entityName'];
-		  });  
+		  // this.activatedRoute.parent.parent.params.subscribe((params: Params) => {
+			// this.entityname = params['entityName'];
+      // });  
+    let result=this.menuService.getMenuconext();
+      this.entityname = result.param_name;
 
   }
 
   updateLayoutDetails() {
     this.layoutService.updateLayout(this.entityname, this.id, this.layoutInfo).subscribe(result => {
-      this.toster.showSuccess(this.getResourceValue("LayoutSavedSuccessfully"));  
+      this.toster.showSuccess(this.getResourceValue("metadata_operation_save_success_message"));  
     });
   }
 

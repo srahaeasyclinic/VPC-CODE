@@ -1,26 +1,32 @@
 <!-- <a class="btn btn-primary margin-top-10 margin-bottom-10" (click)="addResource(resourceDetails)">Add Resource</a> -->
-<div class="text-header">{{getResourceValue("Resource_Name_Plural")}}</div>
+  <div class="text-header">{{getResourceValue("resource_pluralname")}}</div>
 <div class="detailsMenu">
   <div class="msg-tips-left">
-    <div class="msg-entrance" ngbTooltip="globalresource[generateResourceName('AddResource')]" container="body" (click)="addResource(resourceDetails)">
-      <i class="fa fa-plus"></i>{{getResourceValue("Resource_Operation_Create")}}
+    <div class="msg-entrance" ngbTooltip="getResourceValue('resource_operation_create')" container="body" (click)="addResource(resourceDetails)">
+      <i class="fa fa-plus"></i>{{getResourceValue("operation_create")}}
     </div>
-  </div>
+    <div class="msg-entrance" ngbTooltip="getResourceValue('resource_operation_repair')" container="body" (click)="RepairResourcesList()">
+      <span class="bandaid-icon"></span><span class="margin-left-20">{{getResourceValue("resource_operation_repair")}}</span>
+    </div>
+    <div class="msg-entrance" ngbTooltip="getResourceValue('resource_operation_reset')" container="body" (click)="ResetResourcesList()">
+      <i class="fa fa-repeat"></i>{{getResourceValue("resource_operation_reset")}}
+    </div>
+</div>
 </div>
 
 
 
 <div class="page-content">
 
-  <kendo-grid [kendoGridBinding]="resources" [pageSize]="10" [pageable]="true" [sortable]="true"
+  <kendo-grid [kendoGridBinding]="resources" [pageSize]="pageSize" [pageable]="true" [sortable]="true" [style.maxHeight.px]="750"
               (dataStateChange)="pageChange($event)" [filterable]="true">
-    <kendo-grid-column field="key" title="{{getResourceValue('Resource_Field_Key')}}" [width]="140">
+    <kendo-grid-column field="key" title="{{getResourceValue('resource_field_key')}}" [width]="140">
       <ng-template kendoGridCellTemplate let-resources>
         <a class="gridLink" (click)="getDefaultLanguage(resourceDetails,resources)">{{resources.key}}</a>
       </ng-template>
     </kendo-grid-column>
-    <kendo-grid-column field="value" title="{{getResourceValue('Resource_Field_Text')}}" [width]="120"></kendo-grid-column>
-    <kendo-grid-column field="languageName" title="{{getResourceValue('Resource_Field_Language')}}" [width]="120"></kendo-grid-column>
+    <kendo-grid-column field="value" title="{{getResourceValue('resource_field_text')}}" [width]="120"></kendo-grid-column>
+    <kendo-grid-column field="languageName" title="{{getResourceValue('resource_field_language')}}" [width]="120"></kendo-grid-column>
     <kendo-grid-column [width]="120">
       <ng-template kendoGridCellTemplate let-resources>
         <button mat-icon-button [matMenuTriggerFor]="menu" class="actions">
@@ -29,7 +35,7 @@
           </mat-icon>
         </button>
         <mat-menu #menu="matMenu">
-          <a class="dropdown-item" (click)="deleteResourceByKey(resources.key)">{{getResourceValue("Resource_Operation_Delete")}}</a>
+          <a class="dropdown-item" (click)="deleteResourceByKey(resources.key)">{{getResourceValue("operation_delete")}}</a>
         </mat-menu>
       </ng-template>
     </kendo-grid-column>
@@ -48,7 +54,7 @@
         <div class="col-md-6">
           <div class="form-group">
             <label class="control control--checkbox pull-right">
-              {{getResourceValue("Resource_Field_TranslateView")}}
+              {{getResourceValue("resource_field_translateview")}}
               <input type="checkbox" [(ngModel)]="translate" name="translate"
                      (ngModelChange)="checkChange($event)">
               <span class="control__indicator"></span>
@@ -56,13 +62,13 @@
 
           </div>
           <div class="form-group">
-            <label for="key">{{getResourceValue("Resource_Field_Key")}}</label><label class="text-mandatory margin-left-3">*</label>
-            <input type="text" [disabled]="(resource.id!='')" name="key" [(ngModel)]="resource.key"
-                   class="input-control" #key="ngModel" maxlength="225">
-
+            <label for="key">{{getResourceValue("resource_field_key")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <input type="text" name="key" [(ngModel)]="resource.key" *ngIf="resource.id=='' || resource.id==undefined"
+             #key="ngModel" maxlength="225" class="input-control">
+            <div class="text-label-preview margin-top-10" *ngIf="resource.id!='' && resource.id!=undefined">{{resource.key}}</div>
           </div>
           <div class="form-group">
-            <label for="value">{{getResourceValue("Resource_Field_Text")}}</label><label class="text-mandatory margin-left-3">*</label>
+            <label for="value">{{getResourceValue("resource_field_text")}}</label><label class="text-mandatory margin-left-3">*</label>
             <label class="pull-right">{{resource.languageName}}</label>
             <label class="lan-icon pull-right margin-right-10"></label>
             <input type="text" name="value" [(ngModel)]="resource.value" class="input-control" #value="ngModel">
@@ -77,7 +83,7 @@
             </label>               -->
           </div>
           <div class="form-group">
-            <label for="language">{{getResourceValue("Resource_Field_Language")}}</label>
+            <label for="language">{{getResourceValue("resource_field_language")}}</label>
             <!-- <label class="text-mandatory margin-left-3">*</label> -->
             <select name="newlan" class="input-control" [(ngModel)]="newlanguage"
                     (ngModelChange)="languageChange($event)">
@@ -87,7 +93,7 @@
           <div class="form-group">
             <label *ngIf="!(newlanguage.text==null)" class="pull-right">{{newlanguage.text}}</label>
             <label *ngIf="!(newlanguage.text==null)" class="lan-icon pull-right margin-right-10"></label>
-            <label for="newResourceName">{{getResourceValue("Resource_Field_Text")}}</label>
+            <label for="newResourceName">{{getResourceValue("resource_field_text")}}</label>
             <!-- <label class="text-mandatory margin-left-3">*</label> -->
             <input name="newResourceName" type="text" [(ngModel)]="newResource.value" class="input-control">
           </div>
@@ -95,8 +101,9 @@
       </div>
     
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("Resource_Operation_Cancel")}}</button>
-      <button class="btn btn-primary" (click)="saveResource()">{{editUpdate}}</button>
+        <button class="btn btn-primary" (click)="saveResource()">{{editUpdate}}</button>
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel click')">{{getResourceValue("task_cancel")}}</button>
+     
     </div>
 
   </div>

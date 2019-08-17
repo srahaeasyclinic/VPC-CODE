@@ -25,34 +25,50 @@ namespace VPC.Entities.EntityCore.Metadata.ProductionEntities
     
     public class ProductionOrderAlternativeComponent : PrimaryEntity, IItem<Item>
     {
+         [DisplayName("Entity context")]
         public override EntityContext EntityContext => new EntityContext(InfoType.ProductionOrderAlternativeComponent);
 
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+         [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
         [NonQueryable]
         [Tagable]
+         [DisplayName("Name")]
         public override Name Name { get; set; }
 
+         [DisplayName("Sub types")]
         public override Dictionary<string, string> SubTypes => new Dictionary<string, string>
         {
             {"EN20046-ST01", "Standard"}
         };
 
+         [DisplayName("Sub type")]
         public override XSmallText SubType { get; set; }
       
+       [DisplayName("Component Id")]
         public Guid ComponentId { get; set; }
+
         [Tagable]
-        public PickList<Product> Product { get; set; }
+         [DisplayName("Product")]
+        public PickList<VPC.Entities.EntityCore.Metadata.Product.Entity.Product> Product { get; set; }
+
         [Tagable]
+         [DisplayName("Vendor")]
         public Lookup<Vendor> Vendor { get; set; }
+
         [Tagable]
+         [DisplayName("Manufactor")]
         public Lookup<Manufacturer> Manufactor { get; set; }
+
         [Tagable]
+         [DisplayName("Quantity")]
         public DecimalType Quantity { get; set; }
+
         [Tagable]
+         [DisplayName("UOM")]
         public PickList<Uom> UOM { get; set; }
     }
 }

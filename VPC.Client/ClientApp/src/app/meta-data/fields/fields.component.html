@@ -1,16 +1,16 @@
 <div class="tab-section">
 <kendo-grid [kendoGridBinding]="gridData" [pageSize]="10" [pageable]="true" [sortable]="true" [filterable]="true"
    [style.height.%]="100">
-  <kendo-grid-column field="name" title="{{getResourceValue('FieldName')}}" [width]="120"></kendo-grid-column>
-  <kendo-grid-column field="DisplayName" title="{{getResourceValue('DisplayName')}}" [width]="140">
+  <kendo-grid-column field="name" title="{{getResourceValue('metadata_entityname')}}" [width]="120"></kendo-grid-column>
+  <kendo-grid-column field="DisplayName" title="{{getResourceValue('metadata_displayname')}}" [width]="140">
     <ng-template kendoGridCellTemplate let-gridData>
-      <span>{{getResourceValue(gridData.name)}}</span>
+      <span>{{gridData.name}}</span>
       <span *ngIf="getRequired(gridData.validators)" class="text-mandatory margin-left-3">*</span>
     </ng-template>
   </kendo-grid-column>
-  <kendo-grid-column field="dataType" title="{{getResourceValue('DataType')}}" [width]="120">
+  <kendo-grid-column field="dataType" title="{{getResourceValue('metadata_datatype')}}" [width]="120">
   </kendo-grid-column>
-  <kendo-grid-column field="controlType" title="{{getResourceValue('ControlType')}}" [width]="100">
+  <kendo-grid-column field="controlType" title="{{getResourceValue('metadata_controltype')}}" [width]="100">
   </kendo-grid-column>
   <!-- <kendo-grid-column [width]="25">
     <ng-template kendoGridCellTemplate let-gridData>
@@ -34,7 +34,7 @@
       </button>
       <mat-menu #menu="matMenu">
         <a class="dropdown-item" (click)="validationRule('validationModal')">
-          {{getResourceValue("ValidationRule")}}
+          {{getResourceValue("metadata_validationrule")}}
         </a>
       </mat-menu>
     </ng-template>

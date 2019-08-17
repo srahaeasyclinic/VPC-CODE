@@ -17,6 +17,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [NonQueryable]
         [ColumnName("[TenantId]")]
         [NotNull]
+        [DisplayName("Tenant Id")]
         public InternalId TenantId { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List)]
@@ -24,8 +25,10 @@ namespace VPC.Entities.EntityCore.Metadata
         [NonQueryable]
         [ColumnName("[Id]")]
         [NotNull]
+        [DisplayName("Internal Id")]
         public override InternalId InternalId { get; set; }
 
+         [DisplayName("Name")]
         public override Name Name { get; set; }
 
         [DefaultValue(InfoType.UserInRole)]
@@ -37,6 +40,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [ColumnName("[UserId]")]
         [NotNull]
         [ForeignKey("[dbo].[User]", "[Id]")]
+         [DisplayName("User")]
         public Lookup<User> User { get; set; }
 
         [AccessibleLayout((int)LayoutType.View, (int)LayoutType.List, (int)LayoutType.Form)]
@@ -45,6 +49,7 @@ namespace VPC.Entities.EntityCore.Metadata
         [ColumnName("[RoleId]")]
         [NotNull]
         [ForeignKey("[dbo].[Role]", "[Id]")]
+        [DisplayName("Role")]
         public Lookup<Role> Role { get; set; }
 
     }

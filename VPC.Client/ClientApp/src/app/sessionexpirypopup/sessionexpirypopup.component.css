@@ -1,0 +1,71 @@
+.modal-expire{
+    margin:100px auto;
+}
+
+.modal-expire .modal-top{
+    background-color: #ec5d57;
+    padding: 20px;
+}
+.modal-expire .modal-top .icon{
+    text-align: center;
+}
+
+.modal-expire .modal-top .icon i{
+    font-size: 4rem;
+    color: #fff;
+}
+
+.modal-expire .modal-top .text{
+    color:#fff;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.modal-expire .modal-info{
+    background-color: #fff;
+    padding: 40px;
+    text-align: center;
+}
+
+.time-wrapper{
+    display: inline-block;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+
+
+.modal-expire .modal-info .time{
+    width: 70px;
+    height: 65px;
+    background-color: #223946;
+    line-height: 65px;
+    border-radius: 5px;
+    text-align: center;
+    color: #fff;
+    /* margin: 0 auto; */
+    font-size: 2.2rem;
+}
+
+.modal-expire .modal-info .text-info{
+    margin-top: 30px;
+    color: #484848 !important;
+    font-size: 0.9rem;
+}
+
+.modal-bottom{
+    padding-bottom: 20px;
+    text-align: center;
+}
+.btn {
+    border: none !important;
+    padding: 1rem 3.5rem;
+    font-size: 1rem !important;
+    color: #fff !important;
+    border-radius: 0px;
+  }
+  .btn:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
