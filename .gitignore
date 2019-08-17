@@ -20,3 +20,4 @@ obj
 /qry
 /.vs/VPC/config/applicationhost.config
 /VPC.Client/ClientApp/src/app/utility/cookie-typescript-utils.ts
+*.user
